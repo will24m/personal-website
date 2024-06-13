@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Contact Me</title>
+    <link rel="stylesheet" href="styles/styles.css" />
+  </head>
+  <body>
+    <div id="header"></div>
+    <div class="container">
+      <h1>Contact Me</h1>
+      <p>If you have any questions or would like to get in touch, please reach out through any of the following methods:</p>
+      <div class="contact-info">
+        <div class="contact-item">Phone: <a href="tel:+16478864250">647-886-4250</a></div>
+        <div class="contact-item">Email: <a href="mailto:will@williamwu.ca">will@williamwu.ca</a></div>
+        <div class="contact-item">LinkedIn: <a href="https://www.linkedin.com/in/will24m" target="_blank">linkedin.com/will24m</a></div>
+        <div class="contact-item">GitHub: <a href="https://github.com/will24m" target="_blank">github.com/will24m</a></div>
+      </div>
+      <form class="contact-form" id="contactForm" action="#" method="post">
+        <label for="name">Name</label>
+        <input type="text" id="name" name="name" required>
+        <span class="error-message" id="nameError"></span>
+        
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email" required>
+        <span class="error-message" id="emailError"></span>
+        
+        <label for="message">Message</label>
+        <textarea id="message" name="message" rows="5" required></textarea>
+        <span class="error-message" id="messageError"></span>
+        
+        <button type="submit" class="button">Send Message</button>
+      </form>
+      <div class="form-feedback" id="formFeedback"></div>
+    </div>
+    <footer>
+      &copy; 2024 Will Wu. All rights reserved.
+    </footer>
+    <script src="scripts/script.js"></script>
+  </body>
+</html>
