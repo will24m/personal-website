@@ -1,0 +1,244 @@
+/* Import the "Poppins" font from Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap');
+
+body {
+  background: linear-gradient(to right, #2e2e2e, #121212);
+  font-family: 'Poppins', sans-serif;
+  margin: 0;
+  padding: 0;
+  color: #f0f0f0;
+  overflow-x: hidden;
+  cursor: url('images/cursor.png'), auto; /* Custom cursor */
+}
+
+header {
+  background: linear-gradient(to right, #333, #000);
+  color: white;
+  padding: 10px 0;
+  position: fixed;
+  width: 100%;
+  top: 0;
+  left: 0;
+  z-index: 1000;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+nav ul {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+}
+
+nav ul li {
+  margin: 0 15px;
+}
+
+nav ul li a {
+  color: white;
+  text-decoration: none;
+  font-size: 18px;
+  transition: color 0.3s;
+}
+
+nav ul li a:hover {
+  color: #ff6347;
+}
+
+body {
+  padding-top: 60px; /* Adjust according to header height */
+}
+
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+  background: linear-gradient(to bottom, #333, #222);
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+  border-radius: 10px;
+  margin-top: 50px;
+  text-align: center;
+  position: relative;
+  z-index: 10;
+}
+
+.h11 {
+  font-size: 50px;
+  font-weight: 500;
+  background: linear-gradient(to right, #ff6347, #ff4500);
+  text-align: center;
+  padding: 10px;
+  border-radius: 10px;
+  transition: all 0.3s ease-in-out;
+  margin-bottom: 20px;
+  color: white;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+}
+
+.h11:hover {
+  background: linear-gradient(to right, #ff4500, #ff6347);
+}
+
+h2 {
+  text-align: center;
+  color: #fff;
+  font-size: 28px;
+  margin-bottom: 20px;
+}
+
+.main-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.main-content p {
+  font-size: 18px;
+  margin-bottom: 10px;
+  color: #ccc;
+  max-width: 600px;
+}
+
+.profile-pic, .profile-picture {
+  width: 200px;
+  border-radius: 50%;
+  transition: transform 0.3s ease-in-out;
+  margin-top: 20px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+}
+
+.profile-pic:hover, .profile-picture:hover {
+  transform: scale(1.1);
+}
+
+.button {
+  display: inline-block;
+  font-size: 18px;
+  text-decoration: none;
+  color: white;
+  background: linear-gradient(to right, #ff6347, #ff4500);
+  padding: 10px 20px;
+  border-radius: 5px;
+  margin-top: 20px;
+  transition: background 0.3s;
+  border: none;
+  cursor: pointer;
+}
+
+.button:hover {
+  background: linear-gradient(to right, #ff4500, #ff6347);
+}
+
+footer {
+  text-align: center;
+  padding: 20px;
+  margin-top: 20px;
+  background: linear-gradient(to right, #333, #000);
+  color: white;
+  box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.bubble {
+  position: absolute;
+  background-color: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  animation: float 10s infinite ease-in-out;
+}
+
+.bubble:nth-child(1) {
+  width: 60px;
+  height: 60px;
+  bottom: 10%;
+  left: 20%;
+  animation-duration: 12s;
+}
+
+.bubble:nth-child(2) {
+  width: 40px;
+  height: 40px;
+  bottom: 15%;
+  left: 50%;
+  animation-duration: 8s;
+}
+
+.bubble:nth-child(3) {
+  width: 80px;
+  height: 80px;
+  bottom: 20%;
+  left: 80%;
+  animation-duration: 14s;
+}
+
+@keyframes float {
+  0% {
+    transform: translateY(0) scale(1);
+  }
+  50% {
+    transform: translateY(-50px) scale(1.1);
+  }
+  100% {
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Social icons */
+.social-icons {
+  margin-top: 20px;
+}
+
+.social-icons a {
+  color: #f0f0f0;
+  font-size: 24px;
+  margin: 0 10px;
+  transition: color 0.3s;
+}
+
+.social-icons a:hover {
+  color: #ff6347;
+}
+
+a:hover,
+button:hover {
+  cursor: url('images/cursor.png'), pointer; /* Custom cursor on hover */
+}
+
+#game-container {
+    margin-top: 20px;
+    text-align: center;
+}
+  
+  #game {
+    position: relative;
+    width: 600px;
+    height: 150px;
+    border: 2px solid #ccc;
+    margin: 0 auto;
+    background: #fff;
+    overflow: hidden;
+  }
+  
+  #dino {
+    position: absolute;
+    bottom: 0;
+    left: 50px;
+    width: 40px;
+    height: 40px;
+    background-color: #333;
+    transition: bottom 0.1s;
+  }
+  
+  #obstacle {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 20px;
+    height: 40px;
+    background-color: #f00;
+  }
+  
+  #score {
+    margin-top: 10px;
+    font-size: 18px;
+  }
