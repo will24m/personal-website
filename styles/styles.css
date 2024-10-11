@@ -242,3 +242,100 @@ button:hover {
     margin-top: 10px;
     font-size: 18px;
   }
+
+  body {
+    font-family: 'Arial', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f4;
+  }
+  
+  .container {
+    max-width: 800px;
+    margin: 50px auto;
+    padding: 20px;
+    background-color: white;
+    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+  }
+  
+  h1 {
+    text-align: center;
+    color: #333;
+  }
+  
+  .contact-info {
+    margin-bottom: 30px;
+  }
+  
+  .contact-item {
+    margin-bottom: 10px;
+  }
+  
+  .contact-item a {
+    color: #0d6efd;
+    text-decoration: none;
+  }
+  
+  .contact-item a:hover {
+    text-decoration: underline;
+  }
+  
+  .contact-form {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .contact-form label {
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #555;
+  }
+  
+  .contact-form input, .contact-form textarea {
+    margin-bottom: 15px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+  
+  .contact-form input:focus, .contact-form textarea:focus {
+    border-color: #0d6efd;
+    outline: none;
+  }
+  
+  .button {
+    background-color: #0d6efd;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  .button:hover {
+    background-color: #0a58ca;
+  }
+  
+  .error-message {
+    color: red;
+    font-size: 12px;
+    margin-top: -10px;
+  }
+  
+  footer {
+    text-align: center;
+    padding: 20px;
+    background-color: #0d6efd;
+    color: white;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+  }
+  
+  @media (max-width: 768px) {
+    .container {
+      margin: 20px;
+      padding: 10px;
+    }
+  }
+  

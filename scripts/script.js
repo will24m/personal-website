@@ -165,3 +165,43 @@ document.addEventListener('keydown', (e) => {
 });
 
 moveObstacle();
+document.getElementById('contactForm').addEventListener('submit', function(event) {
+  event.preventDefault();
+
+  // Form field values
+  const name = document.getElementById('name').value;
+  const email = document.getElementById('email').value;
+  const message = document.getElementById('message').value;
+
+  let valid = true;
+
+  // Clear previous error messages
+  document.getElementById('nameError').innerText = '';
+  document.getElementById('emailError').innerText = '';
+  document.getElementById('messageError').innerText = '';
+
+  // Name validation
+  if (name.trim() === '') {
+      document.getElementById('nameError').innerText = 'Please enter your name.';
+      valid = false;
+  }
+
+  // Email validation
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+      document.getElementById('emailError').innerText = 'Please enter a valid email.';
+      valid = false;
+  }
+
+  // Message validation
+  if (message.trim() === '') {
+      document.getElementById('messageError').innerText = 'Please enter your message.';
+      valid = false;
+  }
+
+  if (valid) {
+      document.getElementById('formFeedback').innerText = 'Your message has been sent! Thank you for reaching out.';
+      document.getElementById('formFeedback').style.color = 'green';
+      document.getElementById('contactForm').reset();
+  }
+});
