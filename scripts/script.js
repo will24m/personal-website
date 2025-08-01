@@ -345,7 +345,7 @@ class DinoGame {
 
 // Initialize the game when the page loads
 document.addEventListener('DOMContentLoaded', () => {
-    new DinoGame();
+    window.dinoGame = new DinoGame();
 });
 
 // Contact form handling
@@ -388,4 +388,168 @@ document.getElementById('contactForm').addEventListener('submit', function(event
       document.getElementById('formFeedback').style.color = 'green';
       document.getElementById('contactForm').reset();
   }
+});
+
+// Site Manager - Connects admin panel to the actual site
+class SiteManager {
+    constructor() {
+        this.init();
+    }
+    
+    init() {
+        this.loadSiteContent();
+        this.loadCustomizationSettings();
+        this.loadGameSettings();
+        this.setupAutoRefresh();
+    }
+    
+    loadSiteContent() {
+        // Load home page content
+        const homeContent = JSON.parse(localStorage.getItem('homeContent') || '{}');
+        
+        // Update name
+        if (homeContent.name) {
+            const nameElements = document.querySelectorAll('.name, h1, .profile-name');
+            nameElements.forEach(el => {
+                if (el.textContent.includes('William') || el.textContent.includes('Your Name')) {
+                    el.textContent = homeContent.name;
+                }
+            });
+        }
+        
+        // Update title
+        if (homeContent.title) {
+            const titleElements = document.querySelectorAll('.title, .profile-title, h2');
+            titleElements.forEach(el => {
+                if (el.textContent.includes('Web Developer') || el.textContent.includes('Your Title')) {
+                    el.textContent = homeContent.title;
+                }
+            });
+        }
+        
+        // Update description
+        if (homeContent.description) {
+            const descElements = document.querySelectorAll('.description, .profile-description, p');
+            descElements.forEach(el => {
+                if (el.textContent.includes('passionate') || el.textContent.includes('Your description')) {
+                    el.textContent = homeContent.description;
+                }
+            });
+        }
+        
+        // Update about content
+        const aboutContent = JSON.parse(localStorage.getItem('aboutContent') || '{}');
+        if (aboutContent.aboutText) {
+            const aboutElements = document.querySelectorAll('.about-text, .about-content p');
+            aboutElements.forEach(el => {
+                if (el.textContent.includes('About') || el.textContent.includes('Your about text')) {
+                    el.textContent = aboutContent.aboutText;
+                }
+            });
+        }
+        
+        if (aboutContent.skills) {
+            const skillsElements = document.querySelectorAll('.skills, .skills-list');
+            skillsElements.forEach(el => {
+                if (el.textContent.includes('HTML') || el.textContent.includes('Your skills')) {
+                    el.textContent = aboutContent.skills;
+                }
+            });
+        }
+    }
+    
+    loadCustomizationSettings() {
+        const customization = JSON.parse(localStorage.getItem('customization') || '{}');
+        
+        // Apply color scheme
+        if (customization.primaryColor) {
+            document.documentElement.style.setProperty('--primary-color', customization.primaryColor);
+        }
+        
+        if (customization.secondaryColor) {
+            document.documentElement.style.setProperty('--secondary-color', customization.secondaryColor);
+        }
+        
+        if (customization.accentColor) {
+            document.documentElement.style.setProperty('--accent-color', customization.accentColor);
+        }
+        
+        // Apply cursor type
+        if (customization.cursorType) {
+            const cursorStyles = {
+                'default': 'auto',
+                'pointer': 'pointer',
+                'crosshair': 'crosshair',
+                'custom': 'url("../images/cursor.png"), auto'
+            };
+            
+            document.body.style.cursor = cursorStyles[customization.cursorType] || 'auto';
+        }
+        
+        // Apply animations
+        if (customization.animations === false) {
+            document.body.classList.add('no-animations');
+        } else {
+            document.body.classList.remove('no-animations');
+        }
+    }
+    
+    loadGameSettings() {
+        const gameSettings = JSON.parse(localStorage.getItem('gameSettings') || '{}');
+        
+        // Apply game speed
+        if (gameSettings.speed) {
+            const game = window.dinoGame;
+            if (game) {
+                game.speed = parseInt(gameSettings.speed);
+            }
+        }
+        
+        // Apply difficulty
+        if (gameSettings.difficulty) {
+            const game = window.dinoGame;
+            if (game) {
+                switch (gameSettings.difficulty) {
+                    case 'easy':
+                        game.gravity = 0.4;
+                        game.jumpVelocity = -12;
+                        break;
+                    case 'medium':
+                        game.gravity = 0.6;
+                        game.jumpVelocity = -15;
+                        break;
+                    case 'hard':
+                        game.gravity = 0.8;
+                        game.jumpVelocity = -18;
+                        break;
+                }
+            }
+        }
+    }
+    
+    setupAutoRefresh() {
+        // Refresh content when localStorage changes (for admin panel updates)
+        window.addEventListener('storage', (e) => {
+            if (e.key && (e.key.includes('Content') || e.key.includes('customization') || e.key.includes('gameSettings'))) {
+                setTimeout(() => {
+                    this.loadSiteContent();
+                    this.loadCustomizationSettings();
+                    this.loadGameSettings();
+                }, 100);
+            }
+        });
+        
+        // Also check for changes every 2 seconds (for same-tab updates)
+        setInterval(() => {
+            this.loadSiteContent();
+            this.loadCustomizationSettings();
+            this.loadGameSettings();
+        }, 2000);
+    }
+}
+
+// Initialize the site manager when the page loads
+document.addEventListener('DOMContentLoaded', () => {
+    new DinoGame();
+    new SiteManager();
 });

@@ -140,6 +140,7 @@ class PortfolioManager {
 // Initialize portfolio manager when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
     new PortfolioManager();
+    new SiteManager();
 });
 
 // Add smooth scrolling for anchor links
@@ -231,4 +232,106 @@ class MouseTrail {
 }
 
 // Initialize mouse trail (optional - can be disabled)
-// new MouseTrail(); 
+// new MouseTrail();
+
+// Site Manager - Connects admin panel to the actual site
+class SiteManager {
+    constructor() {
+        this.init();
+    }
+    
+    init() {
+        this.loadSiteContent();
+        this.loadCustomizationSettings();
+        this.setupAutoRefresh();
+    }
+    
+    loadSiteContent() {
+        // Load home page content
+        const homeContent = JSON.parse(localStorage.getItem('homeContent') || '{}');
+        
+        // Update name
+        if (homeContent.name) {
+            const nameElements = document.querySelectorAll('.name, h1, .profile-name');
+            nameElements.forEach(el => {
+                if (el.textContent.includes('William') || el.textContent.includes('Your Name')) {
+                    el.textContent = homeContent.name;
+                }
+            });
+        }
+        
+        // Update title
+        if (homeContent.title) {
+            const titleElements = document.querySelectorAll('.title, .profile-title, h2');
+            titleElements.forEach(el => {
+                if (el.textContent.includes('Web Developer') || el.textContent.includes('Your Title')) {
+                    el.textContent = homeContent.title;
+                }
+            });
+        }
+        
+        // Update description
+        if (homeContent.description) {
+            const descElements = document.querySelectorAll('.description, .profile-description, p');
+            descElements.forEach(el => {
+                if (el.textContent.includes('passionate') || el.textContent.includes('Your description')) {
+                    el.textContent = homeContent.description;
+                }
+            });
+        }
+    }
+    
+    loadCustomizationSettings() {
+        const customization = JSON.parse(localStorage.getItem('customization') || '{}');
+        
+        // Apply color scheme
+        if (customization.primaryColor) {
+            document.documentElement.style.setProperty('--primary-color', customization.primaryColor);
+        }
+        
+        if (customization.secondaryColor) {
+            document.documentElement.style.setProperty('--secondary-color', customization.secondaryColor);
+        }
+        
+        if (customization.accentColor) {
+            document.documentElement.style.setProperty('--accent-color', customization.accentColor);
+        }
+        
+        // Apply cursor type
+        if (customization.cursorType) {
+            const cursorStyles = {
+                'default': 'auto',
+                'pointer': 'pointer',
+                'crosshair': 'crosshair',
+                'custom': 'url("../images/cursor.png"), auto'
+            };
+            
+            document.body.style.cursor = cursorStyles[customization.cursorType] || 'auto';
+        }
+        
+        // Apply animations
+        if (customization.animations === false) {
+            document.body.classList.add('no-animations');
+        } else {
+            document.body.classList.remove('no-animations');
+        }
+    }
+    
+    setupAutoRefresh() {
+        // Refresh content when localStorage changes (for admin panel updates)
+        window.addEventListener('storage', (e) => {
+            if (e.key && (e.key.includes('Content') || e.key.includes('customization'))) {
+                setTimeout(() => {
+                    this.loadSiteContent();
+                    this.loadCustomizationSettings();
+                }, 100);
+            }
+        });
+        
+        // Also check for changes every 2 seconds (for same-tab updates)
+        setInterval(() => {
+            this.loadSiteContent();
+            this.loadCustomizationSettings();
+        }, 2000);
+    }
+} 
