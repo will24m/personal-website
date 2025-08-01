@@ -1,3 +1,29 @@
+/* CSS Variables for Dynamic Spacing */
+:root {
+    --spacing-xs: clamp(0.25rem, 1vw, 0.5rem);
+    --spacing-sm: clamp(0.5rem, 2vw, 1rem);
+    --spacing-md: clamp(1rem, 3vw, 2rem);
+    --spacing-lg: clamp(1.5rem, 4vw, 3rem);
+    --spacing-xl: clamp(2rem, 5vw, 4rem);
+    --spacing-xxl: clamp(3rem, 6vw, 6rem);
+    
+    --padding-xs: clamp(0.25rem, 1vw, 0.5rem);
+    --padding-sm: clamp(0.5rem, 2vw, 1rem);
+    --padding-md: clamp(1rem, 3vw, 2rem);
+    --padding-lg: clamp(1.5rem, 4vw, 3rem);
+    --padding-xl: clamp(2rem, 5vw, 4rem);
+    
+    --margin-xs: clamp(0.25rem, 1vw, 0.5rem);
+    --margin-sm: clamp(0.5rem, 2vw, 1rem);
+    --margin-md: clamp(1rem, 3vw, 2rem);
+    --margin-lg: clamp(1.5rem, 4vw, 3rem);
+    --margin-xl: clamp(2rem, 5vw, 4rem);
+    
+    --border-radius-sm: clamp(0.25rem, 1vw, 0.5rem);
+    --border-radius-md: clamp(0.5rem, 2vw, 1rem);
+    --border-radius-lg: clamp(1rem, 3vw, 2rem);
+}
+
 /* Custom Cursor */
 * {
     cursor: url('../images/cursor.png'), auto;
@@ -66,16 +92,16 @@ body::after {
 /* Login Container */
 .login-container {
     width: 100%;
-    max-width: 400px;
-    padding: 20px;
+    max-width: clamp(350px, 90vw, 450px);
+    padding: var(--padding-lg);
     z-index: 1;
 }
 
 .login-card {
     background: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(10px);
-    border-radius: 20px;
-    padding: 40px;
+    border-radius: var(--border-radius-lg);
+    padding: var(--padding-xl);
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
     border: 1px solid rgba(255, 255, 255, 0.2);
     animation: slideInUp 0.6s ease-out;
