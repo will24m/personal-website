@@ -1,57 +1,82 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
+    <!-- Document metadata and SEO optimization -->
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Contact Me</title>
+    <meta name="description" content="Contact Will Wu - Software Developer. Get in touch for collaboration, questions, or opportunities." />
+    <meta name="keywords" content="contact, Will Wu, software developer, web development, programming" />
+    <meta name="author" content="Will Wu" />
+    <title>Contact Me - Will Wu</title>
+    
+    <!-- External resources and styling -->
     <link rel="stylesheet" href="styles/styles.css" />
+    <link rel="icon" href="favicon.ico" type="image/x-icon" />
   </head>
-  <body>
+  <body>    
+    <!-- Header section for navigation -->
     <div id="header"></div>
 
-    <div class="container">
+    <main class="container">
+      <!-- Page introduction and contact information display -->
       <h1>Contact Me</h1>
       <p>If you have any questions or would like to get in touch, please reach out through any of the following methods:</p>
       
-      <div class="contact-info">
+      <!-- Contact details section with various communication channels -->
+      <section class="contact-info">
+        <h2>Contact Information</h2>
         <div class="contact-item">
-          <strong>Phone:</strong> <a href="tel:+16478864250">647-886-4250</a>
+          <strong>Phone:</strong> <a href="tel:+16478864250" aria-label="Call Will Wu at 647-886-4250">647-886-4250</a>
         </div>
         <div class="contact-item">
-          <strong>Email:</strong> <a href="mailto:will@williamwu.ca">will@williamwu.ca</a>
+          <strong>Email:</strong> <a href="mailto:will@williamwu.ca" aria-label="Send email to will@williamwu.ca">will@williamwu.ca</a>
         </div>
         <div class="contact-item">
-          <strong>LinkedIn:</strong> <a href="https://www.linkedin.com/in/will24m" target="_blank">linkedin.com/will24m</a>
+          <strong>LinkedIn:</strong> <a href="https://www.linkedin.com/in/will24m" target="_blank" rel="noopener noreferrer" aria-label="Visit Will Wu's LinkedIn profile">linkedin.com/will24m</a>
         </div>
         <div class="contact-item">
-          <strong>GitHub:</strong> <a href="https://github.com/will24m" target="_blank">github.com/will24m</a>
+          <strong>GitHub:</strong> <a href="https://github.com/will24m" target="_blank" rel="noopener noreferrer" aria-label="Visit Will Wu's GitHub profile">github.com/will24m</a>
         </div>
-      </div>
+      </section>
 
-      <form class="contact-form" id="contactForm" action="#" method="post">
-        <label for="name">Name</label>
-        <input type="text" id="name" name="name" placeholder="Enter your name" required>
-        <span class="error-message" id="nameError"></span>
+      <!-- Interactive contact form with validation and accessibility features -->
+      <section class="contact-form-section">
+        <h2>Send a Message</h2>
+        <form class="contact-form" id="contactForm" action="#" method="post" novalidate>
+          <div class="form-group">
+            <label for="name" id="nameLabel">Name</label>
+            <input type="text" id="name" name="name" placeholder="Enter your name" required aria-labelledby="nameLabel" aria-describedby="nameError">
+            <span class="error-message" id="nameError" role="alert" aria-live="polite"></span>
+          </div>
 
-        <label for="email">Email</label>
-        <input type="email" id="email" name="email" placeholder="Enter your email" required>
-        <span class="error-message" id="emailError"></span>
+          <div class="form-group">
+            <label for="email" id="emailLabel">Email</label>
+            <input type="email" id="email" name="email" placeholder="Enter your email" required aria-labelledby="emailLabel" aria-describedby="emailError">
+            <span class="error-message" id="emailError" role="alert" aria-live="polite"></span>
+          </div>
 
-        <label for="message">Message</label>
-        <textarea id="message" name="message" rows="5" placeholder="Type your message" required></textarea>
-        <span class="error-message" id="messageError"></span>
+          <div class="form-group">
+            <label for="message" id="messageLabel">Message</label>
+            <textarea id="message" name="message" rows="5" placeholder="Type your message" required aria-labelledby="messageLabel" aria-describedby="messageError"></textarea>
+            <span class="error-message" id="messageError" role="alert" aria-live="polite"></span>
+          </div>
 
-        <button type="submit" class="button">Send Message</button>
-      </form>
+          <button type="submit" class="button" aria-describedby="formFeedback">
+            Send Message
+          </button>
+        </form>
 
-      <div class="form-feedback" id="formFeedback"></div>
-    </div>
+        <div class="form-feedback" id="formFeedback" role="status" aria-live="polite"></div>
+      </section>
+    </main>
 
+    <!-- Footer with copyright information -->
     <footer>
-      &copy; 2024 Will Wu. All rights reserved.
+      <p>&copy; 2024 Will Wu. All rights reserved.</p>
     </footer>
 
+    <!-- JavaScript for form validation and dynamic functionality -->
     <script src="scripts/script.js"></script>
   </body>
 </html>

@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Portfolio - Will Wu's Projects and Work" />
+    <meta name="keywords" content="portfolio, projects, Will Wu, software developer, web development" />
+    <meta name="author" content="Will Wu" />
+    <title>Portfolio - Will Wu</title>
+    
+    <link rel="stylesheet" href="styles/styles.css" />
+    <link rel="stylesheet" href="styles/portfolio.css" />
+    <link rel="icon" href="favicon.ico" type="image/x-icon" />
+  </head>
+  <body>
+    <div id="header"></div>
+
+    <main class="container">
+      <h1 class="animated-title">My Portfolio</h1>
+      <p class="subtitle">Explore my latest projects and creative work</p>
+      
+      <div class="portfolio-grid">
+        <div class="project-card" data-category="web">
+          <div class="card-image">
+            <div class="project-preview web-project"></div>
+            <div class="card-overlay">
+              <div class="tech-stack">
+                <span class="tech-tag">HTML</span>
+                <span class="tech-tag">CSS</span>
+                <span class="tech-tag">JavaScript</span>
+              </div>
+            </div>
+          </div>
+          <div class="card-content">
+            <h3>Personal Website</h3>
+            <p>A responsive personal website with interactive elements and modern design.</p>
+            <div class="card-actions">
+              <a href="#" class="btn-primary">View Live</a>
+              <a href="#" class="btn-secondary">Source Code</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="project-card" data-category="game">
+          <div class="card-image">
+            <div class="project-preview game-project"></div>
+            <div class="card-overlay">
+              <div class="tech-stack">
+                <span class="tech-tag">JavaScript</span>
+                <span class="tech-tag">Canvas</span>
+                <span class="tech-tag">CSS3</span>
+              </div>
+            </div>
+          </div>
+          <div class="card-content">
+            <h3>Chrome Dinosaur Game</h3>
+            <p>A recreation of Google's Chrome dinosaur game with enhanced features and animations.</p>
+            <div class="card-actions">
+              <a href="index.html#game-container" class="btn-primary">Play Game</a>
+              <a href="#" class="btn-secondary">Source Code</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="project-card" data-category="app">
+          <div class="card-image">
+            <div class="project-preview app-project"></div>
+            <div class="card-overlay">
+              <div class="tech-stack">
+                <span class="tech-tag">React</span>
+                <span class="tech-tag">Node.js</span>
+                <span class="tech-tag">MongoDB</span>
+              </div>
+            </div>
+          </div>
+          <div class="card-content">
+            <h3>Task Management App</h3>
+            <p>A full-stack task management application with real-time updates and user authentication.</p>
+            <div class="card-actions">
+              <a href="#" class="btn-primary">View Demo</a>
+              <a href="#" class="btn-secondary">Source Code</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="project-card" data-category="ai">
+          <div class="card-image">
+            <div class="project-preview ai-project"></div>
+            <div class="card-overlay">
+              <div class="tech-stack">
+                <span class="tech-tag">Python</span>
+                <span class="tech-tag">TensorFlow</span>
+                <span class="tech-tag">OpenCV</span>
+              </div>
+            </div>
+          </div>
+          <div class="card-content">
+            <h3>Image Recognition AI</h3>
+            <p>Machine learning model for image classification using convolutional neural networks.</p>
+            <div class="card-actions">
+              <a href="#" class="btn-primary">View Demo</a>
+              <a href="#" class="btn-secondary">Source Code</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="project-card" data-category="mobile">
+          <div class="card-image">
+            <div class="project-preview mobile-project"></div>
+            <div class="card-overlay">
+              <div class="tech-stack">
+                <span class="tech-tag">React Native</span>
+                <span class="tech-tag">Firebase</span>
+                <span class="tech-tag">Redux</span>
+              </div>
+            </div>
+          </div>
+          <div class="card-content">
+            <h3>Fitness Tracker</h3>
+            <p>A cross-platform mobile app for tracking workouts and fitness goals with social features.</p>
+            <div class="card-actions">
+              <a href="#" class="btn-primary">Download</a>
+              <a href="#" class="btn-secondary">Source Code</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="project-card" data-category="web">
+          <div class="card-image">
+            <div class="project-preview ecommerce-project"></div>
+            <div class="card-overlay">
+              <div class="tech-stack">
+                <span class="tech-tag">Vue.js</span>
+                <span class="tech-tag">Express</span>
+                <span class="tech-tag">PostgreSQL</span>
+              </div>
+            </div>
+          </div>
+          <div class="card-content">
+            <h3>E-commerce Platform</h3>
+            <p>A complete e-commerce solution with payment integration and inventory management.</p>
+            <div class="card-actions">
+              <a href="#" class="btn-primary">View Live</a>
+              <a href="#" class="btn-secondary">Source Code</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="filter-section">
+        <h3>Filter by Category</h3>
+        <div class="filter-buttons">
+          <button class="filter-btn active" data-filter="all">All</button>
+          <button class="filter-btn" data-filter="web">Web Development</button>
+          <button class="filter-btn" data-filter="game">Games</button>
+          <button class="filter-btn" data-filter="app">Applications</button>
+          <button class="filter-btn" data-filter="ai">AI/ML</button>
+          <button class="filter-btn" data-filter="mobile">Mobile</button>
+        </div>
+      </div>
+    </main>
+
+    <footer>
+      <p>&copy; 2024 Will Wu. All rights reserved.</p>
+    </footer>
+
+    <script src="scripts/script.js"></script>
+    <script src="scripts/portfolio.js"></script>
+  </body>
+</html> 
