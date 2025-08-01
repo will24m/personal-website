@@ -84,6 +84,10 @@ class AdminPanel {
 }
 
 // Global functions for admin actions
+function returnToWebsite() {
+    window.location.href = 'index.html';
+}
+
 function previewSite() {
     window.open('index.html', '_blank');
     showNotification('Opening site preview...', 'success');
