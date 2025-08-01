@@ -30,12 +30,26 @@
       </div>
 
       <div id="game-container">
-        <h3>Play the Dinosaur Game!</h3>
+        <h3>Chrome Dinosaur Game</h3>
         <div id="game">
-          <div id="dino"></div>
-          <div id="obstacle"></div>
+          <div id="ground"></div>
+          <div id="dino">
+            <div class="dino-sprite"></div>
+          </div>
+          <div id="obstacles"></div>
+          <div id="clouds"></div>
         </div>
-        <div id="score">Score: 0</div>
+        <div id="game-ui">
+          <div id="score">Score: 0</div>
+          <div id="high-score">High Score: 0</div>
+        </div>
+        <div id="game-over" class="hidden">
+          <h2>Game Over!</h2>
+          <p>Press SPACE to restart</p>
+        </div>
+        <div id="game-start">
+          <p>Press SPACE to start</p>
+        </div>
       </div>
 
       <div class="social-icons">

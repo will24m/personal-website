@@ -1,341 +1,633 @@
 /* Import the "Poppins" font from Google Fonts */
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap');
 
-body {
-  background: linear-gradient(to right, #2e2e2e, #121212);
-  font-family: 'Poppins', sans-serif;
-  margin: 0;
-  padding: 0;
-  color: #f0f0f0;
-  overflow-x: hidden;
-  cursor: url('images/cursor.png'), auto; /* Custom cursor */
+/* Global Motion Effects */
+@keyframes float {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-50px) scale(1.1); }
 }
 
-header {
-  background: linear-gradient(to right, #333, #000);
-  color: white;
-  padding: 10px 0;
-  position: fixed;
-  width: 100%;
-  top: 0;
-  left: 0;
-  z-index: 1000;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
 }
 
-nav ul {
-  list-style-type: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  justify-content: center;
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-nav ul li {
-  margin: 0 15px;
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-nav ul li a {
-  color: white;
-  text-decoration: none;
-  font-size: 18px;
-  transition: color 0.3s;
+@keyframes gradientShift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
 }
 
-nav ul li a:hover {
-  color: #ff6347;
-}
-
-body {
-  padding-top: 60px; /* Adjust according to header height */
-}
-
-.container {
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 20px;
-  background: linear-gradient(to bottom, #333, #222);
-  box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
-  border-radius: 10px;
-  margin-top: 50px;
-  text-align: center;
-  position: relative;
-  z-index: 10;
-}
-
+/* Enhanced motion effects for existing elements */
 .h11 {
-  font-size: 50px;
-  font-weight: 500;
-  background: linear-gradient(to right, #ff6347, #ff4500);
-  text-align: center;
-  padding: 10px;
-  border-radius: 10px;
-  transition: all 0.3s ease-in-out;
-  margin-bottom: 20px;
-  color: white;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-}
-
-.h11:hover {
-  background: linear-gradient(to right, #ff4500, #ff6347);
-}
-
-h2 {
-  text-align: center;
-  color: #fff;
-  font-size: 28px;
-  margin-bottom: 20px;
-}
-
-.main-content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin-bottom: 20px;
-}
-
-.main-content p {
-  font-size: 18px;
-  margin-bottom: 10px;
-  color: #ccc;
-  max-width: 600px;
+  animation: gradientShift 3s ease-in-out infinite;
 }
 
 .profile-pic, .profile-picture {
-  width: 200px;
-  border-radius: 50%;
-  transition: transform 0.3s ease-in-out;
-  margin-top: 20px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+  transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
 }
 
 .profile-pic:hover, .profile-picture:hover {
-  transform: scale(1.1);
+  transform: scale(1.1) rotate(2deg);
+  box-shadow: 0 8px 25px rgba(255, 99, 71, 0.4);
 }
 
 .button {
-  display: inline-block;
-  font-size: 18px;
-  text-decoration: none;
-  color: white;
-  background: linear-gradient(to right, #ff6347, #ff4500);
-  padding: 10px 20px;
-  border-radius: 5px;
-  margin-top: 20px;
-  transition: background 0.3s;
-  border: none;
-  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  position: relative;
+  overflow: hidden;
+}
+
+.button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s;
+}
+
+.button:hover::before {
+  left: 100%;
 }
 
 .button:hover {
-  background: linear-gradient(to right, #ff4500, #ff6347);
+  transform: translateY(-3px) scale(1.05);
+  box-shadow: 0 10px 25px rgba(255, 99, 71, 0.4);
+}
+
+.social-icons a {
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.social-icons a:hover {
+  transform: translateY(-5px) scale(1.2);
+  text-shadow: 0 5px 15px rgba(255, 99, 71, 0.5);
+}
+
+/* Enhanced bubble animations */
+.bubble {
+  animation: float 10s infinite ease-in-out;
+  transition: all 0.3s ease;
+}
+
+.bubble:hover {
+  transform: scale(1.2);
+  background-color: rgba(255, 99, 71, 0.3);
+}
+
+/* Loading animation */
+body.loaded .container {
+  animation: fadeInUp 0.8s ease-out;
+}
+
+/* Scroll-triggered animations */
+.scroll-animate {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: all 0.6s ease-out;
+}
+
+.scroll-animate.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Enhanced navigation hover effects */
+nav ul li a {
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+nav ul li a::after {
+  content: '';
+  position: absolute;
+  bottom: -5px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: #ff6347;
+  transition: width 0.3s ease;
+}
+
+nav ul li a:hover::after {
+  width: 100%;
+}
+
+nav ul li a:hover {
+  transform: translateY(-2px);
+  text-shadow: 0 2px 10px rgba(255, 99, 71, 0.5);
+}
+
+body {
+  background: linear-gradient(to right, #2e2e2e, #121212); /* Creates a dark gradient background from left to right */
+  font-family: 'Poppins', sans-serif; /* Sets the font to Poppins with fallback to sans-serif */
+  margin: 0; /* Removes default margin around the body */
+  padding: 0; /* Removes default padding around the body */
+  color: #f0f0f0; /* Sets text color to light gray */
+  overflow-x: hidden; /* Hides horizontal scrollbar */
+  cursor: url('images/cursor.png'), auto; /* Custom cursor image with fallback to default */
+}
+
+header {
+  background: linear-gradient(to right, #333, #000); /* Creates a dark gradient for header background */
+  color: white; /* Sets header text color to white */
+  padding: 10px 0; /* Adds vertical padding of 10px, no horizontal padding */
+  position: fixed; /* Fixes header position at top of viewport */
+  width: 100%; /* Makes header span full width */
+  top: 0; /* Positions header at top of viewport */
+  left: 0; /* Positions header at left edge */
+  z-index: 1000; /* Ensures header appears above other content */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Adds subtle shadow below header */
+}
+
+nav ul {
+  list-style-type: none; /* Removes bullet points from navigation list */
+  margin: 0; /* Removes default margin */
+  padding: 0; /* Removes default padding */
+  display: flex; /* Makes navigation items display in a row */
+  justify-content: center; /* Centers navigation items horizontally */
+}
+
+nav ul li {
+  margin: 0 15px; /* Adds horizontal spacing between navigation items */
+}
+
+nav ul li a {
+  color: white; /* Sets navigation link color to white */
+  text-decoration: none; /* Removes underline from links */
+  font-size: 18px; /* Sets font size for navigation links */
+  transition: color 0.3s; /* Adds smooth color transition effect */
+}
+
+nav ul li a:hover {
+  color: #ff6347; /* Changes link color to orange-red on hover */
+}
+
+body {
+  padding-top: 60px; /* Adds top padding to body to account for fixed header */
+}
+
+.container {
+  max-width: 800px; /* Limits container width to 800px */
+  margin: 0 auto; /* Centers container horizontally */
+  padding: 20px; /* Adds 20px padding inside container */
+  background: linear-gradient(to bottom, #333, #222); /* Creates dark gradient background */
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.5); /* Adds shadow around container */
+  border-radius: 10px; /* Rounds container corners */
+  margin-top: 50px; /* Adds top margin to container */
+  text-align: center; /* Centers text content inside container */
+  position: relative; /* Sets positioning context for child elements */
+  z-index: 10; /* Sets stacking order */
+}
+
+.h11 {
+  font-size: 50px; /* Sets large font size for main heading */
+  font-weight: 500; /* Sets font weight to medium */
+  background: linear-gradient(to right, #ff6347, #ff4500); /* Creates orange gradient background */
+  text-align: center; /* Centers the heading text */
+  padding: 10px; /* Adds padding around heading */
+  border-radius: 10px; /* Rounds heading corners */
+  transition: all 0.3s ease-in-out; /* Adds smooth transition for all properties */
+  margin-bottom: 20px; /* Adds bottom margin */
+  color: white; /* Sets text color to white */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3); /* Adds shadow below heading */
+}
+
+.h11:hover {
+  background: linear-gradient(to right, #ff4500, #ff6347); /* Reverses gradient on hover */
+}
+
+h2 {
+  text-align: center; /* Centers h2 headings */
+  color: #fff; /* Sets h2 text color to white */
+  font-size: 28px; /* Sets h2 font size */
+  margin-bottom: 20px; /* Adds bottom margin */
+}
+
+.main-content {
+  display: flex; /* Makes content display as flexbox */
+  flex-direction: column; /* Stacks content vertically */
+  align-items: center; /* Centers content horizontally */
+  margin-bottom: 20px; /* Adds bottom margin */
+}
+
+.main-content p {
+  font-size: 18px; /* Sets paragraph font size */
+  margin-bottom: 10px; /* Adds bottom margin to paragraphs */
+  color: #ccc; /* Sets paragraph text color to light gray */
+  max-width: 600px; /* Limits paragraph width */
+}
+
+.profile-pic, .profile-picture {
+  width: 200px; /* Sets profile picture width */
+  border-radius: 50%; /* Makes profile picture circular */
+  transition: transform 0.3s ease-in-out; /* Adds smooth transform transition */
+  margin-top: 20px; /* Adds top margin */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3); /* Adds shadow below profile picture */
+}
+
+.profile-pic:hover, .profile-picture:hover {
+  transform: scale(1.1); /* Scales up profile picture on hover */
+}
+
+.button {
+  display: inline-block; /* Makes button display as inline block */
+  font-size: 18px; /* Sets button font size */
+  text-decoration: none; /* Removes underline from button links */
+  color: white; /* Sets button text color to white */
+  background: linear-gradient(to right, #ff6347, #ff4500); /* Creates orange gradient background */
+  padding: 10px 20px; /* Adds padding inside button */
+  border-radius: 5px; /* Rounds button corners */
+  margin-top: 20px; /* Adds top margin */
+  transition: background 0.3s; /* Adds smooth background transition */
+  border: none; /* Removes button border */
+  cursor: pointer; /* Changes cursor to pointer on hover */
+}
+
+.button:hover {
+  background: linear-gradient(to right, #ff4500, #ff6347); /* Reverses gradient on hover */
 }
 
 footer {
-  text-align: center;
-  padding: 20px;
-  margin-top: 20px;
-  background: linear-gradient(to right, #333, #000);
-  color: white;
-  box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.2);
+  text-align: center; /* Centers footer content */
+  padding: 20px; /* Adds padding inside footer */
+  margin-top: 20px; /* Adds top margin */
+  background: linear-gradient(to right, #333, #000); /* Creates dark gradient background */
+  color: white; /* Sets footer text color to white */
+  box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.2); /* Adds shadow above footer */
 }
 
 .bubble {
-  position: absolute;
-  background-color: rgba(255, 255, 255, 0.2);
-  border-radius: 50%;
-  animation: float 10s infinite ease-in-out;
+  position: absolute; /* Positions bubbles absolutely */
+  background-color: rgba(255, 255, 255, 0.2); /* Creates semi-transparent white background */
+  border-radius: 50%; /* Makes bubbles circular */
+  animation: float 10s infinite ease-in-out; /* Applies floating animation */
 }
 
 .bubble:nth-child(1) {
-  width: 60px;
-  height: 60px;
-  bottom: 10%;
-  left: 20%;
-  animation-duration: 12s;
+  width: 60px; /* Sets width of first bubble */
+  height: 60px; /* Sets height of first bubble */
+  bottom: 10%; /* Positions from bottom */
+  left: 20%; /* Positions from left */
+  animation-duration: 12s; /* Sets animation duration for first bubble */
 }
 
 .bubble:nth-child(2) {
-  width: 40px;
-  height: 40px;
-  bottom: 15%;
-  left: 50%;
-  animation-duration: 8s;
+  width: 40px; /* Sets width of second bubble */
+  height: 40px; /* Sets height of second bubble */
+  bottom: 15%; /* Positions from bottom */
+  left: 50%; /* Positions from left */
+  animation-duration: 8s; /* Sets animation duration for second bubble */
 }
 
 .bubble:nth-child(3) {
-  width: 80px;
-  height: 80px;
-  bottom: 20%;
-  left: 80%;
-  animation-duration: 14s;
+  width: 80px; /* Sets width of third bubble */
+  height: 80px; /* Sets height of third bubble */
+  bottom: 20%; /* Positions from bottom */
+  left: 80%; /* Positions from left */
+  animation-duration: 14s; /* Sets animation duration for third bubble */
 }
 
 @keyframes float {
   0% {
-    transform: translateY(0) scale(1);
+    transform: translateY(0) scale(1); /* Starting position - no movement, normal size */
   }
   50% {
-    transform: translateY(-50px) scale(1.1);
+    transform: translateY(-50px) scale(1.1); /* Middle position - moves up and scales up */
   }
   100% {
-    transform: translateY(0) scale(1);
+    transform: translateY(0) scale(1); /* Ending position - returns to original position and size */
   }
 }
 
 /* Social icons */
 .social-icons {
-  margin-top: 20px;
+  margin-top: 20px; /* Adds top margin to social icons container */
 }
 
 .social-icons a {
-  color: #f0f0f0;
-  font-size: 24px;
-  margin: 0 10px;
-  transition: color 0.3s;
+  color: #f0f0f0; /* Sets social icon color to light gray */
+  font-size: 24px; /* Sets social icon size */
+  margin: 0 10px; /* Adds horizontal spacing between icons */
+  transition: color 0.3s; /* Adds smooth color transition */
 }
 
 .social-icons a:hover {
-  color: #ff6347;
+  color: #ff6347; /* Changes icon color to orange-red on hover */
 }
 
 a:hover,
 button:hover {
-  cursor: url('images/cursor.png'), pointer; /* Custom cursor on hover */
+  cursor: url('images/cursor.png'), pointer; /* Changes cursor to custom image on hover */
 }
 
 #game-container {
     margin-top: 20px;
     text-align: center;
 }
-  
-  #game {
-    position: relative;
-    width: 600px;
-    height: 150px;
-    border: 2px solid #ccc;
-    margin: 0 auto;
-    background: #fff;
-    overflow: hidden;
-  }
-  
-  #dino {
-    position: absolute;
-    bottom: 0;
-    left: 50px;
-    width: 40px;
-    height: 40px;
-    background-color: #333;
-    transition: bottom 0.1s;
-  }
-  
-  #obstacle {
-    position: absolute;
-    bottom: 0;
-    right: 0;
-    width: 20px;
-    height: 40px;
-    background-color: #f00;
-  }
-  
-  #score {
-    margin-top: 10px;
-    font-size: 18px;
-  }
 
-  body {
-    font-family: 'Arial', sans-serif;
-    margin: 0;
-    padding: 0;
-    background-color: #f4f4f4;
-  }
-  
-  .container {
-    max-width: 800px;
-    margin: 50px auto;
-    padding: 20px;
-    background-color: white;
-    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
-  }
-  
-  h1 {
-    text-align: center;
-    color: #333;
-  }
-  
-  .contact-info {
-    margin-bottom: 30px;
-  }
-  
-  .contact-item {
-    margin-bottom: 10px;
-  }
-  
-  .contact-item a {
-    color: #0d6efd;
-    text-decoration: none;
-  }
-  
-  .contact-item a:hover {
-    text-decoration: underline;
-  }
-  
-  .contact-form {
-    display: flex;
-    flex-direction: column;
-  }
-  
-  .contact-form label {
-    margin-bottom: 5px;
-    font-weight: bold;
-    color: #555;
-  }
-  
-  .contact-form input, .contact-form textarea {
-    margin-bottom: 15px;
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-  }
-  
-  .contact-form input:focus, .contact-form textarea:focus {
-    border-color: #0d6efd;
-    outline: none;
-  }
-  
-  .button {
-    background-color: #0d6efd;
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 4px;
-    cursor: pointer;
-  }
-  
-  .button:hover {
-    background-color: #0a58ca;
-  }
-  
-  .error-message {
-    color: red;
-    font-size: 12px;
-    margin-top: -10px;
-  }
-  
-  footer {
-    text-align: center;
-    padding: 20px;
-    background-color: #0d6efd;
-    color: white;
-    position: fixed;
+#game {
+    position: relative;
+    width: 800px;
+    height: 300px;
+    border: 2px solid #535353;
+    margin: 0 auto;
+    background: #f7f7f7;
+    overflow: hidden;
+    font-family: 'Courier New', monospace;
+}
+
+#ground {
+    position: absolute;
     bottom: 0;
     width: 100%;
-  }
+    height: 2px;
+    background: #535353;
+}
+
+#dino {
+    position: absolute;
+    bottom: 2px;
+    left: 50px;
+    width: 44px;
+    height: 47px;
+    z-index: 10;
+}
+
+.dino-sprite {
+    width: 100%;
+    height: 100%;
+    background: #535353;
+    position: relative;
+}
+
+.dino-sprite::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #535353;
+    clip-path: polygon(
+        0% 100%, 0% 60%, 10% 60%, 10% 40%, 20% 40%, 20% 20%, 30% 20%, 30% 0%, 
+        70% 0%, 70% 20%, 80% 20%, 80% 40%, 90% 40%, 90% 60%, 100% 60%, 100% 100%
+    );
+}
+
+.dino-sprite::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 10px;
+    width: 24px;
+    height: 8px;
+    background: #535353;
+    border-radius: 0 0 4px 4px;
+}
+
+#dino.jumping .dino-sprite {
+    animation: jump 0.5s ease-out;
+}
+
+@keyframes jump {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-100px); }
+}
+
+#dino.running .dino-sprite::before {
+    animation: run 0.2s infinite;
+}
+
+@keyframes run {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-2px); }
+}
+
+.obstacle {
+    position: absolute;
+    bottom: 2px;
+    width: 17px;
+    height: 35px;
+    background: #535353;
+    border-radius: 2px;
+}
+
+.obstacle.cactus {
+    height: 35px;
+}
+
+.obstacle.cactus::before {
+    content: '';
+    position: absolute;
+    top: -8px;
+    left: 4px;
+    width: 9px;
+    height: 8px;
+    background: #535353;
+    border-radius: 2px;
+}
+
+.obstacle.cactus::after {
+    content: '';
+    position: absolute;
+    top: -8px;
+    right: 4px;
+    width: 9px;
+    height: 8px;
+    background: #535353;
+    border-radius: 2px;
+}
+
+.obstacle.pterodactyl {
+    height: 20px;
+    width: 46px;
+    background: #535353;
+    border-radius: 10px;
+}
+
+.obstacle.pterodactyl::before {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 8px;
+    width: 30px;
+    height: 8px;
+    background: #535353;
+    border-radius: 4px;
+}
+
+.cloud {
+    position: absolute;
+    width: 46px;
+    height: 14px;
+    background: #535353;
+    border-radius: 7px;
+    opacity: 0.8;
+}
+
+#game-ui {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 10px;
+    font-size: 18px;
+    font-family: 'Courier New', monospace;
+}
+
+#score, #high-score {
+    font-weight: bold;
+    color: #535353;
+}
+
+#game-over, #game-start {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(255, 255, 255, 0.9);
+    padding: 20px;
+    border-radius: 8px;
+    text-align: center;
+    z-index: 100;
+}
+
+#game-over h2 {
+    color: #d32f2f;
+    margin: 0 0 10px 0;
+}
+
+.hidden {
+    display: none;
+}
+
+body {
+    font-family: 'Arial', sans-serif; /* Sets font to Arial with fallback */
+    margin: 0; /* Removes default margin */
+    padding: 0; /* Removes default padding */
+    background-color: #f4f4f4; /* Sets light gray background */
+}
   
-  @media (max-width: 768px) {
+.container {
+    max-width: 800px; /* Limits container width to 800px */
+    margin: 50px auto; /* Centers container with top/bottom margin */
+    padding: 20px; /* Adds padding inside container */
+    background-color: white; /* Sets white background */
+    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1); /* Adds subtle shadow */
+}
+  
+h1 {
+    text-align: center; /* Centers h1 headings */
+    color: #333; /* Sets h1 text color to dark gray */
+}
+  
+.contact-info {
+    margin-bottom: 30px; /* Adds bottom margin to contact info section */
+}
+  
+.contact-item {
+    margin-bottom: 10px; /* Adds bottom margin to each contact item */
+}
+  
+.contact-item a {
+    color: #0d6efd; /* Sets contact link color to blue */
+    text-decoration: none; /* Removes underline from links */
+}
+  
+.contact-item a:hover {
+    text-decoration: underline; /* Adds underline on hover */
+}
+  
+.contact-form {
+    display: flex; /* Makes contact form display as flexbox */
+    flex-direction: column; /* Stacks form elements vertically */
+}
+  
+.contact-form label {
+    margin-bottom: 5px; /* Adds bottom margin to labels */
+    font-weight: bold; /* Makes labels bold */
+    color: #555; /* Sets label text color to medium gray */
+}
+  
+.contact-form input, .contact-form textarea {
+    margin-bottom: 15px; /* Adds bottom margin to form inputs */
+    padding: 10px; /* Adds padding inside form inputs */
+    border: 1px solid #ccc; /* Adds border around form inputs */
+    border-radius: 4px; /* Rounds form input corners */
+}
+  
+.contact-form input:focus, .contact-form textarea:focus {
+    border-color: #0d6efd; /* Changes border color to blue when focused */
+    outline: none; /* Removes default focus outline */
+}
+  
+.button {
+    background-color: #0d6efd; /* Sets button background to blue */
+    color: white; /* Sets button text color to white */
+    border: none; /* Removes button border */
+    padding: 10px 20px; /* Adds padding inside button */
+    border-radius: 4px; /* Rounds button corners */
+    cursor: pointer; /* Changes cursor to pointer on hover */
+}
+  
+.button:hover {
+    background-color: #0a58ca; /* Darkens button background on hover */
+}
+  
+.error-message {
+    color: red; /* Sets error message color to red */
+    font-size: 12px; /* Sets error message font size */
+    margin-top: -10px; /* Moves error message up slightly */
+}
+  
+footer {
+    text-align: center; /* Centers footer content */
+    padding: 20px; /* Adds padding inside footer */
+    background-color: #0d6efd; /* Sets footer background to blue */
+    color: white; /* Sets footer text color to white */
+    position: fixed; /* Fixes footer position at bottom */
+    bottom: 0; /* Positions footer at bottom of viewport */
+    width: 100%; /* Makes footer span full width */
+}
+  
+@media (max-width: 768px) {
     .container {
-      margin: 20px;
-      padding: 10px;
+        margin: 20px; /* Reduces container margin on mobile */
+        padding: 10px; /* Reduces container padding on mobile */
     }
-  }
+}
+
+.contact-form {
+    display: flex; /* Makes contact form display as flexbox */
+    flex-direction: column; /* Stacks form elements vertically */
+    align-items: center; /* Centers form elements horizontally */
+}
   
+.contact-form input, .contact-form textarea {
+    width: 100%; /* Makes form inputs span full width */
+    padding: 10px; /* Adds padding inside form inputs */
+    margin-bottom: 15px; /* Adds bottom margin to form inputs */
+}
