@@ -1,4 +1,9 @@
 /* Blog Page Styles */
+
+/* Custom Cursor */
+* {
+  cursor: url('../images/cursor.png'), auto;
+}
 .animated-title {
   background: linear-gradient(45deg, #ff6347, #ff4500, #ff8c00);
   background-size: 200% 200%;

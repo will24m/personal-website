@@ -1,6 +1,11 @@
 /* Import the "Poppins" font from Google Fonts */
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap');
 
+/* Custom Cursor */
+* {
+  cursor: url('../images/cursor.png'), auto;
+}
+
 /* Global Motion Effects */
 @keyframes float {
   0%, 100% { transform: translateY(0) scale(1); }
@@ -270,6 +275,16 @@ h2 {
 
 .button:hover {
   background: linear-gradient(to right, #ff4500, #ff6347); /* Reverses gradient on hover */
+}
+
+.admin-link {
+  background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+  border: 2px solid #ff6b6b;
+}
+
+.admin-link:hover {
+  background: linear-gradient(135deg, #ff5252 0%, #d32f2f 100%);
+  box-shadow: 0 5px 15px rgba(255, 107, 107, 0.3);
 }
 
 footer {
