@@ -2,9 +2,8 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Home</title>
+    <title>Will Wu - Web Developer</title>
     <link rel="stylesheet" href="styles/styles.css" />
     <link
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
@@ -12,65 +11,78 @@
     />
   </head>
   <body>
-    <div id="header"></div>
-    <div class="container">
-      <h1 class="h11">Will Wu</h1>
-      <h2>Welcome to my Personal Website</h2>
-
-      <div class="main-content">
-        <p>
-          This is a paragraph about me and what I do. I am a software engineer
-          and I enjoy working on interesting projects. I am also an avid
-          traveler and love to explore new places.
-        </p>
-        <p>Click on my photo to learn more about me.</p>
-        <a href="about.html">
-          <img src="images/headshot.jpg" alt="My Picture" class="profile-pic"/>
-        </a>
+    <nav class="navbar">
+      <div class="nav-container">
+        <a href="#" class="nav-logo">Will Wu</a>
+        <ul class="nav-menu">
+          <li class="nav-item">
+            <a href="index.html" class="nav-link active">Home</a>
+          </li>
+          <li class="nav-item">
+            <a href="about.html" class="nav-link">About</a>
+          </li>
+          <li class="nav-item">
+            <a href="contact.html" class="nav-link">Contact</a>
+          </li>
+        </ul>
+        <div class="hamburger">
+          <span class="bar"></span>
+          <span class="bar"></span>
+          <span class="bar"></span>
+        </div>
       </div>
+    </nav>
 
-      <div id="game-container">
-        <h3>Chrome Dinosaur Game</h3>
-        <div id="game">
-          <div id="ground"></div>
-          <div id="dino">
-            <div class="dino-sprite"></div>
+    <main>
+      <section class="hero">
+        <div class="hero-content">
+          <div class="profile-section">
+            <img src="images/headshot.jpg" alt="Will Wu" class="profile-image" />
+            <div class="profile-text">
+              <h1 class="name">Will Wu</h1>
+              <h2 class="title">Web Developer & Designer</h2>
+              <p class="description">
+                Passionate about creating beautiful, functional, and user-friendly web experiences.
+                I love bringing ideas to life through clean code and modern design.
+              </p>
+              <div class="cta-buttons">
+                <a href="about.html" class="btn btn-primary">Learn More</a>
+                <a href="contact.html" class="btn btn-outline">Get In Touch</a>
+              </div>
+            </div>
           </div>
-          <div id="obstacles"></div>
-          <div id="clouds"></div>
         </div>
-        <div id="game-ui">
-          <div id="score">Score: 0</div>
-          <div id="high-score">High Score: 0</div>
+      </section>
+
+      <section class="social">
+        <div class="social-container">
+          <h3>Let's Connect</h3>
+          <div class="social-links">
+            <a href="https://www.linkedin.com/in/will24m" target="_blank" class="social-link">
+              <i class="fab fa-linkedin"></i>
+              <span>LinkedIn</span>
+            </a>
+            <a href="https://github.com/will24m" target="_blank" class="social-link">
+              <i class="fab fa-github"></i>
+              <span>GitHub</span>
+            </a>
+            <a href="mailto:will@williamwu.ca" class="social-link">
+              <i class="fas fa-envelope"></i>
+              <span>Email</span>
+            </a>
+          </div>
         </div>
-        <div id="game-over" class="hidden">
-          <h2>Game Over!</h2>
-          <p>Press SPACE to restart</p>
-        </div>
-        <div id="game-start">
-          <p>Press SPACE to start</p>
-        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-content">
+        <p>&copy; 2024 Will Wu. All rights reserved.</p>
+        <button id="back-to-top" class="back-to-top" aria-label="Back to top">
+          <i class="fas fa-arrow-up"></i>
+        </button>
       </div>
-
-      <div class="social-icons">
-        <a href="https://www.linkedin.com/in/will24m" target="_blank"><i class="fab fa-linkedin"></i></a>
-        <a href="https://github.com/will24m" target="_blank"><i class="fab fa-github"></i></a>
-        <a href="mailto:will@williamwu.ca"><i class="fas fa-envelope"></i></a>
-      </div>
-
-      <a href="mailto:williamwu924@gmail.com" class="button">Email me</a>
-      <a href="https://google.ca" target="_blank" class="button">Google</a>
-      <a href="#" id="top-link" class="button">Jump to Top</a>
-      <a href="login.html" class="button admin-link">🔧 Admin Panel</a>
-    </div>
-
-    <footer>
-      &copy; 2024 Will Wu. All rights reserved.
     </footer>
-
-    <div class="bubble"></div>
-    <div class="bubble"></div>
-    <div class="bubble"></div>
 
     <script src="scripts/script.js"></script>
   </body>
