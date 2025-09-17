@@ -2,38 +2,117 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>About Me</title>
+    <title>About - Will Wu</title>
     <link rel="stylesheet" href="styles/styles.css" />
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+      rel="stylesheet"
+    />
   </head>
   <body>
-    <div id="header"></div>
-    <div class="container">
-      <h1>About Me</h1>
-      <img src="images/headshot.jpg" alt="My Picture" class="profile-picture" />
-      <p>
-        Hi, I'm Will Wu, a computer science student at Queen's University. I
-        have a passion for software development and enjoy working on
-        challenging projects. My interests include web development, artificial
-        intelligence, and exploring new technologies. In my free time, I love to
-        travel and experience new cultures.
-      </p>
-      <p>
-        I believe in continuous learning and am always looking for opportunities
-        to expand my skill set and knowledge. Feel free to connect with me on
-        LinkedIn!
-      </p>
-      <a
-        href="https://www.linkedin.com/in/will24m"
-        class="linkedin-link"
-        target="_blank"
-        >Visit my LinkedIn profile</a
-      >
-    </div>
-    <footer>
-      &copy; 2024 Will Wu. All rights reserved.
+    <nav class="navbar">
+      <div class="nav-container">
+        <a href="index.html" class="nav-logo">Will Wu</a>
+        <ul class="nav-menu">
+          <li class="nav-item">
+            <a href="index.html" class="nav-link">Home</a>
+          </li>
+          <li class="nav-item">
+            <a href="about.html" class="nav-link active">About</a>
+          </li>
+          <li class="nav-item">
+            <a href="contact.html" class="nav-link">Contact</a>
+          </li>
+        </ul>
+        <div class="hamburger">
+          <span class="bar"></span>
+          <span class="bar"></span>
+          <span class="bar"></span>
+        </div>
+      </div>
+    </nav>
+
+    <main class="about-main">
+      <div class="container">
+        <section class="about-hero">
+          <div class="about-content">
+            <div class="about-image">
+              <img src="images/headshot.jpg" alt="Will Wu" class="profile-image" />
+            </div>
+            <div class="about-text">
+              <h1>About Me</h1>
+              <p class="lead">
+                I'm a passionate web developer with a love for creating innovative and user-friendly digital experiences.
+                My journey in technology started with curiosity and has evolved into a dedicated pursuit of excellence in web development.
+              </p>
+              <p>
+                I believe in the power of clean code, thoughtful design, and continuous learning.
+                Every project is an opportunity to solve problems and create something meaningful.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <section class="skills-section">
+          <h2>Skills & Technologies</h2>
+          <div class="skills-grid">
+            <div class="skill-category">
+              <h3>Frontend</h3>
+              <ul class="skill-list">
+                <li>HTML5 & CSS3</li>
+                <li>JavaScript (ES6+)</li>
+                <li>React</li>
+                <li>TypeScript</li>
+              </ul>
+            </div>
+            <div class="skill-category">
+              <h3>Backend</h3>
+              <ul class="skill-list">
+                <li>Node.js</li>
+                <li>Express</li>
+                <li>Python</li>
+                <li>Database Design</li>
+              </ul>
+            </div>
+            <div class="skill-category">
+              <h3>Tools & Others</h3>
+              <ul class="skill-list">
+                <li>Git & GitHub</li>
+                <li>VS Code</li>
+                <li>Responsive Design</li>
+                <li>UI/UX Principles</li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
+        <section class="connect-section">
+          <h2>Let's Connect</h2>
+          <p>I'm always interested in new opportunities and collaborations.</p>
+          <div class="connect-links">
+            <a href="https://www.linkedin.com/in/will24m" target="_blank" class="btn btn-primary">
+              <i class="fab fa-linkedin"></i>
+              LinkedIn Profile
+            </a>
+            <a href="contact.html" class="btn btn-outline">
+              <i class="fas fa-envelope"></i>
+              Get In Touch
+            </a>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-content">
+        <p>&copy; 2024 Will Wu. All rights reserved.</p>
+        <button id="back-to-top" class="back-to-top" aria-label="Back to top">
+          <i class="fas fa-arrow-up"></i>
+        </button>
+      </div>
     </footer>
+
     <script src="scripts/script.js"></script>
   </body>
 </html>

@@ -1,82 +1,265 @@
-document.getElementById('header').innerHTML = `
-  <header>
-    <nav>
-      <ul>
-        <li><a href="index.html">Home</a></li>
-        <li><a href="about.html">About</a></li>
-        <li><a href="contact.html">Contact</a></li>
-      </ul>
-    </nav>
-  </header>
-`;
+// Modern, clean JavaScript for Will Wu's personal website
 
-// JavaScript for smooth scroll to top
-document.getElementById('top-link').addEventListener('click', function(event) {
-  event.preventDefault();
-  window.scrollTo({ top: 0, behavior: 'smooth' });
+// Mobile Navigation Toggle
+class MobileNav {
+  constructor() {
+    this.hamburger = document.querySelector('.hamburger');
+    this.navMenu = document.querySelector('.nav-menu');
+    this.navLinks = document.querySelectorAll('.nav-link');
+    
+    this.init();
+  }
+  
+  init() {
+    if (this.hamburger && this.navMenu) {
+      this.hamburger.addEventListener('click', () => this.toggleMenu());
+      
+      // Close menu when clicking on nav links
+      this.navLinks.forEach(link => {
+        link.addEventListener('click', () => this.closeMenu());
+      });
+      
+      // Close menu when clicking outside
+      document.addEventListener('click', (e) => {
+        if (!e.target.closest('.navbar')) {
+          this.closeMenu();
+        }
+      });
+    }
+  }
+  
+  toggleMenu() {
+    this.hamburger.classList.toggle('active');
+    this.navMenu.classList.toggle('active');
+  }
+  
+  closeMenu() {
+    this.hamburger.classList.remove('active');
+    this.navMenu.classList.remove('active');
+  }
+}
+
+// Smooth Scroll to Top
+class SmoothScroll {
+  constructor() {
+    this.backToTopBtn = document.getElementById('back-to-top');
+    this.init();
+  }
+  
+  init() {
+    if (this.backToTopBtn) {
+      this.backToTopBtn.addEventListener('click', () => this.scrollToTop());
+      
+      // Show/hide button based on scroll position
+      window.addEventListener('scroll', () => this.toggleBackToTop());
+    }
+  }
+  
+  scrollToTop() {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+  }
+  
+  toggleBackToTop() {
+    if (window.pageYOffset > 300) {
+      this.backToTopBtn.style.opacity = '1';
+      this.backToTopBtn.style.visibility = 'visible';
+    } else {
+      this.backToTopBtn.style.opacity = '0';
+      this.backToTopBtn.style.visibility = 'hidden';
+    }
+  }
+}
+
+// Contact Form Handler
+class ContactForm {
+  constructor() {
+    this.form = document.getElementById('contactForm');
+    this.feedback = document.getElementById('formFeedback');
+    
+    this.init();
+  }
+  
+  init() {
+    if (this.form) {
+      this.form.addEventListener('submit', (e) => this.handleSubmit(e));
+      
+      // Real-time validation
+      const inputs = this.form.querySelectorAll('input, textarea');
+      inputs.forEach(input => {
+        input.addEventListener('blur', () => this.validateField(input));
+        input.addEventListener('input', () => this.clearError(input));
+      });
+    }
+  }
+  
+  handleSubmit(e) {
+    e.preventDefault();
+    
+    if (this.validateForm()) {
+      this.simulateSubmission();
+    }
+  }
+  
+  validateForm() {
+    let isValid = true;
+    const requiredFields = this.form.querySelectorAll('[required]');
+    
+    requiredFields.forEach(field => {
+      if (!this.validateField(field)) {
+        isValid = false;
+      }
+    });
+    
+    return isValid;
+  }
+  
+  validateField(field) {
+    const value = field.value.trim();
+    const errorElement = document.getElementById(field.id + 'Error');
+    
+    // Clear previous error
+    this.clearError(field);
+    
+    // Validation rules
+    if (field.hasAttribute('required') && !value) {
+      this.showError(field, `${this.getFieldLabel(field)} is required.`);
+      return false;
+    }
+    
+    if (field.type === 'email' && value && !this.isValidEmail(value)) {
+      this.showError(field, 'Please enter a valid email address.');
+      return false;
+    }
+    
+    if (field.id === 'message' && value && value.length < 10) {
+      this.showError(field, 'Message must be at least 10 characters long.');
+      return false;
+    }
+    
+    return true;
+  }
+  
+  showError(field, message) {
+    const errorElement = document.getElementById(field.id + 'Error');
+    if (errorElement) {
+      errorElement.textContent = message;
+      errorElement.style.display = 'block';
+      field.style.borderColor = '#dc2626';
+    }
+  }
+  
+  clearError(field) {
+    const errorElement = document.getElementById(field.id + 'Error');
+    if (errorElement) {
+      errorElement.textContent = '';
+      errorElement.style.display = 'none';
+      field.style.borderColor = '';
+    }
+  }
+  
+  getFieldLabel(field) {
+    const label = this.form.querySelector(`label[for="${field.id}"]`);
+    return label ? label.textContent.replace(' *', '') : field.name;
+  }
+  
+  isValidEmail(email) {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  }
+  
+  simulateSubmission() {
+    const submitBtn = this.form.querySelector('button[type="submit"]');
+    const originalText = submitBtn.innerHTML;
+    
+    // Show loading state
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+    submitBtn.disabled = true;
+    
+    // Simulate API call
+    setTimeout(() => {
+      this.showFeedback('Thank you for your message! I\'ll get back to you soon.', 'success');
+      this.form.reset();
+      
+      // Reset button
+      submitBtn.innerHTML = originalText;
+      submitBtn.disabled = false;
+    }, 2000);
+  }
+  
+  showFeedback(message, type = 'success') {
+    if (this.feedback) {
+      this.feedback.textContent = message;
+      this.feedback.className = `form-feedback ${type}`;
+      this.feedback.style.display = 'block';
+      
+      // Auto-hide after 5 seconds
+      setTimeout(() => {
+        this.feedback.style.display = 'none';
+      }, 5000);
+    }
+  }
+}
+
+// Scroll Animations
+class ScrollAnimations {
+  constructor() {
+    this.observerOptions = {
+      threshold: 0.1,
+      rootMargin: '0px 0px -50px 0px'
+    };
+    
+    this.init();
+  }
+  
+  init() {
+    // Create intersection observer for fade-in animations
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.style.opacity = '1';
+          entry.target.style.transform = 'translateY(0)';
+        }
+      });
+    }, this.observerOptions);
+    
+    // Observe elements that should animate on scroll
+    const animateElements = document.querySelectorAll('.profile-text, .skill-category, .contact-item');
+    animateElements.forEach(el => {
+      el.style.opacity = '0';
+      el.style.transform = 'translateY(30px)';
+      el.style.transition = 'opacity 0.6s ease-out, transform 0.6s ease-out';
+      observer.observe(el);
+    });
+  }
+}
+
+// Initialize everything when DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+  new MobileNav();
+  new SmoothScroll();
+  new ContactForm();
+  new ScrollAnimations();
+  
+  // Add loaded class to body for any additional animations
+  document.body.classList.add('loaded');
 });
 
-// Form submission handling
-document.getElementById('contactForm').addEventListener('submit', function(event) {
-  event.preventDefault();
-
-  // Clear previous error messages
-  clearErrors();
-
-  // Validate form fields
-  let isValid = validateForm();
-
-  if (isValid) {
-    document.getElementById('formFeedback').textContent = 'Thank you for your message!';
-    document.getElementById('formFeedback').className = 'form-feedback success';
+// Handle navbar background on scroll
+window.addEventListener('scroll', () => {
+  const navbar = document.querySelector('.navbar');
+  if (navbar) {
+    if (window.scrollY > 50) {
+      navbar.style.background = 'rgba(255, 255, 255, 0.98)';
+      navbar.style.boxShadow = '0 2px 20px rgba(0, 0, 0, 0.1)';
+    } else {
+      navbar.style.background = 'rgba(255, 255, 255, 0.95)';
+      navbar.style.boxShadow = '0 1px 3px rgba(0, 0, 0, 0.1)';
+    }
   }
 });
-
-function validateForm() {
-  let isValid = true;
-
-  let name = document.getElementById('name').value.trim();
-  if (name === '') {
-    showError('nameError', 'Name is required.');
-    isValid = false;
-  }
-
-  let email = document.getElementById('email').value.trim();
-  if (email === '') {
-    showError('emailError', 'Email is required.');
-    isValid = false;
-  } else if (!validateEmail(email)) {
-    showError('emailError', 'Please enter a valid email address.');
-    isValid = false;
-  }
-
-  let message = document.getElementById('message').value.trim();
-  if (message === '') {
-    showError('messageError', 'Message is required.');
-    isValid = false;
-  }
-
-  return isValid;
-}
-
-function showError(elementId, message) {
-  let errorElement = document.getElementById(elementId);
-  errorElement.textContent = message;
-  errorElement.style.display = 'block';
-}
-
-function clearErrors() {
-  let errorElements = document.querySelectorAll('.error-message');
-  errorElements.forEach(function(element) {
-    element.textContent = '';
-    element.style.display = 'none';
-  });
-}
-
-function validateEmail(email) {
-  let re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  return re.test(email);
-}
 
 // Chrome Dinosaur Game
 class DinoGame {
