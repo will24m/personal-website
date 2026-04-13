@@ -1558,7 +1558,7 @@ function AboutPage() {
       </Reveal>
 
       <Reveal rotate="left">
-        <section id="timeline" className="section">
+        <section id="timeline" className="section timeline-section--wide">
           <div className="section-heading">
             <span className="eyebrow">CV timeline</span>
             <h2 className="section-title">Timeline of work and extracurricular experience.</h2>

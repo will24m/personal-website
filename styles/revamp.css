@@ -259,6 +259,15 @@ img {
   margin-bottom: 1.5rem;
 }
 
+.timeline-section--wide {
+  width: min(1480px, calc(100vw - 2.8rem));
+  margin-left: calc(50% - min(1480px, calc(100vw - 2.8rem)) / 2);
+}
+
+.timeline-section--wide .section-heading {
+  max-width: 58rem;
+}
+
 .eyebrow {
   display: inline-flex;
   align-items: center;
@@ -1313,6 +1322,11 @@ img {
   .site-footer__inner {
     flex-direction: column;
     align-items: flex-start;
+  }
+
+  .timeline-section--wide {
+    width: auto;
+    margin-left: 0;
   }
 }
 
