@@ -742,6 +742,17 @@ function filenameToAlt(filename) {
   return normalized.charAt(0).toUpperCase() + normalized.slice(1);
 }
 
+function buildGalleryPhotosFromNames(photoNames) {
+  const uniqueNames = [...new Set(photoNames)]
+    .filter((name) => galleryImagePattern.test(name))
+    .sort((a, b) => a.localeCompare(b, undefined, { sensitivity: "base" }));
+
+  return uniqueNames.map((name) => ({
+    src: encodeURI(`images/${name}`),
+    alt: filenameToAlt(name),
+  }));
+}
+
 function buildGalleryPhotosFromIndex(indexHtml) {
   const parser = new DOMParser();
   const doc = parser.parseFromString(indexHtml, "text/html");
@@ -759,14 +770,30 @@ function buildGalleryPhotosFromIndex(indexHtml) {
     .map((href) => href.replace(/\\/g, "/"))
     .filter((href) => !href.endsWith("/"))
     .map((href) => href.split("/").pop())
-    .filter(Boolean)
-    .filter((name) => galleryImagePattern.test(name));
+    .filter(Boolean);
 
-  const uniqueNames = [...new Set(photoNames)].sort((a, b) => a.localeCompare(b, undefined, { sensitivity: "base" }));
-  return uniqueNames.map((name) => ({
-    src: encodeURI(`images/${name}`),
-    alt: filenameToAlt(name),
-  }));
+  return buildGalleryPhotosFromNames(photoNames);
+}
+
+async function fetchGalleryPhotosFromApi(signal) {
+  const response = await fetch("/api/gallery", { signal, cache: "no-store" });
+  if (!response.ok) {
+    throw new Error(`Gallery API request failed (${response.status})`);
+  }
+
+  const payload = await response.json();
+  const photoNames = Array.isArray(payload?.photos) ? payload.photos : [];
+  return buildGalleryPhotosFromNames(photoNames);
+}
+
+async function fetchGalleryPhotosFromDirectoryIndex(signal) {
+  const response = await fetch("images/", { signal, cache: "no-store" });
+  if (!response.ok) {
+    throw new Error(`Gallery index request failed (${response.status})`);
+  }
+
+  const indexHtml = await response.text();
+  return buildGalleryPhotosFromIndex(indexHtml);
 }
 
 function useGalleryPhotos() {
@@ -776,18 +803,23 @@ function useGalleryPhotos() {
     const controller = new AbortController();
 
     const loadPhotos = async () => {
-      try {
-        const response = await fetch("images/", { signal: controller.signal, cache: "no-store" });
-        if (!response.ok) {
-          throw new Error(`Gallery index request failed (${response.status})`);
-        }
+      let discovered = [];
 
-        const indexHtml = await response.text();
-        const discovered = buildGalleryPhotosFromIndex(indexHtml);
-        setPhotos(discovered);
+      try {
+        discovered = await fetchGalleryPhotosFromApi(controller.signal);
       } catch (_error) {
-        setPhotos([]);
+        discovered = [];
       }
+
+      if (!discovered.length) {
+        try {
+          discovered = await fetchGalleryPhotosFromDirectoryIndex(controller.signal);
+        } catch (_error) {
+          discovered = [];
+        }
+      }
+
+      setPhotos(discovered);
     };
 
     loadPhotos();
