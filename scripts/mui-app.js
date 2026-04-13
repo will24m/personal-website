@@ -124,7 +124,7 @@ const site = {
   linkedin: "https://www.linkedin.com/in/will24m",
   github: "https://github.com/will24m",
   location: "Toronto, ON",
-  school: "Queen's University Computer Science (Software Design Specialization)",
+  school: "Queen's University | Bachelor's of Computing (Honours), 2026",
   currentRole: "Technical Program Management Intern, Lockheed Martin",
   nextRole: "Previous internships at Lockheed Martin: Software Engineering and Systems Engineering.",
 };
@@ -173,6 +173,13 @@ const profileReviewQuotes = [
     author: "Team Manager",
     context: "Execution and reliability",
   },
+];
+
+const educationHighlights = [
+  "Queen's University - Bachelor's of Computing (Honours), 2026.",
+  "Software Design Specialization. Dean's Honour List, GPA 3.8.",
+  "A.Y. Jackson Secondary School (OSSD), Toronto | 2017-2021 | 94% average.",
+  "Activities: 4x Curling Team Captain, 3x MVP, Charity Head Organizer, Orchestra, Business Competitions, Tutor.",
 ];
 
 const principles = [
@@ -247,91 +254,135 @@ const technicalHighlights = [
 ];
 
 const stackGroups = {
-  Languages: ["Python", "Java", "JavaScript", "TypeScript", "SQL", "C++", "C", "DXL"],
-  Platforms: ["React", "Django", "Power Apps", "Power BI", "Tableau", "Azure DevOps", "Docker", "Kubernetes"],
-  Tools: ["Jira", "Confluence", "Dataverse", "IBM DOORS", "CAMEO", "PTC Windchill", "Postman", "PyTest"],
+  "Programming Languages": ["Python", "Java", "JavaScript", "SQL", "C++", "C"],
+  "Frameworks & Tools": ["Git", "GitHub", "React", "Docker", "Kubernetes", "Django", "Jira", "Confluence", "PowerApps"],
+  "Cloud & Databases": ["AWS (DynamoDB, EC2, LightSail)", "Azure DevOps", "MongoDB", "IBM DOORS", "DXL", "Firebase"],
+  "Data Science & Machine Learning": ["TensorFlow", "PyTorch", "NumPy", "Power BI", "Tableau", "OpenCV", "SciPy"],
+  "System Design": ["Microsoft Office", "Adobe Creative Suite", "Figma", "Canva", "MURAL", "CAMEO"],
+  "Software Testing": ["Selenium", "Postman", "Jest", "Appium", "PyTest"],
+  "Spoken Languages": ["English", "French", "Mandarin", "Cantonese", "Spanish"],
+  Achievements: ["RCM Piano Level 10 (MAX)", "Taekwondo Black Belt", "National Competitor - FBLA", "National Competitor - DECA", "Goldman Sachs Risk Job Simulation (Sep 2025)"],
 };
 
 const stackNarratives = {
-  Languages: {
+  "Programming Languages": {
     intro:
-      "Languages were selected based on delivery constraints: scripting speed for automation, typed reliability for maintainability, and lower-level control for engineering tooling.",
+      "Core delivery languages used across internal tooling, data pipelines, and systems-support workflows.",
     deepDive: [
-      {
-        title: "Automation and scripting",
-        detail: "Python and TypeScript for data-cleaning scripts, report generation, and workflow tooling.",
-      },
-      {
-        title: "Frontend and app logic",
-        detail: "JavaScript and TypeScript for internal app behavior, UI interactions, and deployment-ready features.",
-      },
-      {
-        title: "Engineering tooling",
-        detail: "C and DXL for systems-oriented utilities and specialized engineering database operations.",
-      },
-      {
-        title: "Data and querying",
-        detail: "SQL for metrics extraction, transformation support, and structured reporting pipelines.",
-      },
+      { title: "Automation", detail: "Python and JavaScript for scripting, reporting, and workflow tooling." },
+      { title: "Enterprise delivery", detail: "Java and SQL for structured application and data tasks." },
+      { title: "Systems context", detail: "C and C++ for engineering-oriented tooling and lower-level control." },
+      { title: "Practical mix", detail: "Language choice is driven by maintainability, speed, and deployment constraints." },
     ],
     emphasis: [
-      "Readable, maintainable code over one-off scripts.",
-      "Strong validation and error handling for production-like internal tools.",
-      "Clear interfaces between data, logic, and presentation layers.",
+      "Readable and maintainable implementation under delivery deadlines.",
+      "Strong data validation and reliability in internal tooling.",
+      "Clear separation between business logic and data layers.",
     ],
   },
-  Platforms: {
+  "Frameworks & Tools": {
     intro:
-      "Platform choices reflected organizational reality: enterprise systems for adoption, modern frameworks for flexibility, and dashboard tools for stakeholder communication.",
+      "Framework and platform usage focused on shipping internal applications, dashboards, and team workflows.",
     deepDive: [
-      {
-        title: "Application delivery",
-        detail: "Power Apps and React used to rapidly ship internal tools with practical UI workflows.",
-      },
-      {
-        title: "Data visualization",
-        detail: "Power BI and Tableau for KPI tracking, status reporting, and trend visibility across teams.",
-      },
-      {
-        title: "Engineering ops",
-        detail: "Azure DevOps for workflow orchestration, environment management, and delivery support.",
-      },
-      {
-        title: "Containerized workflows",
-        detail: "Docker and Kubernetes familiarity for deployment-oriented thinking and scalable architecture context.",
-      },
+      { title: "App delivery", detail: "React, Django, and PowerApps for rapid internal application development." },
+      { title: "Collaboration", detail: "Jira and Confluence for planning, requirements tracking, and documentation." },
+      { title: "Dev workflow", detail: "Git/GitHub plus Azure DevOps for source control and deployment lifecycle." },
+      { title: "Container familiarity", detail: "Docker and Kubernetes for deployment architecture context." },
     ],
     emphasis: [
-      "Ship usable internal tools quickly without sacrificing structure.",
-      "Build dashboards that non-technical stakeholders can act on.",
-      "Support repeatable delivery through documented platform workflows.",
+      "Build tools teams can adopt quickly.",
+      "Keep docs and implementation aligned.",
+      "Prioritize repeatable development workflows.",
     ],
   },
-  Tools: {
+  "Cloud & Databases": {
     intro:
-      "Tooling experience centered on traceability, collaboration, and lifecycle reliability, especially in environments where requirements, documentation, and delivery status must stay synchronized.",
+      "Experience spans cloud services, database operations, and requirements/data environments used in enterprise teams.",
     deepDive: [
-      {
-        title: "Program coordination",
-        detail: "Jira and Confluence for backlog hygiene, milestone tracking, and team communication rhythms.",
-      },
-      {
-        title: "Systems traceability",
-        detail: "IBM DOORS and CAMEO for requirements integrity, model linkage, and architecture visibility.",
-      },
-      {
-        title: "Configuration control",
-        detail: "PTC Windchill to maintain consistency between evolving artifacts and approved baselines.",
-      },
-      {
-        title: "Validation workflow",
-        detail: "Postman and PyTest for endpoint checks, regression confidence, and automation reliability.",
-      },
+      { title: "Cloud services", detail: "AWS (DynamoDB, EC2, LightSail) and Azure DevOps in delivery workflows." },
+      { title: "Data stores", detail: "MongoDB and Firebase for data-driven app and prototype needs." },
+      { title: "Requirements systems", detail: "IBM DOORS and DXL for requirements traceability and automation." },
+      { title: "Ops integration", detail: "Cloud/database decisions tied to reliability and maintainability." },
     ],
     emphasis: [
-      "Preserve requirement-to-delivery traceability as systems evolve.",
-      "Make collaboration artifacts clear enough for cross-functional teams.",
-      "Use tooling standards that scale across multiple contributors.",
+      "Choose infrastructure based on workflow fit.",
+      "Maintain traceability from requirements to implementation.",
+      "Keep storage and deployment decisions practical.",
+    ],
+  },
+  "Data Science & Machine Learning": {
+    intro:
+      "Applied ML/data tooling used for analysis, model experimentation, and decision-support reporting.",
+    deepDive: [
+      { title: "Model tooling", detail: "TensorFlow and PyTorch for supervised and sequence-model experimentation." },
+      { title: "Scientific stack", detail: "NumPy and SciPy for data prep, numeric workflows, and experimentation." },
+      { title: "Computer vision / NLP context", detail: "OpenCV and text-data pipelines in student and project work." },
+      { title: "Decision surfaces", detail: "Power BI and Tableau for stakeholder-ready analytics views." },
+    ],
+    emphasis: [
+      "Translate analysis into clear operational reporting.",
+      "Validate model behavior with repeatable checks.",
+      "Prefer actionable insights over novelty.",
+    ],
+  },
+  "System Design": {
+    intro:
+      "System and communication tools used for architecture, design artifacts, and stakeholder alignment.",
+    deepDive: [
+      { title: "Architecture artifacts", detail: "CAMEO and visual system documentation for engineering context." },
+      { title: "Collaboration assets", detail: "Figma, MURAL, and Canva for workflow communication and planning." },
+      { title: "Documentation baseline", detail: "Microsoft Office and Adobe tools for polished deliverables." },
+      { title: "Decision support", detail: "Design tooling used to clarify tradeoffs and constraints." },
+    ],
+    emphasis: [
+      "Keep system communication clear across technical and non-technical groups.",
+      "Use visuals to reduce ambiguity in planning.",
+      "Document decisions for smoother handoffs.",
+    ],
+  },
+  "Software Testing": {
+    intro:
+      "Testing stack focused on regression confidence, API checks, and practical validation of internal tools.",
+    deepDive: [
+      { title: "UI automation", detail: "Selenium and Appium for browser/mobile behavior verification." },
+      { title: "API checks", detail: "Postman for endpoint validation and integration sanity checks." },
+      { title: "Unit/regression", detail: "Jest and PyTest for repeatable checks across code changes." },
+      { title: "Quality mindset", detail: "Testing used to reduce rework and improve release confidence." },
+    ],
+    emphasis: [
+      "Automate high-value checks first.",
+      "Use tests to support faster iteration.",
+      "Keep test coverage aligned to real failure risk.",
+    ],
+  },
+  "Spoken Languages": {
+    intro:
+      "Multilingual communication supports collaboration across diverse teams and stakeholders.",
+    deepDive: [
+      { title: "Primary communication", detail: "English and Mandarin for day-to-day technical and stakeholder communication." },
+      { title: "Additional fluency", detail: "Cantonese and French used in collaborative and community settings." },
+      { title: "Conversational range", detail: "Spanish for broader communication and cultural context." },
+      { title: "Team impact", detail: "Language flexibility helps reduce communication barriers in mixed groups." },
+    ],
+    emphasis: [
+      "Communicate clearly across audiences.",
+      "Adapt tone and detail to stakeholders.",
+      "Use language skills to improve team inclusion.",
+    ],
+  },
+  Achievements: {
+    intro:
+      "Recognition and credentials across music, athletics, business competitions, and career simulations.",
+    deepDive: [
+      { title: "Music", detail: "RCM Piano Level 10 (MAX)." },
+      { title: "Athletics", detail: "Taekwondo Black Belt." },
+      { title: "Competition", detail: "National competitor in FBLA and DECA business competitions." },
+      { title: "Credential", detail: "Goldman Sachs Risk Job Simulation (issued Sep 2025)." },
+    ],
+    emphasis: [
+      "Long-term discipline and consistency.",
+      "Execution under pressure and evaluation.",
+      "Transferable leadership and communication skills.",
     ],
   },
 };
@@ -341,7 +392,7 @@ const professionalExperienceFull = [
     organization: "Lockheed Martin",
     role: "Technical Program Management Intern",
     location: "Ottawa, ON, Canada",
-    timeframe: "Jan 2025-Apr 2026",
+    timeframe: "Jan 2026-Apr 2026",
     bullets: [
       "Created scripts to pull, clean, validate, and display program metrics for a $XXX,000,000,000 program.",
       "Communicated with senior management on program direction and execution priorities.",
@@ -353,14 +404,14 @@ const professionalExperienceFull = [
     location: "Ottawa, ON, Canada",
     timeframe: "Sep 2024-Aug 2025",
     bullets: [
-      "Built 13 custom self-contained applications using PowerApps and Azure DevOps to revamp case-management processes.",
-      "Created dynamic dashboards for custom applications using Power BI, covering 50+ metrics for embassy officials and leadership.",
+      "Built 13 custom self-contained applications using PowerApps and Azure DevOps to revamp case-management processes for clients.",
+      "Created dynamic dashboards for every custom application using Power BI, covering 50+ reporting metrics for embassy officials and GAC leadership.",
       "Upgraded DevOps cloud pipeline infrastructure using custom TypeScript to automate environment variable generation.",
-      "Elicited requirements from clients to gather feedback, assess capabilities, and iteratively improve software projects.",
+      "Elicited requirements from clients to gather feedback, assess capabilities, and iteratively improve software projects to 100% customer satisfaction.",
       "Elicited requirements from clients and developed business process, business rules, and UI behavior.",
       "Designed system architecture, optimizing decisions to meet system and requirement constraints.",
       "Optimized and refactored scripts, improving efficiency by up to 7200%.",
-      "Mentored incoming interns, consultants, and testers as a primary source of support.",
+      "Mentored incoming interns, consultants, and testers as a primary source of assistance.",
       "Developed reusable components used as templates and standalone apps.",
       "Managed data migration, database administration tasks, deployment pipelines, and Power BI reporting.",
       "Worked across MS Power Platform (Power Apps, Dataverse, Power BI, Power Pages, Power Automate) and JavaScript.",
@@ -399,10 +450,11 @@ const professionalExperienceFull = [
     location: "Ottawa, ON, Canada",
     timeframe: "Jan 2023-Aug 2023",
     bullets: [
-      "Designed intricate system data models in CAMEO (UML/SysML) for architecture and certification visualization.",
+      "Designed 3 intricate system data models in CAMEO (UML/SysML) for architecture and certification visualization.",
       "Iterated 50+ data artifacts with senior engineers using PTC Windchill and IBM DOORS.",
-      "Developed 10+ layered data models for integrated military-vehicle systems in CAMEO.",
-      "Conducted qualitative engineering reviews across appraisal documents, ECRs, procurement packages, and design specs.",
+      "Tailored qualitative engineering reviews on design appraisal documents, engineering change requests, procurement packages, clearance requirements, and project implementation proposals.",
+      "Developed 10+ layered and complex data models for integrated military-vehicle systems in CAMEO.",
+      "Conducted qualitative engineering reviews across appraisal documents, ECRs, procurement packages, clearance requirements, and design specs.",
       "Collaborated with senior engineers using Jira/Confluence, PTC Windchill, and IBM DOORS.",
       "Updated 90+ classified design documents for Canadian Surface Combatant R&D through requirements analysis and trade-study review.",
     ],
@@ -411,7 +463,7 @@ const professionalExperienceFull = [
     organization: "En Ville",
     role: "Storefront Supervisor",
     location: "Toronto, ON, Canada",
-    timeframe: "Summer 2022",
+    timeframe: "May 2022-Aug 2022",
     summary:
       "En Ville (est. 1982) is a high-end catering company in Toronto.",
     bullets: [
@@ -427,7 +479,7 @@ const professionalExperienceFull = [
     organization: "Global Amusement Consulting (GAC)",
     role: "Sales Associate",
     location: "Vaughan, ON, Canada",
-    timeframe: "Summer 2021",
+    timeframe: "Jul 2021-Aug 2021",
     summary:
       "GAC operates games and attractions in amusement parks including Canada's Wonderland.",
     bullets: [
@@ -501,6 +553,7 @@ const extracurricularExperienceFull = [
       "Led partnership communication for AI education opportunities including panels, talks, and workshops.",
       "Founded QDAA's AI division to focus on the intersection of data analytics and AI.",
       "Hired senior and junior AI consultants for internal content and project-team support.",
+      "Organized educational workshops on supervised-learning implementation in project teams.",
       "Consulted external clients on AI solutions to real business problems.",
     ],
   },
@@ -561,6 +614,16 @@ const extracurricularExperienceFull = [
       "Developed a Python trading algorithm in QuantConnect using indicator-based strategies.",
       "Tested and improved model performance through backtesting against historical market data.",
       "Built inverse trading strategies across oil and renewable energy equities for stable positive returns.",
+    ],
+  },
+  {
+    organization: "Goldman Sachs",
+    role: "Risk Job Simulation (Credential)",
+    location: "Virtual",
+    timeframe: "Sep 2025",
+    summary: "Credential ID: RiEy92jeANWriG24C.",
+    bullets: [
+      "Completed risk simulation exercises focused on practical analysis and decision-making workflows.",
     ],
   },
 ];
@@ -1532,7 +1595,8 @@ function InteractiveCvTimeline() {
 function AboutPage() {
   const [tab, setTab] = useState(Object.keys(stackGroups)[0]);
   const deferredTab = useDeferredValue(tab);
-  const stackContext = stackNarratives[deferredTab] || stackNarratives.Languages;
+  const defaultStackKey = Object.keys(stackGroups)[0];
+  const stackContext = stackNarratives[deferredTab] || stackNarratives[defaultStackKey];
   const [profileReviewIndex, setProfileReviewIndex] = useState(0);
   const activeProfileReview = profileReviewQuotes[profileReviewIndex % profileReviewQuotes.length] || profileReviewQuotes[0];
 
@@ -1552,9 +1616,13 @@ function AboutPage() {
                   <Typography color="text.secondary">{activeProfileReview.context}</Typography>
                 </Stack>
               </Paper>
-              <Typography color="text.secondary">
-                Queen's University Computer Science (Software Design Specialization), graduating 2026.
-              </Typography>
+              <Stack spacing={0.55}>
+                {educationHighlights.map((line) => (
+                  <Typography key={line} color="text.secondary">
+                    {line}
+                  </Typography>
+                ))}
+              </Stack>
             </Stack>
           </InteractiveCard>
 
@@ -1571,7 +1639,7 @@ function AboutPage() {
                 gap={1}
               >
                 <Box>
-                  <Typography className="panel-meta">Queen's CS | Class of 2026</Typography>
+                  <Typography className="panel-meta">Bachelor of Computing (Honours) | Class of 2026</Typography>
                 </Box>
                 <Chip label={site.location} variant="outlined" />
               </Stack>
@@ -1986,7 +2054,7 @@ function Footer() {
     <footer className="site-footer">
       <Paper className="site-footer__inner" elevation={0}>
         <Typography className="footer-copy">
-          Queen's CS (Software Design Specialization), Dean's Honour List (GPA 3.8). Experience across software engineering, systems engineering, and technical program management. Toronto time: {availability.timeLabel}.
+          Queen's University Bachelor of Computing (Honours), Software Design Specialization, Dean's Honour List (GPA 3.8). Experience across software engineering, systems engineering, and technical program management. Toronto time: {availability.timeLabel}.
         </Typography>
         <div className="footer-links">
           <a href={site.linkedin} target="_blank" rel="noreferrer">LinkedIn</a>

@@ -80,9 +80,9 @@ Keep these removed unless user explicitly asks for them back:
 
 - If user still sees removed UI, assume stale cache first.
 - HTML pages currently use cache-busting query params:
-  - `styles/revamp.css?v=20260413-15`
-  - `styles/dynamic-ui.css?v=20260413-15`
-  - `scripts/mui-app.js?v=20260413-15`
+  - `styles/revamp.css?v=20260413-17`
+  - `styles/dynamic-ui.css?v=20260413-17`
+  - `scripts/mui-app.js?v=20260413-17`
 - Keep version string updated when necessary.
 
 ## 6) Gallery Behavior
@@ -136,6 +136,13 @@ For deployment compatibility, prefer keeping `/api/gallery` available so folder 
 - Mobile timeline interaction:
   - On narrow viewports (`<= 980px`), timeline slope is disabled in JS so cards sit flat for easier horizontal swipe.
   - Timeline strip uses horizontal snap and touch panning (`scroll-snap-type`, `touch-action: pan-x`).
+- CV refresh updates applied:
+  - Lockheed Martin TPM intern updated to `Jan 2026-Apr 2026`.
+  - En Ville timeframe updated to `May 2022-Aug 2022`.
+  - Global Amusement Consulting Sales Associate timeframe updated to `Jul 2021-Aug 2021`.
+  - Added `Goldman Sachs - Risk Job Simulation (Credential)` entry (`Sep 2025`, credential ID included).
+  - Education block in profile now shows Queen's degree details + A.Y. Jackson details and activities.
+  - Stack tabs expanded to CV categories: Programming Languages, Frameworks & Tools, Cloud & Databases, Data Science & ML, System Design, Software Testing, Spoken Languages, Achievements.
 
 ## 8) Motion Preference
 
