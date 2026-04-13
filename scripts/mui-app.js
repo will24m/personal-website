@@ -1573,7 +1573,6 @@ function AboutPage() {
                 <Chip label={site.location} variant="outlined" />
               </Stack>
               <RotatingPhotoGallery
-                bottomChip="Software, systems, TPM"
                 onIndexChange={setProfileReviewIndex}
               />
             </Stack>
