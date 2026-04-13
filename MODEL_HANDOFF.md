@@ -34,6 +34,7 @@ Keep these removed unless user explicitly asks for them back:
 - "Current internship" block under the profile photo
 - Separate "Full CV" section
 - Static hero line "I build internal tools, reporting workflows, and systems documentation."
+- "Sample performance feedback" label chip above rotating quote card
 - Three-item profile story block under the education sentence
   - "Lockheed Martin internships."
   - "Global Affairs Canada work term."
@@ -54,9 +55,9 @@ Keep these removed unless user explicitly asks for them back:
 
 - If user still sees removed UI, assume stale cache first.
 - `index.html` currently uses cache-busting query params:
-  - `styles/revamp.css?v=20260413-3`
-  - `styles/dynamic-ui.css?v=20260413-3`
-  - `scripts/mui-app.js?v=20260413-3`
+  - `styles/revamp.css?v=20260413-4`
+  - `styles/dynamic-ui.css?v=20260413-4`
+  - `scripts/mui-app.js?v=20260413-4`
 - Keep version string updated when necessary.
 
 ## 6) Gallery Behavior
@@ -92,7 +93,11 @@ Note: relies on directory listing from local server (works with `python -m http.
 
 ## 8) Motion Preference
 
-- Reveal transitions are intentionally slightly slower:
+- Reveal transitions are intentionally slightly slower.
+- Reveal effect should be fade + slight horizontal slide (not heavy rotation).
+- Direction should alternate section-by-section: right, left, right, left.
+- This alternation should remain visible while scrolling up and down.
+- Current reveal timing:
   - `.reveal-rotate` in `styles/dynamic-ui.css`
   - `opacity 520ms ease 90ms`
   - `transform 620ms cubic-bezier(...) 90ms`
@@ -126,3 +131,4 @@ After meaningful changes, verify:
 6. No reintroduced "Full CV" section.
 7. Copy remains plain and non-buzzwordy.
 8. Technical Focus accordion summary text does not overlap the right toggle.
+9. Reveal animation alternates left/right between adjacent sections.
