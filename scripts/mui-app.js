@@ -881,6 +881,26 @@ function useInView(threshold = 0.18) {
   return [ref, visible];
 }
 
+function useIsNarrowViewport(maxWidth = 980) {
+  const [isNarrow, setIsNarrow] = useState(() => {
+    if (typeof window === "undefined") {
+      return false;
+    }
+    return window.innerWidth <= maxWidth;
+  });
+
+  useEffect(() => {
+    const onResize = () => {
+      setIsNarrow(window.innerWidth <= maxWidth);
+    };
+    onResize();
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, [maxWidth]);
+
+  return isNarrow;
+}
+
 function Reveal({ children, rotate = "right" }) {
   const [ref, visible] = useInView();
 
@@ -1078,6 +1098,13 @@ function RotatingPhotoGallery({ topChip, bottomChip, showSpotlight = false, onIn
   const galleryPhotos = useGalleryPhotos();
   const [index, setIndex] = useState(0);
   const [isHovering, setIsHovering] = useState(false);
+  const touchStateRef = useRef({
+    active: false,
+    horizontal: false,
+    startX: 0,
+    startY: 0,
+    startIndex: 0,
+  });
   const hasPhotos = galleryPhotos.length > 0;
   const activePhoto = galleryPhotos[index] || galleryPhotos[0];
 
@@ -1123,15 +1150,77 @@ function RotatingPhotoGallery({ topChip, bottomChip, showSpotlight = false, onIn
     syncIndexToPointer(event);
   };
 
+  const handlePointerDown = (event) => {
+    if (!hasPhotos || event.pointerType !== "touch") {
+      return;
+    }
+
+    touchStateRef.current = {
+      active: true,
+      horizontal: false,
+      startX: event.clientX,
+      startY: event.clientY,
+      startIndex: index,
+    };
+    setIsHovering(true);
+    syncIndexToPointer(event);
+  };
+
   const handlePointerMove = (event) => {
+    if (event.pointerType === "touch" && touchStateRef.current.active) {
+      const deltaX = event.clientX - touchStateRef.current.startX;
+      const deltaY = event.clientY - touchStateRef.current.startY;
+
+      if (!touchStateRef.current.horizontal && Math.abs(deltaX) > Math.abs(deltaY) + 5) {
+        touchStateRef.current.horizontal = true;
+      }
+
+      if (touchStateRef.current.horizontal) {
+        event.preventDefault();
+        syncIndexToPointer(event);
+        return;
+      }
+    }
+
     if (!isHovering) {
       setIsHovering(true);
     }
     syncIndexToPointer(event);
   };
 
+  const handlePointerUp = (event) => {
+    if (event.pointerType !== "touch" || !touchStateRef.current.active || !hasPhotos) {
+      return;
+    }
+
+    const deltaX = event.clientX - touchStateRef.current.startX;
+    if (touchStateRef.current.horizontal && Math.abs(deltaX) >= 34) {
+      const direction = deltaX < 0 ? 1 : -1;
+      const next = (touchStateRef.current.startIndex + direction + galleryPhotos.length) % galleryPhotos.length;
+      setIndex(next);
+    }
+
+    touchStateRef.current = {
+      active: false,
+      horizontal: false,
+      startX: 0,
+      startY: 0,
+      startIndex: 0,
+    };
+    setIsHovering(false);
+    event.currentTarget.style.setProperty("--gallery-cursor-x", "50%");
+    event.currentTarget.style.setProperty("--gallery-cursor-y", "50%");
+  };
+
   const handlePointerLeave = (event) => {
     setIsHovering(false);
+    touchStateRef.current = {
+      active: false,
+      horizontal: false,
+      startX: 0,
+      startY: 0,
+      startIndex: 0,
+    };
     event.currentTarget.style.setProperty("--gallery-cursor-x", "50%");
     event.currentTarget.style.setProperty("--gallery-cursor-y", "50%");
   };
@@ -1162,8 +1251,11 @@ function RotatingPhotoGallery({ topChip, bottomChip, showSpotlight = false, onIn
   return (
     <Box
       className={`portrait-frame portrait-frame--gallery ${isHovering ? "is-hovering" : ""}`.trim()}
+      onPointerDown={handlePointerDown}
       onPointerEnter={handlePointerEnter}
       onPointerMove={handlePointerMove}
+      onPointerUp={handlePointerUp}
+      onPointerCancel={handlePointerUp}
       onPointerLeave={handlePointerLeave}
       style={{ "--gallery-count": galleryPhotos.length }}
     >
@@ -1234,6 +1326,7 @@ function Header() {
 }
 
 function InteractiveCvTimeline() {
+  const isNarrowViewport = useIsNarrowViewport(980);
   const [selectedId, setSelectedId] = useState(cvTimelineEntries[0]?.id || "");
   const [timelineFilter, setTimelineFilter] = useState("all");
   const entries = cvTimelineEntries;
@@ -1293,6 +1386,8 @@ function InteractiveCvTimeline() {
     filteredEntries.length > 1
       ? (Math.atan2(totalSlopeDropPx, Math.max(1, filteredEntries.length * laneWidthPx)) * 180) / Math.PI
       : 0;
+  const effectiveSlopeDropPx = isNarrowViewport ? 0 : totalSlopeDropPx;
+  const effectiveRailTiltDeg = isNarrowViewport ? 0 : railTiltDeg;
 
   if (!activeEntry) {
     return null;
@@ -1345,14 +1440,14 @@ function InteractiveCvTimeline() {
               className="cv-timeline-rail"
               style={{
                 background: railColor,
-                top: `calc(1.02rem + ${totalSlopeDropPx.toFixed(2)}px)`,
-                transform: `rotate(${-railTiltDeg.toFixed(3)}deg)`,
+                top: `calc(1.02rem + ${effectiveSlopeDropPx.toFixed(2)}px)`,
+                transform: `rotate(${-effectiveRailTiltDeg.toFixed(3)}deg)`,
               }}
             />
             {filteredEntries.map((item, index) => {
               const isActive = selectedId === item.id;
               const itemType = typeConfig[item.type] || typeConfig.extracurricular;
-              const verticalOffsetPx = Number((totalSlopeDropPx - index * nodeSlopeStepPx).toFixed(2));
+              const verticalOffsetPx = isNarrowViewport ? 0 : Number((totalSlopeDropPx - index * nodeSlopeStepPx).toFixed(2));
 
               return (
                 <button

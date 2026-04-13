@@ -80,9 +80,9 @@ Keep these removed unless user explicitly asks for them back:
 
 - If user still sees removed UI, assume stale cache first.
 - HTML pages currently use cache-busting query params:
-  - `styles/revamp.css?v=20260413-14`
-  - `styles/dynamic-ui.css?v=20260413-14`
-  - `scripts/mui-app.js?v=20260413-14`
+  - `styles/revamp.css?v=20260413-15`
+  - `styles/dynamic-ui.css?v=20260413-15`
+  - `scripts/mui-app.js?v=20260413-15`
 - Keep version string updated when necessary.
 
 ## 6) Gallery Behavior
@@ -133,6 +133,9 @@ For deployment compatibility, prefer keeping `/api/gallery` available so folder 
   - Default state is `All`.
   - `Work` and `Extracurricular` filter both timeline nodes and active detail card.
   - When changing filters, selected node is preserved if still visible; otherwise it resets to the first visible entry.
+- Mobile timeline interaction:
+  - On narrow viewports (`<= 980px`), timeline slope is disabled in JS so cards sit flat for easier horizontal swipe.
+  - Timeline strip uses horizontal snap and touch panning (`scroll-snap-type`, `touch-action: pan-x`).
 
 ## 8) Motion Preference
 
@@ -157,6 +160,12 @@ Ambient pointer light behavior:
 - Global spotlight should track cursor precisely (no obvious lag or offset).
 - `useAmbientPointer()` listens to `pointermove` and `pointerrawupdate` (when supported) and writes exact viewport coordinates to CSS vars.
 - `body::after` now renders as a fixed, centered spotlight element (`left/top + translate(-50%, -50%)`) instead of a full-screen gradient anchored by background-position.
+
+Mobile gallery interaction:
+
+- Gallery supports touch drag/scrub + swipe settle in `RotatingPhotoGallery`.
+- Horizontal touch drags are detected and handled with `preventDefault` to avoid accidental page drift while scrubbing photos.
+- `.portrait-frame--gallery` uses `touch-action: pan-y` so vertical page scrolling still works naturally.
 
 ## 9) Accordion UX Rule (Technical Focus)
 
