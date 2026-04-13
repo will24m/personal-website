@@ -523,6 +523,8 @@ img {
   cursor: crosshair;
   --gallery-cursor-x: 50%;
   --gallery-cursor-y: 50%;
+  touch-action: pan-y;
+  user-select: none;
 }
 
 .portrait-frame--gallery::before {
@@ -1011,6 +1013,7 @@ img {
   padding: 0.15rem 0.1rem 0.55rem;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior-x: contain;
+  scroll-snap-type: x proximity;
 }
 
 .cv-timeline-scroll::-webkit-scrollbar {
@@ -1057,6 +1060,8 @@ img {
   cursor: pointer;
   appearance: none;
   -webkit-appearance: none;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
   transition: transform var(--transition), border-color var(--transition), background var(--transition), color var(--transition);
 }
 
@@ -1356,6 +1361,11 @@ img {
 
   .cv-timeline-track {
     gap: 0.74rem;
+  }
+
+  .cv-timeline-scroll {
+    scroll-snap-type: x mandatory;
+    touch-action: pan-x;
   }
 
   .cv-timeline-detail__header {
