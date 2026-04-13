@@ -80,9 +80,9 @@ Keep these removed unless user explicitly asks for them back:
 
 - If user still sees removed UI, assume stale cache first.
 - HTML pages currently use cache-busting query params:
-  - `styles/revamp.css?v=20260413-13`
-  - `styles/dynamic-ui.css?v=20260413-13`
-  - `scripts/mui-app.js?v=20260413-13`
+  - `styles/revamp.css?v=20260413-14`
+  - `styles/dynamic-ui.css?v=20260413-14`
+  - `scripts/mui-app.js?v=20260413-14`
 - Keep version string updated when necessary.
 
 ## 6) Gallery Behavior
@@ -144,6 +144,11 @@ For deployment compatibility, prefer keeping `/api/gallery` available so folder 
   - `.reveal-rotate` in `styles/dynamic-ui.css`
   - `opacity 520ms ease 90ms`
   - `transform 620ms cubic-bezier(...) 90ms`
+- Section title typing behavior:
+  - Major section titles use `TypedSectionTitle` in `scripts/mui-app.js`.
+  - Titles type in when entering viewport and erase when leaving viewport.
+  - Typing includes occasional typo -> backspace -> corrected character frames.
+  - Caret styling is in `.typed-title-caret` and `@keyframes caretBlink` in `styles/revamp.css`.
 
 Keep motion subtle and purposeful.
 

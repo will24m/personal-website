@@ -894,6 +894,144 @@ function Reveal({ children, rotate = "right" }) {
   );
 }
 
+function createSeededRng(seedText) {
+  let seed = 0;
+  for (let index = 0; index < seedText.length; index += 1) {
+    seed = (seed * 31 + seedText.charCodeAt(index)) >>> 0;
+  }
+  if (seed === 0) {
+    seed = 123456789;
+  }
+  return () => {
+    seed = (seed * 1664525 + 1013904223) >>> 0;
+    return seed / 4294967296;
+  };
+}
+
+function buildTypingFrames(text) {
+  const alphabet = "abcdefghijklmnopqrstuvwxyz";
+  const rng = createSeededRng(text);
+  const frames = [];
+  let rendered = "";
+  let typoBudget = Math.max(1, Math.floor(text.length / 28));
+
+  for (let index = 0; index < text.length; index += 1) {
+    const nextChar = text[index];
+    const isLetter = /[a-z]/i.test(nextChar);
+    const canTypo = isLetter && typoBudget > 0 && index > 1 && index < text.length - 2;
+    const shouldTypo = canTypo && rng() < 0.18;
+
+    if (shouldTypo) {
+      typoBudget -= 1;
+      let wrongChar = alphabet[Math.floor(rng() * alphabet.length)];
+      while (wrongChar.toLowerCase() === nextChar.toLowerCase()) {
+        wrongChar = alphabet[Math.floor(rng() * alphabet.length)];
+      }
+      if (nextChar === nextChar.toUpperCase()) {
+        wrongChar = wrongChar.toUpperCase();
+      }
+      frames.push(rendered + wrongChar);
+      frames.push(rendered);
+    }
+
+    rendered += nextChar;
+    frames.push(rendered);
+  }
+
+  return frames;
+}
+
+function typingDelay(currentFrame, nextFrame) {
+  if (!nextFrame) {
+    return 0;
+  }
+  if (nextFrame.length < currentFrame.length) {
+    return 72;
+  }
+  const lastChar = currentFrame.charAt(currentFrame.length - 1);
+  if (/[.!?]/.test(lastChar)) {
+    return 140;
+  }
+  if (/[,:;]/.test(lastChar)) {
+    return 95;
+  }
+  if (lastChar === " ") {
+    return 34;
+  }
+  return 24;
+}
+
+function TypedSectionTitle({ text, className = "section-title", as = "h2", variant = null }) {
+  const [ref, visible] = useInView(0.3);
+  const [displayText, setDisplayText] = useState("");
+  const timerRef = useRef(0);
+  const typingFrames = useMemo(() => buildTypingFrames(text), [text]);
+
+  useEffect(() => {
+    const prefersReducedMotion =
+      typeof window !== "undefined" &&
+      typeof window.matchMedia === "function" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    window.clearTimeout(timerRef.current);
+
+    if (prefersReducedMotion) {
+      setDisplayText(text);
+      return undefined;
+    }
+
+    if (visible) {
+      let frameIndex = 0;
+      const runTyping = () => {
+        if (frameIndex >= typingFrames.length) {
+          return;
+        }
+        const currentFrame = typingFrames[frameIndex];
+        const nextFrame = typingFrames[frameIndex + 1];
+        setDisplayText(currentFrame);
+        frameIndex += 1;
+        timerRef.current = window.setTimeout(runTyping, typingDelay(currentFrame, nextFrame));
+      };
+
+      setDisplayText("");
+      runTyping();
+    } else {
+      let current = displayText;
+      const erase = () => {
+        if (!current.length) {
+          setDisplayText("");
+          return;
+        }
+        current = current.slice(0, -1);
+        setDisplayText(current);
+        timerRef.current = window.setTimeout(erase, 14);
+      };
+      erase();
+    }
+
+    return () => {
+      window.clearTimeout(timerRef.current);
+    };
+  }, [visible, text, typingFrames]);
+
+  const content = (
+    <>
+      <span>{displayText}</span>
+      <span className="typed-title-caret" aria-hidden="true" />
+    </>
+  );
+
+  if (variant) {
+    return (
+      <Typography ref={ref} className={`${className} typed-title`} variant={variant}>
+        {content}
+      </Typography>
+    );
+  }
+
+  return React.createElement(as, { ref, className: `${className} typed-title` }, content);
+}
+
 function InteractiveCard({ children, className = "", sx = {}, ...props }) {
   const handleMove = (event) => {
     const rect = event.currentTarget.getBoundingClientRect();
@@ -1354,7 +1492,7 @@ function AboutPage() {
         <section id="timeline" className="section timeline-section--wide">
           <div className="section-heading">
             <span className="eyebrow">CV timeline</span>
-            <h2 className="section-title">Timeline of work and extracurricular experience.</h2>
+            <TypedSectionTitle text="Timeline of work and extracurricular experience." />
           </div>
           <InteractiveCvTimeline />
         </section>
@@ -1364,7 +1502,7 @@ function AboutPage() {
         <section className="section">
           <div className="section-heading">
             <span className="eyebrow">Technical focus</span>
-            <h2 className="section-title">Types of work completed in internships.</h2>
+            <TypedSectionTitle text="Types of work completed in internships." />
           </div>
           <Stack spacing={1.2} className="technical-focus-shell">
             <InteractiveCard className="technical-focus-intro" sx={{ p: { xs: 2.3, md: 2.8 } }}>
@@ -1453,7 +1591,7 @@ function AboutPage() {
         <section id="skills" className="section">
           <div className="section-heading">
             <span className="eyebrow">Tech stack</span>
-            <h2 className="section-title">Languages, platforms, and tools used in work terms.</h2>
+            <TypedSectionTitle text="Languages, platforms, and tools used in work terms." />
           </div>
           <InteractiveCard className="stack-panel stack-panel--expanded" sx={{ p: { xs: 2.3, md: 3 } }}>
             <Stack spacing={2}>
@@ -1656,9 +1794,10 @@ function ContactPage() {
           <InteractiveCard className="contact-copy-card" sx={{ p: { xs: 3, md: 4 } }}>
             <Stack spacing={2.2} className="parallax-layer">
               <Chip label="Contact" variant="outlined" color="secondary" sx={{ width: "fit-content" }} />
-              <Typography className="section-title" variant="h2">
-                Open to software engineering and technical program roles.
-              </Typography>
+              <TypedSectionTitle
+                text="Open to software engineering and technical program roles."
+                variant="h2"
+              />
               <Typography color="text.secondary">
                 Experience includes Lockheed Martin internships in TPM, software engineering, and systems engineering, plus application development at Global Affairs Canada.
               </Typography>
@@ -1677,7 +1816,7 @@ function ContactPage() {
         <section className="section">
           <div className="section-heading">
             <span className="eyebrow">Reach out</span>
-            <h2 className="section-title">Contact channels.</h2>
+            <TypedSectionTitle text="Contact channels." />
           </div>
           <div className="experience-grid">
             {contactMethods.map((item) => (
