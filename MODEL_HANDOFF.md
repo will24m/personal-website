@@ -55,9 +55,9 @@ Keep these removed unless user explicitly asks for them back:
 
 - If user still sees removed UI, assume stale cache first.
 - `index.html` currently uses cache-busting query params:
-  - `styles/revamp.css?v=20260413-4`
-  - `styles/dynamic-ui.css?v=20260413-4`
-  - `scripts/mui-app.js?v=20260413-4`
+  - `styles/revamp.css?v=20260413-5`
+  - `styles/dynamic-ui.css?v=20260413-5`
+  - `scripts/mui-app.js?v=20260413-5`
 - Keep version string updated when necessary.
 
 ## 6) Gallery Behavior
@@ -67,6 +67,8 @@ Current behavior:
 - Pointer-driven gallery (changes image by cursor position)
 - Dot controls retained
 - Images auto-loaded from `images/` directory (not hardcoded)
+  - On Vercel: via serverless endpoint `api/gallery.js` (`/api/gallery`)
+  - Local fallback: directory index parsing via `fetch("images/")`
 - Profile quote card is synchronized to photo index.
   - Hover or dot-switching photo changes quote immediately.
   - Quotes are sample performance-feedback style content.
@@ -78,6 +80,7 @@ Implementation points in `scripts/mui-app.js`:
 - `filenameToAlt(...)`
 
 Note: relies on directory listing from local server (works with `python -m http.server`).
+For deployment compatibility, prefer keeping `/api/gallery` available so folder listing is not required in production.
 
 ## 7) Timeline Rules
 
