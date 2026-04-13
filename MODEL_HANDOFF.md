@@ -33,6 +33,7 @@ Keep these removed unless user explicitly asks for them back:
 - "Move cursor to change photo" helper line
 - "Current internship" block under the profile photo
 - Separate "Full CV" section
+- Static hero line "I build internal tools, reporting workflows, and systems documentation."
 - Three-item profile story block under the education sentence
   - "Lockheed Martin internships."
   - "Global Affairs Canada work term."
@@ -53,9 +54,9 @@ Keep these removed unless user explicitly asks for them back:
 
 - If user still sees removed UI, assume stale cache first.
 - `index.html` currently uses cache-busting query params:
-  - `styles/revamp.css?v=20260413-2`
-  - `styles/dynamic-ui.css?v=20260413-2`
-  - `scripts/mui-app.js?v=20260413-2`
+  - `styles/revamp.css?v=20260413-3`
+  - `styles/dynamic-ui.css?v=20260413-3`
+  - `scripts/mui-app.js?v=20260413-3`
 - Keep version string updated when necessary.
 
 ## 6) Gallery Behavior
@@ -65,6 +66,9 @@ Current behavior:
 - Pointer-driven gallery (changes image by cursor position)
 - Dot controls retained
 - Images auto-loaded from `images/` directory (not hardcoded)
+- Profile quote card is synchronized to photo index.
+  - Hover or dot-switching photo changes quote immediately.
+  - Quotes are sample performance-feedback style content.
 
 Implementation points in `scripts/mui-app.js`:
 
@@ -95,7 +99,14 @@ Note: relies on directory listing from local server (works with `python -m http.
 
 Keep motion subtle and purposeful.
 
-## 9) Guardrails for Future Models
+## 9) Accordion UX Rule (Technical Focus)
+
+- In the Technical Focus accordion, right-side toggle must stay visually obvious.
+- Use a clear toggle affordance (index + chevron), not just a bare number.
+- Summary text must reserve horizontal space for the right-side toggle.
+- Ensure no overlap between long summary copy and the expand control.
+
+## 10) Guardrails for Future Models
 
 - Before copy edits, preserve direct and non-hype tone.
 - Before layout edits, verify removed items are not reintroduced.
@@ -103,7 +114,7 @@ Keep motion subtle and purposeful.
 - When touching gallery, verify dynamic loading still handles spaces and mixed-case extensions.
 - Preserve mobile behavior when changing desktop layout.
 
-## 10) Quick Regression Checklist
+## 11) Quick Regression Checklist
 
 After meaningful changes, verify:
 
@@ -114,3 +125,4 @@ After meaningful changes, verify:
 5. Timeline remains earliest-left to latest-right.
 6. No reintroduced "Full CV" section.
 7. Copy remains plain and non-buzzwordy.
+8. Technical Focus accordion summary text does not overlap the right toggle.

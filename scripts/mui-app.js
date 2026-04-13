@@ -207,6 +207,45 @@ const quickStats = [
   { value: 3000, suffix: "+", label: "objects auto-linked" },
 ];
 
+const profileReviewQuotes = [
+  {
+    quote:
+      "Will consistently translated unclear asks into actionable plans. He shipped updates quickly without dropping detail.",
+    author: "Technical Manager",
+    context: "Program delivery review",
+  },
+  {
+    quote:
+      "As a co-chair, he kept meetings focused, made decisions fast, and followed through on operational details.",
+    author: "Fellow Co-Chair",
+    context: "Student leadership cycle",
+  },
+  {
+    quote:
+      "He was the person we asked when a process was blocking progress. Most issues were resolved in one pass.",
+    author: "Engineering Teammate",
+    context: "Systems and software workflow",
+  },
+  {
+    quote:
+      "His dashboards were clear enough for technical and non-technical stakeholders to use without extra explanation.",
+    author: "Program Stakeholder",
+    context: "Reporting and KPI reviews",
+  },
+  {
+    quote:
+      "He documented decisions well, which made handoffs easier and reduced rework across teams.",
+    author: "Project Lead",
+    context: "Cross-team collaboration",
+  },
+  {
+    quote:
+      "Strong ownership: if something slipped, he communicated early and offered practical recovery options.",
+    author: "Team Manager",
+    context: "Execution and reliability",
+  },
+];
+
 const principles = [
   {
     title: "Software engineering work",
@@ -977,7 +1016,7 @@ function ScrollProgressBar() {
   return <div className="scroll-progress" style={{ transform: `scaleX(${progress})` }} />;
 }
 
-function RotatingPhotoGallery({ topChip, bottomChip, showSpotlight = false }) {
+function RotatingPhotoGallery({ topChip, bottomChip, showSpotlight = false, onIndexChange = null }) {
   const galleryPhotos = useGalleryPhotos();
   const [index, setIndex] = useState(0);
   const [isHovering, setIsHovering] = useState(false);
@@ -990,6 +1029,12 @@ function RotatingPhotoGallery({ topChip, bottomChip, showSpotlight = false }) {
     }
     setIndex((current) => (current >= galleryPhotos.length ? 0 : current));
   }, [galleryPhotos.length, hasPhotos]);
+
+  useEffect(() => {
+    if (typeof onIndexChange === "function") {
+      onIndexChange(index);
+    }
+  }, [index, onIndexChange]);
 
   const syncIndexToPointer = (event) => {
     if (!hasPhotos) {
@@ -1435,6 +1480,8 @@ function AboutPage() {
   const [tab, setTab] = useState(Object.keys(stackGroups)[0]);
   const deferredTab = useDeferredValue(tab);
   const stackContext = stackNarratives[deferredTab] || stackNarratives.Languages;
+  const [profileReviewIndex, setProfileReviewIndex] = useState(0);
+  const activeProfileReview = profileReviewQuotes[profileReviewIndex % profileReviewQuotes.length] || profileReviewQuotes[0];
 
   return (
     <>
@@ -1442,10 +1489,17 @@ function AboutPage() {
         <section id="profile" className="section contact-panel-grid">
           <InteractiveCard className="about-copy-card" sx={{ p: { xs: 3, md: 4 } }}>
             <Stack spacing={2.2} className="parallax-layer">
-              <Chip label="About" variant="outlined" color="secondary" sx={{ width: "fit-content" }} />
-              <Typography className="section-title" variant="h2">
-                I build internal tools, reporting workflows, and systems documentation.
-              </Typography>
+              <Chip label="Sample performance feedback" variant="outlined" color="secondary" sx={{ width: "fit-content" }} />
+              <Paper variant="outlined" className="profile-review-card" sx={{ p: { xs: 2.2, md: 2.5 } }}>
+                <Stack spacing={1.15}>
+                  <Typography className="profile-review-quote" variant="h3">
+                    "{activeProfileReview.quote}"
+                  </Typography>
+                  <div className="dynamic-divider" />
+                  <Typography className="mini-label">{activeProfileReview.author}</Typography>
+                  <Typography color="text.secondary">{activeProfileReview.context}</Typography>
+                </Stack>
+              </Paper>
               <Typography color="text.secondary">
                 Queen's University Computer Science (Software Design Specialization), graduating 2026.
               </Typography>
@@ -1465,6 +1519,7 @@ function AboutPage() {
               </Stack>
               <RotatingPhotoGallery
                 bottomChip="Software, systems, TPM"
+                onIndexChange={setProfileReviewIndex}
               />
             </Stack>
           </InteractiveCard>
@@ -1521,7 +1576,15 @@ function AboutPage() {
                   border: "1px solid rgba(255,255,255,0.08)",
                 }}
               >
-                <AccordionSummary expandIcon={<span>{index + 1}</span>}>
+                <AccordionSummary
+                  className="technical-focus-summary"
+                  expandIcon={
+                    <span className="technical-focus-expand-icon" aria-hidden="true">
+                      <span className="technical-focus-expand-index">{index + 1}</span>
+                      <span className="technical-focus-expand-chevron">v</span>
+                    </span>
+                  }
+                >
                   <Stack spacing={0.75}>
                     <Typography variant="h6">{item.title}</Typography>
                     <Typography color="text.secondary">{item.copy}</Typography>
