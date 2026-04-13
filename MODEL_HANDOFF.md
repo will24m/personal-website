@@ -55,9 +55,9 @@ Keep these removed unless user explicitly asks for them back:
 
 - If user still sees removed UI, assume stale cache first.
 - `index.html` currently uses cache-busting query params:
-  - `styles/revamp.css?v=20260413-6`
-  - `styles/dynamic-ui.css?v=20260413-6`
-  - `scripts/mui-app.js?v=20260413-6`
+  - `styles/revamp.css?v=20260413-7`
+  - `styles/dynamic-ui.css?v=20260413-7`
+  - `scripts/mui-app.js?v=20260413-7`
 - Keep version string updated when necessary.
 
 ## 6) Gallery Behavior
@@ -97,6 +97,10 @@ For deployment compatibility, prefer keeping `/api/gallery` available so folder 
   - Timeline section uses `timeline-section--wide` breakout to use more side space than base page width.
   - CSS: `width: min(1480px, calc(100vw - 2.8rem))` with centered offset margin.
   - Mobile reset at `max-width: 980px` returns to normal section width.
+- Timeline visual geometry:
+  - Nodes are intentionally vertically offset to create a left-low to right-high slope.
+  - Timeline rail is rendered as `.cv-timeline-rail` and rotated slightly upward toward the right.
+  - Node pin/dot uses ring + inner-core styling via CSS variables (`--node-color`) for less awkward visuals.
 
 ## 8) Motion Preference
 
