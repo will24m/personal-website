@@ -61,11 +61,17 @@ body::before {
 body::after {
   content: "";
   position: fixed;
-  inset: 0;
+  left: var(--pointer-x, 70vw);
+  top: var(--pointer-y, 20vh);
+  width: clamp(280px, 32vw, 520px);
+  aspect-ratio: 1;
+  transform: translate(-50%, -50%);
   pointer-events: none;
   z-index: -2;
   background:
-    radial-gradient(520px circle at var(--pointer-x, 70%) var(--pointer-y, 20%), rgba(255, 255, 255, 0.08), transparent 50%);
+    radial-gradient(circle, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.12) 14%, rgba(255, 255, 255, 0.07) 34%, rgba(255, 255, 255, 0.03) 52%, transparent 72%);
+  filter: blur(1.5px);
+  will-change: transform, left, top;
 }
 
 a {
@@ -987,6 +993,8 @@ img {
 .cv-timeline-scroll {
   overflow-x: auto;
   padding: 0.15rem 0.1rem 0.55rem;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
 }
 
 .cv-timeline-scroll::-webkit-scrollbar {
@@ -1020,9 +1028,10 @@ img {
 .cv-timeline-node {
   position: relative;
   text-align: left;
-  width: 220px;
+  width: clamp(168px, 42vw, 220px);
   min-height: 7.2rem;
   padding: 1.75rem 0.9rem 0.95rem;
+  margin-top: var(--node-offset, 0px);
   border-radius: 16px;
   border: 1px solid var(--node-border, rgba(255, 255, 255, 0.1));
   background: var(--node-bg, rgba(255, 255, 255, 0.04));
@@ -1109,6 +1118,11 @@ img {
   background: rgba(255, 255, 255, 0.04) !important;
   border-color: rgba(255, 255, 255, 0.1) !important;
   animation: timelineDetailIn 240ms ease;
+}
+
+.cv-timeline-detail__chips {
+  flex-wrap: wrap;
+  justify-content: flex-end;
 }
 
 .availability-status {
@@ -1303,8 +1317,23 @@ img {
   }
 
   .cv-timeline-node {
-    width: 188px;
-    min-height: 7rem;
+    width: min(74vw, 188px);
+    min-height: 6.9rem;
+    padding: 1.6rem 0.82rem 0.9rem;
+  }
+
+  .cv-timeline-track {
+    gap: 0.74rem;
+  }
+
+  .cv-timeline-detail__header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.7rem;
+  }
+
+  .cv-timeline-detail__chips {
+    justify-content: flex-start;
   }
 
   .nav-toggle {
@@ -1375,6 +1404,34 @@ img {
 
   .section-title {
     font-size: clamp(2rem, 11vw, 3.4rem);
+  }
+
+  .profile-review-quote {
+    font-size: clamp(1.55rem, 8.9vw, 2.25rem);
+    line-height: 1.16;
+  }
+
+  .cv-timeline-scroll {
+    padding-bottom: 0.72rem;
+  }
+
+  .cv-timeline-node {
+    width: min(78vw, 176px);
+    min-height: 6.75rem;
+    padding: 1.52rem 0.76rem 0.84rem;
+    border-radius: 14px;
+  }
+
+  .cv-timeline-node__org {
+    font-size: 0.88rem;
+  }
+
+  .cv-timeline-node__role {
+    font-size: 0.76rem;
+  }
+
+  .cv-timeline-node__dot {
+    left: 0.72rem;
   }
 
   .brand__copy {

@@ -831,13 +831,34 @@ function useGalleryPhotos() {
 
 function useAmbientPointer() {
   useEffect(() => {
-    const handleMove = (event) => {
-      document.documentElement.style.setProperty("--pointer-x", `${event.clientX}px`);
-      document.documentElement.style.setProperty("--pointer-y", `${event.clientY}px`);
+    const setPointer = (x, y) => {
+      document.documentElement.style.setProperty("--pointer-x", `${x}px`);
+      document.documentElement.style.setProperty("--pointer-y", `${y}px`);
     };
 
-    window.addEventListener("pointermove", handleMove);
-    return () => window.removeEventListener("pointermove", handleMove);
+    const handleMove = (event) => {
+      setPointer(event.clientX, event.clientY);
+    };
+
+    const handleLeave = () => {
+      setPointer(window.innerWidth * 0.7, window.innerHeight * 0.2);
+    };
+
+    window.addEventListener("pointermove", handleMove, { passive: true });
+    if ("onpointerrawupdate" in window) {
+      window.addEventListener("pointerrawupdate", handleMove, { passive: true });
+    }
+    window.addEventListener("pointerleave", handleLeave);
+    window.addEventListener("blur", handleLeave);
+
+    return () => {
+      window.removeEventListener("pointermove", handleMove);
+      if ("onpointerrawupdate" in window) {
+        window.removeEventListener("pointerrawupdate", handleMove);
+      }
+      window.removeEventListener("pointerleave", handleLeave);
+      window.removeEventListener("blur", handleLeave);
+    };
   }, []);
 }
 
@@ -1215,7 +1236,13 @@ function HeroPanel({ selectedId, onChange, onOpenDialog }) {
         <span />
         <span />
       </Box>
-      <Stack direction="row" justifyContent="space-between" alignItems="center" className="parallax-layer">
+      <Stack
+        direction={{ xs: "column", sm: "row" }}
+        justifyContent="space-between"
+        alignItems={{ xs: "flex-start", sm: "center" }}
+        gap={1}
+        className="parallax-layer hero-panel-header"
+      >
         <Box>
           <Typography className="panel-title">Experience snapshot</Typography>
           <Typography className="panel-meta">Recent technical roles and outcomes</Typography>
@@ -1237,7 +1264,13 @@ function HeroPanel({ selectedId, onChange, onOpenDialog }) {
       </Box>
       <Paper variant="outlined" sx={{ p: 2, borderRadius: "22px", background: "rgba(255,255,255,0.04)" }}>
         <Stack spacing={1.5}>
-          <Stack direction="row" justifyContent="space-between" alignItems="center" gap={1}>
+          <Stack
+            direction={{ xs: "column", sm: "row" }}
+            justifyContent="space-between"
+            alignItems={{ xs: "flex-start", sm: "center" }}
+            gap={1}
+            className="hero-panel-role-header"
+          >
             <Typography variant="h6">{selected.title}</Typography>
             <Chip size="small" label={selected.accent} sx={{ bgcolor: "rgba(255,255,255,0.08)", color: "#f3f5f7" }} />
           </Stack>
@@ -1423,7 +1456,7 @@ function InteractiveCvTimeline() {
                   className={`cv-timeline-node ${isActive ? "is-active" : ""}`}
                   onClick={() => setSelectedId(item.id)}
                   style={{
-                    marginTop: `${verticalOffsetPx}px`,
+                    "--node-offset": `${verticalOffsetPx}px`,
                     "--node-color": itemType.color,
                     "--node-border": isActive ? itemType.chipBorder : "rgba(255,255,255,0.1)",
                     "--node-bg": isActive ? "rgba(255,255,255,0.12)" : "rgba(255,255,255,0.04)",
@@ -1461,12 +1494,12 @@ function InteractiveCvTimeline() {
 
         <Paper key={activeEntry.id} className="cv-timeline-detail" variant="outlined" sx={{ p: 2 }}>
           <Stack spacing={1.4}>
-            <Stack direction="row" justifyContent="space-between" alignItems="center" gap={1}>
+            <Stack className="cv-timeline-detail__header" direction="row" justifyContent="space-between" alignItems="center" gap={1}>
               <Box>
                 <Typography variant="h6">{activeEntry.role}</Typography>
                 <Typography className="panel-meta">{activeEntry.org}</Typography>
               </Box>
-              <Stack direction="row" gap={0.8}>
+              <Stack className="cv-timeline-detail__chips" direction="row" gap={0.8}>
                 <Chip
                   size="small"
                   label={(typeConfig[activeEntry.type] || typeConfig.extracurricular).label}
@@ -1527,7 +1560,13 @@ function AboutPage() {
             sx={{ p: 2, alignSelf: "flex-start", height: "auto", minHeight: 0 }}
           >
             <Stack spacing={2} className="parallax-layer">
-              <Stack direction="row" justifyContent="space-between" alignItems="center">
+              <Stack
+                className="profile-gallery-meta"
+                direction={{ xs: "column", sm: "row" }}
+                justifyContent="space-between"
+                alignItems={{ xs: "flex-start", sm: "center" }}
+                gap={1}
+              >
                 <Box>
                   <Typography className="panel-meta">Queen's CS | Class of 2026</Typography>
                 </Box>
