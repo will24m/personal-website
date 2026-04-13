@@ -130,8 +130,8 @@ const site = {
   github: "https://github.com/will24m",
   location: "Toronto, ON",
   school: "Queen's University Computer Science (Software Design Specialization)",
-  currentRole: "Technical Program Management Intern at Lockheed Martin",
-  nextRole: "Previous Lockheed roles: Software Engineering Intern and Systems Engineering Intern",
+  currentRole: "Technical Program Management Intern, Lockheed Martin",
+  nextRole: "Previous internships at Lockheed Martin: Software Engineering and Systems Engineering.",
 };
 
 const navItems = [
@@ -210,15 +210,71 @@ const quickStats = [
 const principles = [
   {
     title: "Software engineering work",
-    copy: "Built applications, scripts, and deployment workflows using Python, TypeScript, JavaScript, C, and DXL.",
+    copy: "Built full internal software solutions from requirements to deployed workflow, including frontend implementation, backend logic, scripting automation, and release support.",
+    deliverables: [
+      "Built and maintained internal apps for case-management and engineering process workflows.",
+      "Designed reusable scripts for data transformation, validation, and report generation.",
+      "Integrated automation into delivery pipelines to reduce repetitive manual work.",
+    ],
+    outcomes: [
+      "Reduced baseline-change operations from ~2 hours to ~10 minutes through automation.",
+      "Built applications and scripts used by cross-functional engineering and operations teams.",
+      "Improved day-to-day reliability by replacing brittle manual steps with repeatable tooling.",
+    ],
+    tools: ["Python", "TypeScript", "JavaScript", "C", "DXL", "Power Apps", "Azure DevOps"],
   },
   {
     title: "Data and reporting systems",
-    copy: "Built Power BI, Tableau, and Jira dashboards, including KPI pipelines and reporting for engineering teams.",
+    copy: "Designed KPI pipelines and reporting surfaces that helped teams understand delivery health, execution risk, and operational trends at a glance.",
+    deliverables: [
+      "Built dashboard ecosystems spanning Jira, Tableau, and Power BI across dozens of KPIs.",
+      "Created scripted data-cleaning and validation layers before publishing metrics.",
+      "Structured metric definitions so stakeholders interpreted dashboards consistently.",
+    ],
+    outcomes: [
+      "Enabled leadership reporting and recurring execution reviews with reliable metrics.",
+      "Improved traceability between source systems, dashboard views, and decision-making.",
+      "Reduced time spent collecting and reconciling status updates across teams.",
+    ],
+    tools: ["Jira API", "Tableau", "Power BI", "Python", "SQL", "Confluence"],
   },
   {
     title: "Systems and requirements tooling",
-    copy: "Worked in CAMEO, IBM DOORS/DXL, and PTC Windchill to model systems and maintain requirements traceability.",
+    copy: "Supported model-based and requirements-driven engineering workflows with strong emphasis on traceability, design consistency, and documentation quality.",
+    deliverables: [
+      "Built and iterated SysML/UML models for subsystem behavior, interfaces, and certification paths.",
+      "Validated requirements in IBM DOORS and maintained alignment with Windchill artifacts.",
+      "Reviewed and updated engineering documents based on requirement and design changes.",
+    ],
+    outcomes: [
+      "Strengthened requirement-to-design traceability across milestone-driven workflows.",
+      "Improved consistency between architecture models, artifacts, and delivery documents.",
+      "Helped teams move faster through review cycles with clearer technical baselines.",
+    ],
+    tools: ["CAMEO", "IBM DOORS", "DXL", "PTC Windchill", "Jira", "Confluence"],
+  },
+];
+
+const technicalHighlights = [
+  {
+    value: "3",
+    label: "internship tracks",
+    detail: "Software engineering, systems engineering, and technical program management.",
+  },
+  {
+    value: "50+",
+    label: "engineers enabled",
+    detail: "Internal automation and tooling used directly by engineering teams.",
+  },
+  {
+    value: "30+",
+    label: "KPIs visualized",
+    detail: "Operational metrics surfaced in dashboard and reporting workflows.",
+  },
+  {
+    value: "3000+",
+    label: "objects linked",
+    detail: "Automated consistency and traceability across large structured datasets.",
   },
 ];
 
@@ -228,180 +284,392 @@ const stackGroups = {
   Tools: ["Jira", "Confluence", "Dataverse", "IBM DOORS", "CAMEO", "PTC Windchill", "Postman", "PyTest"],
 };
 
-const cvTimelineEntries = [
-  {
-    id: "extra-quantt",
-    type: "extracurricular",
-    date: "Sep 2021-Aug 2023",
-    org: "QUANTT",
-    role: "Algorithm Team Software Developer",
-    summary:
-      "Developed and tested algorithmic trading strategies in Python, including simulation setup, model tuning, and performance evaluation.",
-    bullets: [
-      "Built Python-based trading logic in QuantConnect and iterated indicator selection and entry/exit rules.",
-      "Ran backtests against historical datasets to evaluate risk-adjusted behavior and stability across market regimes.",
-      "Improved strategy behavior through repeated tuning and validation, with average simulated return around 82%.",
+const stackNarratives = {
+  Languages: {
+    intro:
+      "Languages were selected based on delivery constraints: scripting speed for automation, typed reliability for maintainability, and lower-level control for engineering tooling.",
+    deepDive: [
+      {
+        title: "Automation and scripting",
+        detail: "Python and TypeScript for data-cleaning scripts, report generation, and workflow tooling.",
+      },
+      {
+        title: "Frontend and app logic",
+        detail: "JavaScript and TypeScript for internal app behavior, UI interactions, and deployment-ready features.",
+      },
+      {
+        title: "Engineering tooling",
+        detail: "C and DXL for systems-oriented utilities and specialized engineering database operations.",
+      },
+      {
+        title: "Data and querying",
+        detail: "SQL for metrics extraction, transformation support, and structured reporting pipelines.",
+      },
+    ],
+    emphasis: [
+      "Readable, maintainable code over one-off scripts.",
+      "Strong validation and error handling for production-like internal tools.",
+      "Clear interfaces between data, logic, and presentation layers.",
     ],
   },
-  {
-    id: "extra-qsig-analyst",
-    type: "extracurricular",
-    date: "2022-2023",
-    org: "Queen's Student Investors Group",
-    role: "Senior Data Analyst",
-    summary:
-      "Led financial data modeling experiments, including feature engineering, alternative data collection, and predictive evaluation.",
-    bullets: [
-      "Built a Python classification model using Yahoo Finance market data with average prediction accuracy around 73%.",
-      "Collected and cleaned data from 20+ news sources and 500,000+ tweets for NLP-based signal experiments.",
-      "Prepared analysis outputs and model findings for investment-focused discussion and iteration.",
+  Platforms: {
+    intro:
+      "Platform choices reflected organizational reality: enterprise systems for adoption, modern frameworks for flexibility, and dashboard tools for stakeholder communication.",
+    deepDive: [
+      {
+        title: "Application delivery",
+        detail: "Power Apps and React used to rapidly ship internal tools with practical UI workflows.",
+      },
+      {
+        title: "Data visualization",
+        detail: "Power BI and Tableau for KPI tracking, status reporting, and trend visibility across teams.",
+      },
+      {
+        title: "Engineering ops",
+        detail: "Azure DevOps for workflow orchestration, environment management, and delivery support.",
+      },
+      {
+        title: "Containerized workflows",
+        detail: "Docker and Kubernetes familiarity for deployment-oriented thinking and scalable architecture context.",
+      },
+    ],
+    emphasis: [
+      "Ship usable internal tools quickly without sacrificing structure.",
+      "Build dashboards that non-technical stakeholders can act on.",
+      "Support repeatable delivery through documented platform workflows.",
     ],
   },
-  {
-    id: "work-lockheed-systems",
-    type: "work",
-    date: "2023",
-    org: "Lockheed Martin",
-    role: "Systems Engineering Intern",
-    summary:
-      "Supported model-based systems engineering for defense platform development, including requirements decomposition, architecture modeling, and design package reviews.",
-    bullets: [
-      "Built and iterated SysML/UML models in CAMEO to represent subsystem behavior, interfaces, and certification workflows.",
-      "Performed requirements analysis in IBM DOORS and validated alignment with baseline artifacts in PTC Windchill.",
-      "Reviewed and updated 90+ classified engineering documents through trade-study and change-request workflows.",
-      "Coordinated documentation status through Jira and Confluence so model and requirement updates stayed synchronized.",
+  Tools: {
+    intro:
+      "Tooling experience centered on traceability, collaboration, and lifecycle reliability, especially in environments where requirements, documentation, and delivery status must stay synchronized.",
+    deepDive: [
+      {
+        title: "Program coordination",
+        detail: "Jira and Confluence for backlog hygiene, milestone tracking, and team communication rhythms.",
+      },
+      {
+        title: "Systems traceability",
+        detail: "IBM DOORS and CAMEO for requirements integrity, model linkage, and architecture visibility.",
+      },
+      {
+        title: "Configuration control",
+        detail: "PTC Windchill to maintain consistency between evolving artifacts and approved baselines.",
+      },
+      {
+        title: "Validation workflow",
+        detail: "Postman and PyTest for endpoint checks, regression confidence, and automation reliability.",
+      },
+    ],
+    emphasis: [
+      "Preserve requirement-to-delivery traceability as systems evolve.",
+      "Make collaboration artifacts clear enough for cross-functional teams.",
+      "Use tooling standards that scale across multiple contributors.",
     ],
   },
+};
+
+const professionalExperienceFull = [
   {
-    id: "extra-qsig-tech",
-    type: "extracurricular",
-    date: "May 2023-Aug 2023",
-    org: "Queen's Student Investors Group",
-    role: "Director of Technology",
-    summary:
-      "Owned technical infrastructure and reporting enablement for investment and market-report workflows.",
-    bullets: [
-      "Maintained and improved internal technical resources used by investment and reporting teams.",
-      "Expanded access to structured reporting data so teams could build stronger market analyses and stock pitches.",
-      "Oversaw usage standards and continuity of the group's technical reporting workflows.",
-    ],
-  },
-  {
-    id: "extra-qdaa-ai",
-    type: "extracurricular",
-    date: "May 2023-Apr 2024",
-    org: "Queen's Data Analytics Association",
-    role: "Director of Artificial Intelligence",
-    summary:
-      "Led AI-focused education initiatives, including curriculum design, workshop delivery, and technical support for project teams.",
-    bullets: [
-      "Designed and delivered NLP and applied-ML workshops for 50+ students with implementation-focused exercises.",
-      "Built internal educational content covering supervised learning workflows and model development fundamentals.",
-      "Supported project teams in scoping and applying AI approaches to real problem statements.",
-    ],
-  },
-  {
-    id: "work-lockheed-tpm-2023",
-    type: "work",
-    date: "2023-2024",
-    org: "Lockheed Martin",
+    organization: "Lockheed Martin",
     role: "Technical Program Management Intern",
-    summary:
-      "Supported Agile program execution and delivery reporting for defense engineering teams.",
+    location: "Ottawa, ON, Canada",
+    timeframe: "Jan 2025-Apr 2026",
     bullets: [
-      "Visualized 30+ KPIs (150+ parameters) across 20+ Jira and Tableau dashboards using Jira API data.",
-      "Produced 20+ pages of Agile process documentation and tool guidance for engineering delivery teams.",
-      "Refactored 50+ Jira program milestones and supported requirement-delivery tracking across 100+ design requirements.",
-      "Led recurring Scrum-of-Scrums style coordination and built Jira queries for daily progression/risk analysis.",
+      "Created scripts to pull, clean, validate, and display program metrics for a $XXX,000,000,000 program.",
+      "Communicated with senior management on program direction and execution priorities.",
     ],
   },
   {
-    id: "work-lockheed-software",
-    type: "work",
-    date: "2024",
-    org: "Lockheed Martin",
-    role: "Software Engineering Intern",
-    summary:
-      "Built internal automation tooling for configuration management and engineering database workflows used by multiple teams.",
-    bullets: [
-      "Wrote DXL and C scripts used by 50+ engineers to execute design-baseline and version-control tasks.",
-      "Reduced baseline change operations from approximately 2 hours to 10 minutes by automating manual workflow steps.",
-      "Built Python tooling to transform relational database content into classified, customer-ready documentation.",
-      "Automated attribute linking across 3000+ objects to improve consistency and remove repetitive manual maintenance.",
-    ],
-  },
-  {
-    id: "work-gac",
-    type: "work",
-    date: "2024-2025",
-    org: "Global Affairs Canada",
+    organization: "Global Affairs Canada",
     role: "Junior Software Engineer / Business Analyst",
-    summary:
-      "Owned end-to-end internal application delivery, including requirements gathering, implementation, reporting, and iterative process improvement.",
+    location: "Ottawa, ON, Canada",
+    timeframe: "Sep 2024-Aug 2025",
     bullets: [
-      "Built and maintained 13 custom applications using Power Apps and Azure DevOps for case-management workflows.",
-      "Elicited requirements from stakeholders, translated business rules into technical workflows, and iterated UI/process behavior.",
-      "Built Power BI dashboards across 50+ metrics to provide operational visibility for embassy officials and leadership.",
-      "Refactored scripts with efficiency gains up to 7200% and automated DevOps environment/config workflows with TypeScript.",
+      "Built 13 custom self-contained applications using PowerApps and Azure DevOps to revamp case-management processes.",
+      "Created dynamic dashboards for custom applications using Power BI, covering 50+ metrics for embassy officials and leadership.",
+      "Upgraded DevOps cloud pipeline infrastructure using custom TypeScript to automate environment variable generation.",
+      "Elicited requirements from clients to gather feedback, assess capabilities, and iteratively improve software projects.",
+      "Elicited requirements from clients and developed business process, business rules, and UI behavior.",
+      "Designed system architecture, optimizing decisions to meet system and requirement constraints.",
+      "Optimized and refactored scripts, improving efficiency by up to 7200%.",
+      "Mentored incoming interns, consultants, and testers as a primary source of support.",
+      "Developed reusable components used as templates and standalone apps.",
+      "Managed data migration, database administration tasks, deployment pipelines, and Power BI reporting.",
+      "Worked across MS Power Platform (Power Apps, Dataverse, Power BI, Power Pages, Power Automate) and JavaScript.",
     ],
   },
   {
-    id: "extra-smith-tech",
-    type: "extracurricular",
-    date: "May 2024-Apr 2025",
-    org: "Smith Business and Technology",
-    role: "Co-Chair",
-    summary:
-      "Co-led planning and operations for business/technology events, including team staffing, execution workflows, and stakeholder alignment.",
+    organization: "Lockheed Martin",
+    role: "Software Engineering Intern",
+    location: "Ottawa, ON, Canada",
+    timeframe: "May 2024-Aug 2024",
     bullets: [
-      "Managed a 23-person organizing team responsible for planning and executing large student-facing events.",
-      "Built execution plans and operating timelines for event logistics, communications, and delivery handoffs.",
-      "Led partner communication and compliance coordination with institutional and regulatory stakeholders.",
+      "Wrote 4 original scripts using DXL and C for version control management during a military vehicle design phase.",
+      "Delivered tools used by 50+ engineers, reducing baseline-change time from roughly 2 hours to 10 minutes.",
+      "Converted 1000+ relational database objects into classified Excel documentation via a Python formatting workflow.",
+      "Improved database architecture for 3000+ objects by automating attribute linking and reducing manual effort.",
     ],
   },
   {
-    id: "extra-qhacks",
-    type: "extracurricular",
-    date: "May 2025-Present",
-    org: "QHacks",
-    role: "Co-Chair",
-    summary:
-      "Co-led planning and delivery for a large student hackathon, covering team management, budgeting, sponsorship, and execution systems.",
-    bullets: [
-      "Directed a 30+ person cross-functional organizing team across logistics, partnerships, marketing, and technology.",
-      "Managed a $60K+ budget and coordinated sponsor relationships with major external partners.",
-      "Defined operational workflows and documentation to improve event readiness and continuity between organizing cycles.",
-    ],
-  },
-  {
-    id: "extra-qcsa",
-    type: "extracurricular",
-    date: "May 2025-Present",
-    org: "Queen's Computing Students Association",
-    role: "Vice President of Student Affairs",
-    summary:
-      "Led student affairs operations, including representation, team management, program delivery, and internal process standardization.",
-    bullets: [
-      "Represented 2000+ students in faculty and board-level discussions on academic and community priorities.",
-      "Managed a 50+ person team responsible for professional-development and community-focused initiatives.",
-      "Implemented standardized onboarding/training workflows to improve retention and reduce ramp-up time for new team members.",
-    ],
-  },
-  {
-    id: "work-lockheed-tpm",
-    type: "work",
-    date: "2025-Present",
-    org: "Lockheed Martin",
+    organization: "Lockheed Martin",
     role: "Technical Program Management Intern",
-    summary:
-      "Built program-metric scripting and leadership reporting for a large-scale defense program.",
+    location: "Ottawa, ON, Canada",
+    timeframe: "Sep 2023-Apr 2024",
     bullets: [
-      "Created scripts to pull, clean, validate, and display program metrics for a multi-billion-dollar program.",
-      "Built reporting outputs for leadership reviews and program-direction planning discussions.",
-      "Communicated metric trends and execution risks with senior management and cross-functional teams.",
+      "Visualized 30+ weapon-program KPIs (150+ parameters) across 20+ Tableau and Jira dashboards.",
+      "Developed 20+ pages of Agile documentation on Confluence for engineers on a 12-figure defense program.",
+      "Refactored 50+ Jira program milestones while supporting 100+ design requirements.",
+      "Authored Agile tools/process documentation and supported 200+ engineers by streamlining information channels.",
+      "Coached engineering and non-engineering teams on Agile Scrum practices and resolved process conflicts.",
+      "Constructed Jira queries daily for ticket progression metrics and statistical assessment.",
+      "Led Scrum-of-Scrums and Agile Release Train meetings to track progress and align teams.",
+    ],
+  },
+  {
+    organization: "Lockheed Martin",
+    role: "Systems Engineering Intern",
+    location: "Ottawa, ON, Canada",
+    timeframe: "Jan 2023-Aug 2023",
+    bullets: [
+      "Designed intricate system data models in CAMEO (UML/SysML) for architecture and certification visualization.",
+      "Iterated 50+ data artifacts with senior engineers using PTC Windchill and IBM DOORS.",
+      "Developed 10+ layered data models for integrated military-vehicle systems in CAMEO.",
+      "Conducted qualitative engineering reviews across appraisal documents, ECRs, procurement packages, and design specs.",
+      "Collaborated with senior engineers using Jira/Confluence, PTC Windchill, and IBM DOORS.",
+      "Updated 90+ classified design documents for Canadian Surface Combatant R&D through requirements analysis and trade-study review.",
+    ],
+  },
+  {
+    organization: "En Ville",
+    role: "Storefront Supervisor",
+    location: "Toronto, ON, Canada",
+    timeframe: "Summer 2022",
+    summary:
+      "En Ville (est. 1982) is a high-end catering company in Toronto.",
+    bullets: [
+      "Oversaw daily direct-to-consumer storefront operations serving 80-100 customers per day during peak months.",
+      "Boosted weekly sales by about 25% over three months through product layout and upselling improvements.",
+      "Increased customer return rate by roughly 30% by collecting feedback, offering samples, and refining product mix.",
+      "Trained 3 new part-time staff and created simple SOPs for service consistency and faster onboarding.",
+      "Managed restocking and inventory for 100+ SKUs to minimize shortages and improve freshness.",
+      "Handled customer issues professionally, resolving 20+ escalations with positive follow-up outcomes.",
+    ],
+  },
+  {
+    organization: "Global Amusement Consulting (GAC)",
+    role: "Sales Associate",
+    location: "Vaughan, ON, Canada",
+    timeframe: "Summer 2021",
+    summary:
+      "GAC operates games and attractions in amusement parks including Canada's Wonderland.",
+    bullets: [
+      "Learned and demonstrated a difficult carnival rope-ladder activity for customers on a daily basis.",
+      "Maintained strong technical knowledge of game requirements and explained rules to prospective customers.",
+      "Engaged large daily crowds consistently and supported sales generation through active outreach.",
     ],
   },
 ];
+
+const extracurricularExperienceFull = [
+  {
+    organization: "QHacks",
+    role: "Co-Chair",
+    location: "Kingston, ON",
+    timeframe: "May 2025-Present",
+    bullets: [
+      "Directed a 30+ person organizing team to plan and execute a large student-run hackathon with 800+ applicants.",
+      "Oversaw a $60K+ budget and secured sponsorships including Shopify, RBC, and Microsoft.",
+      "Introduced a hybrid event model and redesigned onboarding, improving participant satisfaction.",
+      "Led cross-functional collaboration across tech, logistics, marketing, and partnerships.",
+      "Expanded equity-focused outreach and accessibility initiatives to increase first-time and underrepresented participants.",
+      "Established documentation and scalable systems for continuity across organizing cycles.",
+    ],
+  },
+  {
+    organization: "Queen's Computing Students Association",
+    role: "Vice President of Student Affairs",
+    location: "Kingston, ON",
+    timeframe: "May 2025-Present",
+    bullets: [
+      "Represented 2000+ students in discussions with undergraduate board, arts and sciences board, and faculty.",
+      "Managed a 50+ person team delivering 15+ professional development and community events.",
+      "Advocated for and secured a $12,000 annual increase in student funding.",
+      "Designed and implemented a standardized training system to improve retention and reduce onboarding time.",
+      "Led faculty-wide survey campaigns with 700+ responses that informed course and mental health service changes.",
+    ],
+  },
+  {
+    organization: "Smith Business and Technology",
+    role: "Co-Chair",
+    location: "Kingston, ON",
+    timeframe: "May 2024-Apr 2025",
+    bullets: [
+      "Managed planning for two large student events focused on business and technology with 200+ attendees.",
+      "Hired and led a team of 23 students in preparation for 5+ events during the academic year.",
+      "Led correspondence with Smith Commerce Society to ensure compliance with regulatory boards.",
+    ],
+  },
+  {
+    organization: "Queen's Conference on Business and Technology",
+    role: "Logistics Director",
+    location: "Kingston, ON",
+    timeframe: "May 2023-Apr 2024",
+    bullets: [
+      "Directed a 5-person team for scheduling, budgeting, and coordination across 4 events totaling 300+ attendees.",
+      "Led correspondence with 10+ external stakeholders, vendors, and student organizations.",
+      "Implemented logistics timelines and coordinated with cross-functional teams and vendors.",
+      "Managed the club's financial portfolio and served as head treasurer.",
+      "Negotiated with venues and sponsors months ahead of events.",
+      "Conducted post-event evaluations and implemented improvements for future conferences.",
+    ],
+  },
+  {
+    organization: "Queen's Data Analytics Association",
+    role: "Director of Artificial Intelligence",
+    location: "Kingston, ON",
+    timeframe: "May 2023-Apr 2024",
+    bullets: [
+      "Delivered 3 NLP workshops and supported 50+ students with hands-on AI implementation.",
+      "Led partnership communication for AI education opportunities including panels, talks, and workshops.",
+      "Founded QDAA's AI division to focus on the intersection of data analytics and AI.",
+      "Hired senior and junior AI consultants for internal content and project-team support.",
+      "Consulted external clients on AI solutions to real business problems.",
+    ],
+  },
+  {
+    organization: "Queen's Student Investors Group",
+    role: "Director of Technology",
+    location: "Kingston, ON",
+    timeframe: "May 2023-Aug 2023",
+    bullets: [
+      "Directed usage of proprietary QSIG financial reporting technology for investment and market-report teams.",
+      "Increased quantity of information available to investment teams by 200%.",
+      "Directed and maintained QSIG's independent website.",
+    ],
+  },
+  {
+    organization: "Queen's Student Investors Group",
+    role: "Senior Data Analyst",
+    location: "Kingston, ON",
+    timeframe: "2022-2023",
+    bullets: [
+      "Developed a Python security-classification model using Yahoo Finance API with average accuracy around 73%.",
+      "Programmed a reinforcement-learning model with LSTM components using PyTorch, TensorFlow, and Colab.",
+      "Scraped 20+ news sites and 500,000+ tweets for NLP data pipelines.",
+    ],
+  },
+  {
+    organization: "Queen's Business Brigades",
+    role: "Senior Advisor",
+    location: "Kingston, ON",
+    timeframe: "Sep 2023-Dec 2023",
+    summary:
+      "QBB is a financial/economic consulting chapter of Global Brigades.",
+    bullets: [
+      "Advised incoming directors on strategies used for the inaugural case competition.",
+      "Maintained the professional development of QBB's website (qubusinessbrigades.com).",
+      "Provided ongoing support for club activities during the 2023-24 season.",
+    ],
+  },
+  {
+    organization: "Queen's Business Brigades",
+    role: "Co-Director of Education",
+    location: "Kingston, ON",
+    timeframe: "Sep 2022-May 2023",
+    bullets: [
+      "Led development of QBB's first intercollegiate business case competition.",
+      "Directed development of QBB's independent website (qubusinessbrigades.com).",
+      "Acted as liaison for partner organizations including McMaster Business Brigades and Queen's Web Development Club.",
+    ],
+  },
+  {
+    organization: "QUANTT",
+    role: "Algorithm Team Software Developer",
+    location: "Kingston, ON",
+    timeframe: "Sep 2021-Aug 2023",
+    summary:
+      "QUANTT is a student-run club focused on quantitative finance and algorithmic trading.",
+    bullets: [
+      "Developed a Python trading algorithm in QuantConnect using indicator-based strategies.",
+      "Tested and improved model performance through backtesting against historical market data.",
+      "Built inverse trading strategies across oil and renewable energy equities for stable positive returns.",
+    ],
+  },
+];
+
+function toTimelineEntry(entry, type, index) {
+  const fallbackSummary = entry.bullets?.[0] || `${entry.organization} | ${entry.location}`;
+  const rawId = `${type}-${index}-${entry.organization}-${entry.role}-${entry.timeframe}`;
+  const normalizedId = rawId.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+
+  return {
+    id: normalizedId,
+    type,
+    date: entry.timeframe,
+    org: entry.organization,
+    role: entry.role,
+    summary: entry.summary || fallbackSummary,
+    bullets: entry.bullets || [],
+  };
+}
+
+function parseTimelineStart(dateLabel) {
+  if (!dateLabel) {
+    return Number.POSITIVE_INFINITY;
+  }
+
+  const text = String(dateLabel);
+  const monthMap = {
+    jan: 0,
+    feb: 1,
+    mar: 2,
+    apr: 3,
+    may: 4,
+    jun: 5,
+    jul: 6,
+    aug: 7,
+    sep: 8,
+    oct: 9,
+    nov: 10,
+    dec: 11,
+  };
+
+  const yearMatch = text.match(/\b(19|20)\d{2}\b/);
+  if (!yearMatch) {
+    return Number.POSITIVE_INFINITY;
+  }
+
+  const year = Number(yearMatch[0]);
+  const monthMatch = text.match(/\b(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\b/i);
+
+  let month = 0;
+  if (monthMatch) {
+    month = monthMap[monthMatch[0].slice(0, 3).toLowerCase()] ?? 0;
+  } else if (/\bSummer\b/i.test(text)) {
+    month = 5;
+  } else if (/\bFall|Autumn\b/i.test(text)) {
+    month = 8;
+  } else if (/\bSpring\b/i.test(text)) {
+    month = 2;
+  } else if (/\bWinter\b/i.test(text)) {
+    month = 0;
+  }
+
+  return year * 12 + month;
+}
+
+const cvTimelineEntriesRaw = [
+  ...professionalExperienceFull.map((entry, index) => toTimelineEntry(entry, "work", index)),
+  ...extracurricularExperienceFull.map((entry, index) => toTimelineEntry(entry, "extracurricular", index)),
+];
+
+const cvTimelineEntries = cvTimelineEntriesRaw
+  .map((entry, index) => ({ entry, index }))
+  .sort((left, right) => {
+    const startDiff = parseTimelineStart(left.entry.date) - parseTimelineStart(right.entry.date);
+    return startDiff !== 0 ? startDiff : left.index - right.index;
+  })
+  .map(({ entry }) => entry);
 
 const contactMethods = [
   {
@@ -424,13 +692,71 @@ const contactMethods = [
   },
 ];
 
-const galleryPhotos = [
-  { src: "images/headshot.jpg", alt: "Will Wu headshot" },
-  { src: "images/sldc headshot.JPG", alt: "Will Wu formal headshot" },
-  { src: "images/qhacks team photo.JPG", alt: "Will Wu with QHacks team" },
-  { src: "images/principal reception.jpg", alt: "Will Wu at principal reception" },
-  { src: "images/neuromech collect.jpg", alt: "Will Wu at Neuromech event" },
-];
+const galleryImagePattern = /\.(avif|bmp|gif|jpe?g|png|webp)$/i;
+
+function filenameToAlt(filename) {
+  const base = filename.replace(/\.[^/.]+$/, "");
+  const normalized = base.replace(/[_-]+/g, " ").replace(/\s+/g, " ").trim();
+  if (!normalized) {
+    return "Gallery photo";
+  }
+  return normalized.charAt(0).toUpperCase() + normalized.slice(1);
+}
+
+function buildGalleryPhotosFromIndex(indexHtml) {
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(indexHtml, "text/html");
+  const photoNames = Array.from(doc.querySelectorAll("a[href]"))
+    .map((anchor) => anchor.getAttribute("href") || "")
+    .map((href) => href.split("#")[0].split("?")[0])
+    .filter(Boolean)
+    .map((href) => {
+      try {
+        return decodeURIComponent(href);
+      } catch (_error) {
+        return href;
+      }
+    })
+    .map((href) => href.replace(/\\/g, "/"))
+    .filter((href) => !href.endsWith("/"))
+    .map((href) => href.split("/").pop())
+    .filter(Boolean)
+    .filter((name) => galleryImagePattern.test(name));
+
+  const uniqueNames = [...new Set(photoNames)].sort((a, b) => a.localeCompare(b, undefined, { sensitivity: "base" }));
+  return uniqueNames.map((name) => ({
+    src: encodeURI(`images/${name}`),
+    alt: filenameToAlt(name),
+  }));
+}
+
+function useGalleryPhotos() {
+  const [photos, setPhotos] = useState([]);
+
+  useEffect(() => {
+    const controller = new AbortController();
+
+    const loadPhotos = async () => {
+      try {
+        const response = await fetch("images/", { signal: controller.signal, cache: "no-store" });
+        if (!response.ok) {
+          throw new Error(`Gallery index request failed (${response.status})`);
+        }
+
+        const indexHtml = await response.text();
+        const discovered = buildGalleryPhotosFromIndex(indexHtml);
+        setPhotos(discovered);
+      } catch (_error) {
+        setPhotos([]);
+      }
+    };
+
+    loadPhotos();
+    return () => controller.abort();
+  }, []);
+
+  return photos;
+}
 
 function useAmbientPointer() {
   useEffect(() => {
@@ -652,23 +978,92 @@ function ScrollProgressBar() {
 }
 
 function RotatingPhotoGallery({ topChip, bottomChip, showSpotlight = false }) {
+  const galleryPhotos = useGalleryPhotos();
   const [index, setIndex] = useState(0);
+  const [isHovering, setIsHovering] = useState(false);
+  const hasPhotos = galleryPhotos.length > 0;
   const activePhoto = galleryPhotos[index] || galleryPhotos[0];
 
   useEffect(() => {
-    if (galleryPhotos.length < 2) {
-      return undefined;
+    if (!hasPhotos) {
+      return;
+    }
+    setIndex((current) => (current >= galleryPhotos.length ? 0 : current));
+  }, [galleryPhotos.length, hasPhotos]);
+
+  const syncIndexToPointer = (event) => {
+    if (!hasPhotos) {
+      return;
     }
 
-    const interval = window.setInterval(() => {
-      setIndex((current) => (current + 1) % galleryPhotos.length);
-    }, 3200);
+    const rect = event.currentTarget.getBoundingClientRect();
+    if (!rect.width || !rect.height) {
+      return;
+    }
 
-    return () => window.clearInterval(interval);
-  }, []);
+    const x = Math.min(Math.max((event.clientX - rect.left) / rect.width, 0), 0.999);
+    const y = Math.min(Math.max((event.clientY - rect.top) / rect.height, 0), 0.999);
+    const horizontalIndex = Math.floor(x * galleryPhotos.length);
+    const verticalOffset = y > 0.62 ? 1 : 0;
+    const nextIndex = (horizontalIndex + verticalOffset) % galleryPhotos.length;
+
+    event.currentTarget.style.setProperty("--gallery-cursor-x", `${(x * 100).toFixed(2)}%`);
+    event.currentTarget.style.setProperty("--gallery-cursor-y", `${(y * 100).toFixed(2)}%`);
+    setIndex((current) => (current === nextIndex ? current : nextIndex));
+  };
+
+  const handlePointerEnter = (event) => {
+    if (!hasPhotos) {
+      return;
+    }
+    setIsHovering(true);
+    syncIndexToPointer(event);
+  };
+
+  const handlePointerMove = (event) => {
+    if (!isHovering) {
+      setIsHovering(true);
+    }
+    syncIndexToPointer(event);
+  };
+
+  const handlePointerLeave = (event) => {
+    setIsHovering(false);
+    event.currentTarget.style.setProperty("--gallery-cursor-x", "50%");
+    event.currentTarget.style.setProperty("--gallery-cursor-y", "50%");
+  };
+
+  if (!hasPhotos) {
+    return (
+      <Box className="portrait-frame portrait-frame--gallery">
+        {showSpotlight ? <div className="hero-spotlight" /> : null}
+        <Box
+          sx={{
+            borderRadius: "28px",
+            border: "1px dashed rgba(255,255,255,0.22)",
+            minHeight: "18rem",
+            display: "grid",
+            placeItems: "center",
+            p: 2,
+            color: "text.secondary",
+            textAlign: "center",
+            background: "rgba(255,255,255,0.02)",
+          }}
+        >
+          Add images to /images to populate the gallery.
+        </Box>
+      </Box>
+    );
+  }
 
   return (
-    <Box className="portrait-frame portrait-frame--gallery">
+    <Box
+      className={`portrait-frame portrait-frame--gallery ${isHovering ? "is-hovering" : ""}`.trim()}
+      onPointerEnter={handlePointerEnter}
+      onPointerMove={handlePointerMove}
+      onPointerLeave={handlePointerLeave}
+      style={{ "--gallery-count": galleryPhotos.length }}
+    >
       {showSpotlight ? <div className="hero-spotlight" /> : null}
       <img
         key={activePhoto.src}
@@ -678,6 +1073,11 @@ function RotatingPhotoGallery({ topChip, bottomChip, showSpotlight = false }) {
       />
       {topChip ? <span className="portrait-chip portrait-chip--top">{topChip}</span> : null}
       {bottomChip ? <span className="portrait-chip portrait-chip--bottom">{bottomChip}</span> : null}
+      <div className="gallery-hover-guide" aria-hidden="true">
+        {galleryPhotos.map((photo, itemIndex) => (
+          <span key={`${photo.src}-guide`} className={`gallery-hover-guide__segment ${itemIndex === index ? "is-active" : ""}`} />
+        ))}
+      </div>
       <div className="gallery-controls" role="tablist" aria-label="Photo gallery">
         {galleryPhotos.map((photo, itemIndex) => (
           <button
@@ -1034,6 +1434,7 @@ function InteractiveCvTimeline() {
 function AboutPage() {
   const [tab, setTab] = useState(Object.keys(stackGroups)[0]);
   const deferredTab = useDeferredValue(tab);
+  const stackContext = stackNarratives[deferredTab] || stackNarratives.Languages;
 
   return (
     <>
@@ -1041,71 +1442,30 @@ function AboutPage() {
         <section id="profile" className="section contact-panel-grid">
           <InteractiveCard className="about-copy-card" sx={{ p: { xs: 3, md: 4 } }}>
             <Stack spacing={2.2} className="parallax-layer">
-              <Chip label="Background" variant="outlined" color="secondary" sx={{ width: "fit-content" }} />
+              <Chip label="About" variant="outlined" color="secondary" sx={{ width: "fit-content" }} />
               <Typography className="section-title" variant="h2">
-                Technical work completed across software, systems, and program roles.
+                I build internal tools, reporting workflows, and systems documentation.
               </Typography>
               <Typography color="text.secondary">
-                Queen's University Computer Science (Software Design Specialization), graduating 2026. Dean's Honour List, GPA 3.8.
+                Queen's University Computer Science (Software Design Specialization), graduating 2026.
               </Typography>
-              <div className="story-list">
-                <div className="story-item">
-                  <span className="story-step">1</span>
-                  <div>
-                    <strong>Three internships at Lockheed Martin.</strong>
-                    <div className="card-copy">
-                      Systems engineering, software engineering, and technical program management.
-                    </div>
-                  </div>
-                </div>
-                <div className="story-item">
-                  <span className="story-step">2</span>
-                  <div>
-                    <strong>Hands-on delivery at Global Affairs Canada.</strong>
-                    <div className="card-copy">
-                      Built 13 custom apps, 50+ reporting metrics, and modernized deployment workflows.
-                    </div>
-                  </div>
-                </div>
-                <div className="story-item">
-                  <span className="story-step">3</span>
-                  <div>
-                    <strong>Additional technical projects.</strong>
-                    <div className="card-copy">
-                      Additional project and data work in student organizations (QUANTT, QSIG, QDAA).
-                    </div>
-                  </div>
-                </div>
-              </div>
             </Stack>
           </InteractiveCard>
 
-          <InteractiveCard className="hero-panel" sx={{ p: 2 }}>
+          <InteractiveCard
+            className="hero-panel profile-gallery-panel"
+            sx={{ p: 2, alignSelf: "flex-start", height: "auto", minHeight: 0 }}
+          >
             <Stack spacing={2} className="parallax-layer">
               <Stack direction="row" justifyContent="space-between" alignItems="center">
                 <Box>
-                  <Typography className="panel-title">Current and previous roles</Typography>
-                  <Typography className="panel-meta">Queen's University | graduating 2026</Typography>
+                  <Typography className="panel-meta">Queen's CS | Class of 2026</Typography>
                 </Box>
-                <Chip label="Dean's Honour List" variant="outlined" />
+                <Chip label={site.location} variant="outlined" />
               </Stack>
               <RotatingPhotoGallery
-                topChip="3 Lockheed internships"
-                bottomChip="Software + systems + TPM"
+                bottomChip="Software, systems, TPM"
               />
-              <Paper variant="outlined" sx={{ p: 2, borderRadius: "22px", background: "rgba(255,255,255,0.04)" }}>
-                <Stack spacing={1.2}>
-                  <Typography className="mini-label">Current role</Typography>
-                  <Typography color="text.secondary">
-                    {site.currentRole}. Previously held Lockheed internships in software engineering and systems engineering.
-                  </Typography>
-                  <div className="pill-cloud">
-                    <Chip label="Python, C, DXL" />
-                    <Chip label="Jira, Tableau, Confluence" />
-                    <Chip label="CAMEO, DOORS, Windchill" />
-                  </div>
-                </Stack>
-              </Paper>
             </Stack>
           </InteractiveCard>
         </section>
@@ -1115,7 +1475,7 @@ function AboutPage() {
         <section id="timeline" className="section">
           <div className="section-heading">
             <span className="eyebrow">CV timeline</span>
-            <h2 className="section-title">Interactive timeline of work and extracurricular experience.</h2>
+            <h2 className="section-title">Timeline of work and extracurricular experience.</h2>
           </div>
           <InteractiveCvTimeline />
         </section>
@@ -1127,14 +1487,74 @@ function AboutPage() {
             <span className="eyebrow">Technical focus</span>
             <h2 className="section-title">Types of work completed in internships.</h2>
           </div>
-          <Stack spacing={1.1}>
+          <Stack spacing={1.2} className="technical-focus-shell">
+            <InteractiveCard className="technical-focus-intro" sx={{ p: { xs: 2.3, md: 2.8 } }}>
+              <Stack spacing={1.3}>
+                <Typography color="text.secondary">
+                  Work spans implementation, reporting systems, and systems engineering support, with each area tied to measurable delivery outcomes.
+                </Typography>
+                <div className="technical-focus-stat-grid">
+                  {technicalHighlights.map((item) => (
+                    <Paper
+                      key={`${item.label}-${item.value}`}
+                      variant="outlined"
+                      className="technical-focus-stat"
+                      sx={{ p: 1.5 }}
+                    >
+                      <Typography className="technical-focus-stat__value">{item.value}</Typography>
+                      <Typography className="mini-label">{item.label}</Typography>
+                      <Typography color="text.secondary">{item.detail}</Typography>
+                    </Paper>
+                  ))}
+                </div>
+              </Stack>
+            </InteractiveCard>
             {principles.map((item, index) => (
-              <Accordion key={item.title} disableGutters sx={{ bgcolor: "rgba(255,255,255,0.04)", borderRadius: "22px !important", overflow: "hidden", border: "1px solid rgba(255,255,255,0.08)" }}>
+              <Accordion
+                key={item.title}
+                className="technical-focus-accordion"
+                disableGutters
+                sx={{
+                  bgcolor: "rgba(255,255,255,0.04)",
+                  borderRadius: "22px !important",
+                  overflow: "hidden",
+                  border: "1px solid rgba(255,255,255,0.08)",
+                }}
+              >
                 <AccordionSummary expandIcon={<span>{index + 1}</span>}>
-                  <Typography variant="h6">{item.title}</Typography>
+                  <Stack spacing={0.75}>
+                    <Typography variant="h6">{item.title}</Typography>
+                    <Typography color="text.secondary">{item.copy}</Typography>
+                  </Stack>
                 </AccordionSummary>
-                <AccordionDetails>
-                  <Typography color="text.secondary">{item.copy}</Typography>
+                <AccordionDetails className="technical-focus-details">
+                  <div className="technical-focus-columns">
+                    <div className="technical-focus-column">
+                      <Typography className="mini-label">Representative deliverables</Typography>
+                      <Stack spacing={0.6}>
+                        {item.deliverables.map((entry) => (
+                          <Typography key={entry} color="text.secondary">
+                            - {entry}
+                          </Typography>
+                        ))}
+                      </Stack>
+                    </div>
+                    <div className="technical-focus-column">
+                      <Typography className="mini-label">Observed outcomes</Typography>
+                      <Stack spacing={0.6}>
+                        {item.outcomes.map((entry) => (
+                          <Typography key={entry} color="text.secondary">
+                            - {entry}
+                          </Typography>
+                        ))}
+                      </Stack>
+                    </div>
+                  </div>
+                  <div className="pill-cloud">
+                    {item.tools.map((tool) => (
+                      <Chip key={tool} label={tool} sx={{ bgcolor: "rgba(255,255,255,0.06)" }} />
+                    ))}
+                  </div>
                 </AccordionDetails>
               </Accordion>
             ))}
@@ -1148,17 +1568,40 @@ function AboutPage() {
             <span className="eyebrow">Tech stack</span>
             <h2 className="section-title">Languages, platforms, and tools used in work terms.</h2>
           </div>
-          <InteractiveCard className="stack-panel" sx={{ p: 2.3 }}>
-            <Tabs value={deferredTab} onChange={(_, value) => startTransition(() => setTab(value))} variant="scrollable" scrollButtons={false}>
-              {Object.keys(stackGroups).map((group) => (
-                <Tab key={group} value={group} label={group} />
-              ))}
-            </Tabs>
-            <div className="pill-cloud">
-              {stackGroups[deferredTab].map((item) => (
-                <Chip key={item} label={item} sx={{ bgcolor: "rgba(255,255,255,0.06)" }} />
-              ))}
-            </div>
+          <InteractiveCard className="stack-panel stack-panel--expanded" sx={{ p: { xs: 2.3, md: 3 } }}>
+            <Stack spacing={2}>
+              <Tabs value={deferredTab} onChange={(_, value) => startTransition(() => setTab(value))} variant="scrollable" scrollButtons={false}>
+                {Object.keys(stackGroups).map((group) => (
+                  <Tab key={group} value={group} label={group} />
+                ))}
+              </Tabs>
+              <Typography className="stack-panel__intro" color="text.secondary">
+                {stackContext.intro}
+              </Typography>
+              <div className="pill-cloud">
+                {stackGroups[deferredTab].map((item) => (
+                  <Chip key={item} label={item} sx={{ bgcolor: "rgba(255,255,255,0.06)" }} />
+                ))}
+              </div>
+              <div className="stack-deep-grid">
+                {stackContext.deepDive.map((item) => (
+                  <Paper key={item.title} variant="outlined" className="stack-deep-card" sx={{ p: 1.5 }}>
+                    <Typography variant="h6">{item.title}</Typography>
+                    <Typography color="text.secondary">{item.detail}</Typography>
+                  </Paper>
+                ))}
+              </div>
+              <Paper variant="outlined" className="stack-note-strip" sx={{ p: 1.6 }}>
+                <Typography className="mini-label">Engineering preferences</Typography>
+                <Stack spacing={0.65} sx={{ mt: 1 }}>
+                  {stackContext.emphasis.map((item) => (
+                    <Typography key={item} className="stack-note-strip__item" color="text.secondary">
+                      - {item}
+                    </Typography>
+                  ))}
+                </Stack>
+              </Paper>
+            </Stack>
           </InteractiveCard>
         </section>
       </Reveal>
