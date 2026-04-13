@@ -1349,6 +1349,15 @@ function InteractiveCvTimeline() {
       chipBorder: "rgba(133, 226, 166, 0.42)",
     },
   };
+  const maxSlopeDropPx = 56;
+  const laneWidthPx = 236;
+  const nodeSlopeStepPx =
+    entries.length > 1 ? Math.min(5.4, maxSlopeDropPx / (entries.length - 1)) : 0;
+  const totalSlopeDropPx = nodeSlopeStepPx * Math.max(entries.length - 1, 0);
+  const railTiltDeg =
+    entries.length > 1
+      ? (Math.atan2(totalSlopeDropPx, Math.max(1, entries.length * laneWidthPx)) * 180) / Math.PI
+      : 0;
 
   return (
     <InteractiveCard className="cv-timeline-shell" sx={{ p: { xs: 2.2, md: 2.6 } }}>
@@ -1392,19 +1401,17 @@ function InteractiveCvTimeline() {
           >
             <span
               aria-hidden="true"
+              className="cv-timeline-rail"
               style={{
-                position: "absolute",
-                left: "1.1rem",
-                right: "1.1rem",
-                top: "0.95rem",
-                height: "2px",
                 background: railColor,
-                zIndex: 0,
+                top: `calc(1.02rem + ${totalSlopeDropPx.toFixed(2)}px)`,
+                transform: `rotate(${-railTiltDeg.toFixed(3)}deg)`,
               }}
             />
-            {entries.map((item) => {
+            {entries.map((item, index) => {
               const isActive = selectedId === item.id;
               const itemType = typeConfig[item.type] || typeConfig.extracurricular;
+              const verticalOffsetPx = Number((totalSlopeDropPx - index * nodeSlopeStepPx).toFixed(2));
 
               return (
                 <button
@@ -1416,36 +1423,14 @@ function InteractiveCvTimeline() {
                   className={`cv-timeline-node ${isActive ? "is-active" : ""}`}
                   onClick={() => setSelectedId(item.id)}
                   style={{
-                    position: "relative",
-                    textAlign: "left",
-                    width: "220px",
-                    minHeight: "7.2rem",
-                    padding: "1.75rem 0.9rem 0.95rem",
-                    borderRadius: "16px",
-                    border: isActive ? `1px solid ${itemType.chipBorder}` : "1px solid rgba(255,255,255,0.1)",
-                    background: isActive ? "rgba(255,255,255,0.12)" : "rgba(255,255,255,0.04)",
-                    color: isActive ? "rgba(243,245,247,1)" : "rgba(165,173,184,1)",
-                    flex: "0 0 auto",
-                    zIndex: 1,
-                    cursor: "pointer",
-                    appearance: "none",
-                    WebkitAppearance: "none",
+                    marginTop: `${verticalOffsetPx}px`,
+                    "--node-color": itemType.color,
+                    "--node-border": isActive ? itemType.chipBorder : "rgba(255,255,255,0.1)",
+                    "--node-bg": isActive ? "rgba(255,255,255,0.12)" : "rgba(255,255,255,0.04)",
+                    "--node-text": isActive ? "rgba(243,245,247,1)" : "rgba(165,173,184,1)",
                   }}
                 >
-                  <span
-                    className="cv-timeline-node__dot"
-                    style={{
-                      position: "absolute",
-                      top: "0.62rem",
-                      left: "0.86rem",
-                      width: "0.72rem",
-                      height: "0.72rem",
-                      borderRadius: "999px",
-                      background: itemType.color,
-                      border: "2px solid rgba(9,11,15,0.9)",
-                      boxShadow: isActive ? "0 0 0 6px rgba(255,255,255,0.16)" : "0 0 0 4px rgba(255,255,255,0.08)",
-                    }}
-                  />
+                  <span className="cv-timeline-node__dot" />
                   <span
                     style={{
                       display: "inline-flex",
