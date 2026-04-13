@@ -35,6 +35,7 @@ Keep these removed unless user explicitly asks for them back:
 - Separate "Full CV" section
 - Static hero line "I build internal tools, reporting workflows, and systems documentation."
 - "Sample performance feedback" label chip above rotating quote card
+- Bottom gallery chip text "Software, systems, TPM" on profile photos
 - Three-item profile story block under the education sentence
   - "Lockheed Martin internships."
   - "Global Affairs Canada work term."
