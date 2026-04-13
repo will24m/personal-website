@@ -1,0 +1,238 @@
+.mui-shell {
+  position: relative;
+}
+
+.scroll-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 40;
+  height: 4px;
+  transform-origin: left center;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.35));
+  box-shadow: 0 10px 30px rgba(255, 255, 255, 0.08);
+}
+
+.mouse-stage {
+  position: relative;
+  overflow: hidden;
+}
+
+.mouse-stage::before {
+  content: "";
+  position: absolute;
+  inset: -18%;
+  pointer-events: none;
+  background:
+    radial-gradient(
+      320px circle at var(--card-mouse-x, 50%) var(--card-mouse-y, 50%),
+      rgba(255, 255, 255, 0.12),
+      transparent 55%
+    );
+  opacity: 0.95;
+  transition: opacity 180ms ease;
+}
+
+.tilt-card {
+  transform:
+    perspective(1100px)
+    rotateX(var(--tilt-x, 0deg))
+    rotateY(var(--tilt-y, 0deg))
+    translateY(var(--lift-y, 0px));
+  transform-style: preserve-3d;
+  transition: transform 180ms ease, box-shadow 220ms ease;
+  will-change: transform;
+}
+
+.tilt-card:hover {
+  box-shadow: 0 30px 70px rgba(0, 0, 0, 0.34);
+}
+
+.parallax-layer {
+  transform: translate3d(var(--layer-x, 0px), var(--layer-y, 0px), 0);
+  transition: transform 220ms ease;
+}
+
+.hero-spotlight {
+  position: absolute;
+  inset: auto -10% -25% auto;
+  width: 18rem;
+  height: 18rem;
+  border-radius: 999px;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0));
+  pointer-events: none;
+  filter: blur(4px);
+}
+
+.float-chip {
+  animation: bob 5.5s ease-in-out infinite;
+}
+
+.float-chip:nth-child(2) {
+  animation-delay: -1.5s;
+}
+
+.float-chip:nth-child(3) {
+  animation-delay: -3s;
+}
+
+.experience-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.quick-stat-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.mini-surface {
+  position: relative;
+  overflow: hidden;
+  border-radius: 22px;
+  background: rgba(18, 20, 25, 0.76);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 18px 38px rgba(0, 0, 0, 0.3);
+}
+
+.mini-surface::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 3px;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.2));
+  opacity: 0.9;
+}
+
+.dynamic-divider {
+  height: 1px;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0));
+}
+
+.orbital-dots {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.orbital-dots span {
+  position: absolute;
+  width: 0.6rem;
+  height: 0.6rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.36);
+  box-shadow: 0 0 0 10px rgba(255, 255, 255, 0.04);
+  animation: orbitDrift 10s ease-in-out infinite;
+}
+
+.orbital-dots span:nth-child(1) {
+  top: 16%;
+  right: 18%;
+}
+
+.orbital-dots span:nth-child(2) {
+  bottom: 22%;
+  left: 14%;
+  background: rgba(255, 255, 255, 0.22);
+  animation-delay: -2.5s;
+}
+
+.orbital-dots span:nth-child(3) {
+  top: 48%;
+  right: 10%;
+  background: rgba(255, 255, 255, 0.14);
+  animation-delay: -5s;
+}
+
+.reveal-shell {
+  min-height: 1px;
+}
+
+.reveal-rotate {
+  opacity: 0;
+  transform: perspective(1200px) rotateZ(2.5deg) rotateX(6deg) scale(0.985);
+  transform-origin: center center;
+  transition:
+    opacity 420ms ease,
+    transform 520ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  will-change: opacity, transform;
+}
+
+.reveal-shell.rotate-left .reveal-rotate {
+  transform: perspective(1200px) rotateZ(-2.5deg) rotateX(6deg) scale(0.985);
+}
+
+.reveal-shell.is-visible .reveal-rotate {
+  opacity: 1;
+  transform: perspective(1200px) rotateZ(0deg) rotateX(0deg) scale(1);
+}
+
+.contact-panel-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: 1.05fr 0.95fr;
+}
+
+.mouse-hint {
+  color: var(--text-soft);
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.pill-cloud {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.7rem;
+}
+
+@keyframes bob {
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+@keyframes orbitDrift {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+
+  50% {
+    transform: translate3d(10px, -16px, 0) scale(1.18);
+  }
+}
+
+@media (max-width: 980px) {
+  .experience-grid,
+  .quick-stat-grid,
+  .contact-panel-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tilt-card,
+  .parallax-layer,
+  .float-chip,
+  .orbital-dots span {
+    animation: none !important;
+    transform: none !important;
+  }
+
+  .reveal-rotate,
+  .reveal-shell.rotate-left .reveal-rotate,
+  .reveal-shell.is-visible .reveal-rotate {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+}
