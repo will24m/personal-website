@@ -3,87 +3,38 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Will Wu - Web Developer</title>
-    <link rel="stylesheet" href="styles/styles.css" />
-    <link
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
-      rel="stylesheet"
+    <meta
+      name="description"
+      content="Will Wu is a Queen's University Computer Science student with technical experience across Lockheed Martin internships in technical program management, software engineering, and systems engineering."
     />
+    <title>Will Wu | Software Engineer</title>
+    <link rel="stylesheet" href="styles/revamp.css" />
+    <link rel="stylesheet" href="styles/dynamic-ui.css" />
   </head>
-  <body>
-    <nav class="navbar">
-      <div class="nav-container">
-        <a href="#" class="nav-logo">Will Wu</a>
-        <ul class="nav-menu">
-          <li class="nav-item">
-            <a href="index.html" class="nav-link active">Home</a>
-          </li>
-          <li class="nav-item">
-            <a href="about.html" class="nav-link">About</a>
-          </li>
-          <li class="nav-item">
-            <a href="contact.html" class="nav-link">Contact</a>
-          </li>
-        </ul>
-        <div class="hamburger">
-          <span class="bar"></span>
-          <span class="bar"></span>
-          <span class="bar"></span>
-        </div>
-      </div>
-    </nav>
+  <body data-page="home">
+    <div id="app"></div>
 
-    <main>
-      <section class="hero">
-        <div class="hero-content">
-          <div class="profile-section">
-            <img src="images/headshot.jpg" alt="Will Wu" class="profile-image" />
-            <div class="profile-text">
-              <h1 class="name">Will Wu</h1>
-              <h2 class="title">Web Developer & Designer</h2>
-              <p class="description">
-                Passionate about creating beautiful, functional, and user-friendly web experiences.
-                I love bringing ideas to life through clean code and modern design.
-              </p>
-              <div class="cta-buttons">
-                <a href="about.html" class="btn btn-primary">Learn More</a>
-                <a href="contact.html" class="btn btn-outline">Get In Touch</a>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section class="social">
-        <div class="social-container">
-          <h3>Let's Connect</h3>
-          <div class="social-links">
-            <a href="https://www.linkedin.com/in/will24m" target="_blank" class="social-link">
-              <i class="fab fa-linkedin"></i>
-              <span>LinkedIn</span>
-            </a>
-            <a href="https://github.com/will24m" target="_blank" class="social-link">
-              <i class="fab fa-github"></i>
-              <span>GitHub</span>
-            </a>
-            <a href="mailto:will@williamwu.ca" class="social-link">
-              <i class="fas fa-envelope"></i>
-              <span>Email</span>
-            </a>
-          </div>
-        </div>
-      </section>
-    </main>
-
-    <footer class="footer">
-      <div class="footer-content">
-        <p>&copy; 2024 Will Wu. All rights reserved.</p>
-        <button id="back-to-top" class="back-to-top" aria-label="Back to top">
-          <i class="fas fa-arrow-up"></i>
-        </button>
-      </div>
-    </footer>
-
-    <script src="scripts/script.js"></script>
+    <script
+      crossorigin
+      src="https://unpkg.com/react@18/umd/react.production.min.js"
+    ></script>
+    <script
+      crossorigin
+      src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"
+    ></script>
+    <script
+      crossorigin
+      src="https://unpkg.com/@emotion/react@11/umd/emotion-react.production.min.js"
+    ></script>
+    <script
+      crossorigin
+      src="https://unpkg.com/@emotion/styled@11/umd/emotion-styled.production.min.js"
+    ></script>
+    <script
+      crossorigin
+      src="https://unpkg.com/@mui/material@5/umd/material-ui.production.min.js"
+    ></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script type="text/babel" src="scripts/mui-app.js"></script>
   </body>
 </html>
