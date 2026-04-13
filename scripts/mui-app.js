@@ -9,12 +9,7 @@ const {
   Card,
   CardContent,
   Chip,
-  Container,
   CssBaseline,
-  Dialog,
-  DialogContent,
-  DialogTitle,
-  Divider,
   Paper,
   Stack,
   Tab,
@@ -139,72 +134,6 @@ const navItems = [
   { href: "#timeline", label: "Timeline", key: "timeline" },
   { href: "#skills", label: "Skills", key: "skills" },
   { href: "#contact", label: "Contact", key: "contact" },
-];
-
-const experiences = [
-  {
-    id: "lockheed-tpm",
-    label: "Lockheed Martin",
-    title: "Technical Program Management Intern",
-    timeframe: "2025-Present",
-    summary: "Built scripts and reporting workflows for program tracking and delivery.",
-    detail: "Pulled, cleaned, validated, and reported engineering metrics across Jira, Tableau, and Confluence.",
-    bullets: [
-      "Visualized 30+ KPIs (150+ parameters) across 20+ Jira and Tableau dashboards.",
-      "Authored 20+ pages of Agile process documentation for large multi-team delivery.",
-      "Communicated metrics and direction updates with senior management.",
-    ],
-    accent: "technical program management",
-  },
-  {
-    id: "gac",
-    label: "Global Affairs Canada",
-    title: "Junior Software Engineer / Business Analyst",
-    timeframe: "2024-2025",
-    summary: "Built internal case-management apps and reporting systems for Global Affairs Canada.",
-    detail: "Built 13 PowerApps/Azure DevOps applications and Power BI dashboards covering 50+ reporting metrics.",
-    bullets: [
-      "Automated DevOps environment variable generation with custom TypeScript.",
-      "Refactored existing scripts to improve efficiency by up to 7200%.",
-      "Elicited requirements with clients and iterated solutions to 100% satisfaction.",
-    ],
-    accent: "software engineering",
-  },
-  {
-    id: "lockheed-se",
-    label: "Lockheed Martin",
-    title: "Software Engineering Intern",
-    timeframe: "2024",
-    summary: "Automated baseline and database workflows with DXL, C, and Python.",
-    detail: "Built tools used by 50+ engineers to speed documentation and data-linking workflows.",
-    bullets: [
-      "Reduced baseline change workflow time from 2 hours to 10 minutes.",
-      "Converted 1000+ relational objects into classified, customer-ready documentation.",
-      "Automated linking across 3000+ database objects to save hours of manual work.",
-    ],
-    accent: "software automation",
-  },
-  {
-    id: "lockheed-systems",
-    label: "Lockheed Martin",
-    title: "Systems Engineering Intern",
-    timeframe: "2023",
-    summary: "Supported model-based systems engineering and requirements workflows.",
-    detail: "Built and iterated system models and artifacts with CAMEO, DOORS, Windchill, and senior engineering teams.",
-    bullets: [
-      "Designed intricate system data models for architecture and certification visualization.",
-      "Iterated 50+ data artifacts tied to project milestones and requirement traceability.",
-      "Updated 90+ classified design documents through requirements analysis and trade-study reviews.",
-    ],
-    accent: "mbse + requirements",
-  },
-];
-
-const quickStats = [
-  { value: 13, suffix: "", label: "custom apps built" },
-  { value: 30, suffix: "+", label: "KPIs visualized" },
-  { value: 7200, suffix: "%", label: "max efficiency improvement" },
-  { value: 3000, suffix: "+", label: "objects auto-linked" },
 ];
 
 const profileReviewQuotes = [
@@ -965,68 +894,6 @@ function Reveal({ children, rotate = "right" }) {
   );
 }
 
-function CountUp({ value, suffix = "" }) {
-  const [ref, visible] = useInView(0.45);
-  const [display, setDisplay] = useState(0);
-
-  useEffect(() => {
-    if (!visible) {
-      return undefined;
-    }
-
-    let frameId = 0;
-    let startTime = 0;
-    const duration = 1200;
-
-    const tick = (timestamp) => {
-      if (!startTime) {
-        startTime = timestamp;
-      }
-      const progress = Math.min((timestamp - startTime) / duration, 1);
-      setDisplay(Math.round(value * progress));
-      if (progress < 1) {
-        frameId = window.requestAnimationFrame(tick);
-      }
-    };
-
-    frameId = window.requestAnimationFrame(tick);
-    return () => window.cancelAnimationFrame(frameId);
-  }, [visible, value]);
-
-  return (
-    <Box ref={ref}>
-      <Typography className="metric-value">
-        {display}
-        {suffix}
-      </Typography>
-    </Box>
-  );
-}
-
-function RotatingWord({ words }) {
-  const [index, setIndex] = useState(0);
-
-  useEffect(() => {
-    const interval = window.setInterval(() => {
-      setIndex((current) => (current + 1) % words.length);
-    }, 2200);
-    return () => window.clearInterval(interval);
-  }, [words.length]);
-
-  return (
-    <span className="headline-rotator" aria-live="polite">
-      {words.map((word, itemIndex) => (
-        <span
-          key={word}
-          className={`headline-rotator__word ${itemIndex === index ? "is-active" : ""}`}
-        >
-          {word}
-        </span>
-      ))}
-    </span>
-  );
-}
-
 function InteractiveCard({ children, className = "", sx = {}, ...props }) {
   const handleMove = (event) => {
     const rect = event.currentTarget.getBoundingClientRect();
@@ -1195,11 +1062,13 @@ function RotatingPhotoGallery({ topChip, bottomChip, showSpotlight = false, onIn
 
 function Header() {
   const [open, setOpen] = useState(false);
+  const currentPage = (document.body?.dataset?.page || "home").toLowerCase();
+  const resolveSectionHref = (sectionHref) => (currentPage === "home" ? sectionHref : `index.html${sectionHref}`);
 
   return (
     <header className="site-header">
       <Paper className="site-header__inner" elevation={0}>
-        <a className="brand" href="#profile" aria-label="Go to profile section">
+        <a className="brand" href={resolveSectionHref("#profile")} aria-label="Go to profile section">
           <span className="brand__mark">WW</span>
           <span className="brand__copy">
             <span className="brand__name">{site.name}</span>
@@ -1214,7 +1083,7 @@ function Header() {
             <a
               key={item.key}
               className="nav-link"
-              href={item.href}
+              href={resolveSectionHref(item.href)}
               onClick={() => setOpen(false)}
             >
               {item.label}
@@ -1226,149 +1095,43 @@ function Header() {
   );
 }
 
-function HeroPanel({ selectedId, onChange, onOpenDialog }) {
-  const selected = experiences.find((item) => item.id === selectedId) || experiences[0];
-
-  return (
-    <InteractiveCard className="hero-panel" sx={{ p: 2 }}>
-      <Box className="orbital-dots">
-        <span />
-        <span />
-        <span />
-      </Box>
-      <Stack
-        direction={{ xs: "column", sm: "row" }}
-        justifyContent="space-between"
-        alignItems={{ xs: "flex-start", sm: "center" }}
-        gap={1}
-        className="parallax-layer hero-panel-header"
-      >
-        <Box>
-          <Typography className="panel-title">Experience snapshot</Typography>
-          <Typography className="panel-meta">Recent technical roles and outcomes</Typography>
-        </Box>
-        <Chip label="CV summary" color="secondary" variant="outlined" />
-      </Stack>
-      <RotatingPhotoGallery topChip="TPM intern" bottomChip="3x Lockheed intern" showSpotlight />
-      <Box className="parallax-layer">
-        <Tabs
-          value={selectedId}
-          onChange={(_, value) => startTransition(() => onChange(value))}
-          variant="scrollable"
-          scrollButtons={false}
-        >
-          {experiences.map((item) => (
-            <Tab key={item.id} value={item.id} label={item.label} />
-          ))}
-        </Tabs>
-      </Box>
-      <Paper variant="outlined" sx={{ p: 2, borderRadius: "22px", background: "rgba(255,255,255,0.04)" }}>
-        <Stack spacing={1.5}>
-          <Stack
-            direction={{ xs: "column", sm: "row" }}
-            justifyContent="space-between"
-            alignItems={{ xs: "flex-start", sm: "center" }}
-            gap={1}
-            className="hero-panel-role-header"
-          >
-            <Typography variant="h6">{selected.title}</Typography>
-            <Chip size="small" label={selected.accent} sx={{ bgcolor: "rgba(255,255,255,0.08)", color: "#f3f5f7" }} />
-          </Stack>
-          <Typography color="text.secondary">{selected.summary}</Typography>
-          <div className="dynamic-divider" />
-          <Typography color="text.secondary">{selected.detail}</Typography>
-          <Button variant="contained" onClick={() => onOpenDialog(selected)} sx={{ alignSelf: "flex-start" }}>
-            Highlights ->
-          </Button>
-        </Stack>
-      </Paper>
-    </InteractiveCard>
-  );
-}
-
-function HomePage() {
-  const [selectedId, setSelectedId] = useState(experiences[0].id);
-  const [dialogItem, setDialogItem] = useState(null);
-  const deferredId = useDeferredValue(selectedId);
-
-  return (
-    <>
-      <Reveal>
-        <section id="top" className="section hero-grid">
-          <InteractiveCard className="hero-copy" sx={{ p: { xs: 3, md: 5 } }}>
-            <Stack spacing={2.5} className="parallax-layer">
-              <Chip label={`${site.currentRole} | ${site.nextRole}`} color="secondary" variant="outlined" sx={{ width: "fit-content" }} />
-              <Typography className="hero-title" variant="h1">
-                Technical experience across <RotatingWord words={["software", "systems", "analytics", "program delivery"]} />.
-              </Typography>
-              <Typography color="text.secondary" sx={{ maxWidth: 720, lineHeight: 1.85 }}>
-                Completed internships in software engineering, systems engineering, and technical program management at Lockheed Martin, plus software delivery work at Global Affairs Canada.
-              </Typography>
-              <Stack direction="row" flexWrap="wrap" gap={1.2}>
-                <Button variant="contained" href="#timeline">
-                  Jump to timeline ->
-                </Button>
-                <Button variant="outlined" href="#profile">
-                  Jump to profile
-                </Button>
-                <Button variant="outlined" href="#contact">
-                  Jump to contact
-                </Button>
-              </Stack>
-              <div className="pill-cloud">
-                <Chip className="float-chip" label="Lockheed Martin" />
-                <Chip className="float-chip" label="Global Affairs Canada" />
-                <Chip className="float-chip" label="Dean's Honour List" />
-              </div>
-              <Typography className="mouse-hint">Use the cards below for detailed results.</Typography>
-            </Stack>
-          </InteractiveCard>
-          <HeroPanel selectedId={deferredId} onChange={setSelectedId} onOpenDialog={setDialogItem} />
-        </section>
-      </Reveal>
-
-      <Reveal rotate="left">
-        <section className="section quick-stat-grid">
-          {quickStats.map((item) => (
-            <InteractiveCard key={item.label} className="mini-surface" sx={{ p: 2.2 }}>
-              <CardContent sx={{ p: 0 }}>
-                <Typography className="mini-label">{item.label}</Typography>
-                <CountUp value={item.value} suffix={item.suffix} />
-              </CardContent>
-            </InteractiveCard>
-          ))}
-        </section>
-      </Reveal>
-
-      <Dialog open={Boolean(dialogItem)} onClose={() => setDialogItem(null)} maxWidth="sm" fullWidth>
-        <DialogTitle>{dialogItem?.title}</DialogTitle>
-        <DialogContent dividers>
-          <Stack spacing={2}>
-            <Typography color="text.secondary">{dialogItem?.detail}</Typography>
-            <Divider />
-            {dialogItem?.bullets?.map((bullet) => (
-              <Typography key={bullet} color="text.secondary">
-                - {bullet}
-              </Typography>
-            ))}
-          </Stack>
-        </DialogContent>
-      </Dialog>
-    </>
-  );
-}
-
 function InteractiveCvTimeline() {
-  const [selectedId, setSelectedId] = useState(cvTimelineEntries[0].id);
+  const [selectedId, setSelectedId] = useState(cvTimelineEntries[0]?.id || "");
+  const [timelineFilter, setTimelineFilter] = useState("all");
   const entries = cvTimelineEntries;
+  const filteredEntries = useMemo(() => {
+    if (timelineFilter === "all") {
+      return entries;
+    }
+    return entries.filter((item) => item.type === timelineFilter);
+  }, [entries, timelineFilter]);
+
+  useEffect(() => {
+    if (!filteredEntries.length) {
+      setSelectedId("");
+      return;
+    }
+    setSelectedId((current) => {
+      if (filteredEntries.some((item) => item.id === current)) {
+        return current;
+      }
+      return filteredEntries[0].id;
+    });
+  }, [filteredEntries]);
 
   const activeEntry = useMemo(
-    () => entries.find((item) => item.id === selectedId) || entries[0],
-    [entries, selectedId]
+    () => filteredEntries.find((item) => item.id === selectedId) || filteredEntries[0] || entries[0],
+    [filteredEntries, entries, selectedId]
   );
 
   const railColor = "linear-gradient(90deg, rgba(255,255,255,0.2), rgba(255,255,255,0.45), rgba(255,255,255,0.2))";
   const typeConfig = {
+    all: {
+      label: "All",
+      color: "rgba(243, 245, 247, 0.95)",
+      chipBg: "rgba(255, 255, 255, 0.12)",
+      chipBorder: "rgba(255, 255, 255, 0.26)",
+    },
     work: {
       label: "Work",
       color: "rgba(109, 195, 255, 1)",
@@ -1382,38 +1145,45 @@ function InteractiveCvTimeline() {
       chipBorder: "rgba(133, 226, 166, 0.42)",
     },
   };
+  const filterOptions = [typeConfig.all, typeConfig.work, typeConfig.extracurricular];
   const maxSlopeDropPx = 56;
   const laneWidthPx = 236;
   const nodeSlopeStepPx =
-    entries.length > 1 ? Math.min(5.4, maxSlopeDropPx / (entries.length - 1)) : 0;
-  const totalSlopeDropPx = nodeSlopeStepPx * Math.max(entries.length - 1, 0);
+    filteredEntries.length > 1 ? Math.min(5.4, maxSlopeDropPx / (filteredEntries.length - 1)) : 0;
+  const totalSlopeDropPx = nodeSlopeStepPx * Math.max(filteredEntries.length - 1, 0);
   const railTiltDeg =
-    entries.length > 1
-      ? (Math.atan2(totalSlopeDropPx, Math.max(1, entries.length * laneWidthPx)) * 180) / Math.PI
+    filteredEntries.length > 1
+      ? (Math.atan2(totalSlopeDropPx, Math.max(1, filteredEntries.length * laneWidthPx)) * 180) / Math.PI
       : 0;
+
+  if (!activeEntry) {
+    return null;
+  }
 
   return (
     <InteractiveCard className="cv-timeline-shell" sx={{ p: { xs: 2.2, md: 2.6 } }}>
       <Stack spacing={2}>
         <Stack direction="row" flexWrap="wrap" gap={1}>
-          <Chip
-            size="small"
-            label="Work"
-            sx={{
-              bgcolor: typeConfig.work.chipBg,
-              border: `1px solid ${typeConfig.work.chipBorder}`,
-              color: typeConfig.work.color,
-            }}
-          />
-          <Chip
-            size="small"
-            label="Extracurricular"
-            sx={{
-              bgcolor: typeConfig.extracurricular.chipBg,
-              border: `1px solid ${typeConfig.extracurricular.chipBorder}`,
-              color: typeConfig.extracurricular.color,
-            }}
-          />
+          {filterOptions.map((option) => {
+            const key = option.label.toLowerCase();
+            const isActive = timelineFilter === key;
+            return (
+              <Chip
+                key={option.label}
+                size="small"
+                clickable
+                label={option.label}
+                aria-pressed={isActive}
+                onClick={() => setTimelineFilter(key)}
+                variant={isActive ? "filled" : "outlined"}
+                sx={{
+                  bgcolor: isActive ? option.chipBg : "rgba(255,255,255,0.04)",
+                  border: `1px solid ${isActive ? option.chipBorder : "rgba(255,255,255,0.12)"}`,
+                  color: isActive ? option.color : "rgba(165,173,184,1)",
+                }}
+              />
+            );
+          })}
         </Stack>
 
         <div
@@ -1441,7 +1211,7 @@ function InteractiveCvTimeline() {
                 transform: `rotate(${-railTiltDeg.toFixed(3)}deg)`,
               }}
             />
-            {entries.map((item, index) => {
+            {filteredEntries.map((item, index) => {
               const isActive = selectedId === item.id;
               const itemType = typeConfig[item.type] || typeConfig.extracurricular;
               const verticalOffsetPx = Number((totalSlopeDropPx - index * nodeSlopeStepPx).toFixed(2));
@@ -1756,7 +1526,7 @@ function ContactFormCard() {
       nextErrors.message = "Please add a bit more detail.";
     }
 
-      setErrors(nextErrors);
+    setErrors(nextErrors);
     if (Object.keys(nextErrors).length) {
       setNote("Please fix the highlighted fields.");
       return;
@@ -1922,7 +1692,6 @@ function ContactPage() {
                     <Typography color="text.secondary">{item.description}</Typography>
                     <Button variant="text" href={item.href} target={item.href.startsWith("http") ? "_blank" : undefined} sx={{ alignSelf: "flex-start", px: 0 }}>
                       Open ->
-                      
                     </Button>
                   </Stack>
                 </CardContent>
@@ -1997,6 +1766,9 @@ function Footer() {
 
 function App() {
   useAmbientPointer();
+  const currentPage = (document.body?.dataset?.page || "home").toLowerCase();
+  const showAbout = currentPage === "home" || currentPage === "about";
+  const showContact = currentPage === "home" || currentPage === "contact";
 
   return (
     <ThemeProvider theme={theme}>
@@ -2008,8 +1780,8 @@ function App() {
         <span className="ambient-orb ambient-orb--c" />
         <Header />
         <main className="page page--single">
-          <AboutPage />
-          <ContactPage />
+          {showAbout ? <AboutPage /> : null}
+          {showContact ? <ContactPage /> : null}
         </main>
         <Footer />
       </div>

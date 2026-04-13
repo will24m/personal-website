@@ -4,10 +4,34 @@ This file captures current website direction, implementation choices, and guardr
 
 ## 1) Project Setup and Architecture
 
-- Main entry page: `index.html`
+- Entry pages:
+  - `index.html` (`data-page="home"`)
+  - `about.html` (`data-page="about"`)
+  - `contact.html` (`data-page="contact"`)
 - Main app logic: `scripts/mui-app.js` (React + MUI via CDN + Babel in browser)
 - Primary styles: `styles/revamp.css`, `styles/dynamic-ui.css`
 - Assets folder: `images/`
+- Page render behavior in `App()`:
+  - `home` renders `AboutPage` + `ContactPage`
+  - `about` renders `AboutPage` only
+  - `contact` renders `ContactPage` only
+- Header nav links are resolved to section anchors on `home`, and to `index.html#...` from `about`/`contact`.
+
+Repo cleanup completed:
+
+- Consolidated readme files:
+  - Removed obsolete `READ.me`
+  - Replaced empty `Readme.md` with run/deploy/structure notes
+- Removed legacy unused files:
+  - `scripts/app.js`
+  - `scripts/script.js`
+  - `styles/styles.css`
+- Removed dead code from `scripts/mui-app.js`:
+  - `HomePage`
+  - `HeroPanel`
+  - `CountUp`
+  - `RotatingWord`
+  - legacy `experiences`/`quickStats` data used only by removed components
 
 This is a static site (no build step). Local run:
 
@@ -55,10 +79,10 @@ Keep these removed unless user explicitly asks for them back:
 ## 5) Cache and Stale UI Guidance
 
 - If user still sees removed UI, assume stale cache first.
-- `index.html` currently uses cache-busting query params:
-  - `styles/revamp.css?v=20260413-9`
-  - `styles/dynamic-ui.css?v=20260413-9`
-  - `scripts/mui-app.js?v=20260413-9`
+- HTML pages currently use cache-busting query params:
+  - `styles/revamp.css?v=20260413-13`
+  - `styles/dynamic-ui.css?v=20260413-13`
+  - `scripts/mui-app.js?v=20260413-13`
 - Keep version string updated when necessary.
 
 ## 6) Gallery Behavior
@@ -104,6 +128,11 @@ For deployment compatibility, prefer keeping `/api/gallery` available so folder 
   - Node pin/dot uses ring + inner-core styling via CSS variables (`--node-color`) for less awkward visuals.
   - Node sizing is responsive (`clamp(...)`) and no longer hard-coded inline, so mobile breakpoints can actually apply.
   - Timeline detail chips wrap on small screens (`.cv-timeline-detail__chips`) to avoid overflow.
+- Timeline filters:
+  - Three filter chips are available: `All`, `Work`, `Extracurricular`.
+  - Default state is `All`.
+  - `Work` and `Extracurricular` filter both timeline nodes and active detail card.
+  - When changing filters, selected node is preserved if still visible; otherwise it resets to the first visible entry.
 
 ## 8) Motion Preference
 
@@ -138,8 +167,8 @@ Ambient pointer light behavior:
 - When touching timeline, verify chronological order still holds.
 - When touching gallery, verify dynamic loading still handles spaces and mixed-case extensions.
 - Preserve mobile behavior when changing desktop layout.
-- Keep stack headers responsive:
-  - `hero-panel-header`, `hero-panel-role-header`, and `profile-gallery-meta` switch from row to column on small viewports.
+- Keep profile gallery meta header responsive:
+  - `profile-gallery-meta` switches from row to column on small viewports.
 - Timeline mobile touch UX:
   - Preserve horizontal scrolling with touch momentum (`-webkit-overflow-scrolling: touch`) and contained horizontal overscroll.
 
