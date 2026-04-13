@@ -1489,7 +1489,6 @@ function AboutPage() {
         <section id="profile" className="section contact-panel-grid">
           <InteractiveCard className="about-copy-card" sx={{ p: { xs: 3, md: 4 } }}>
             <Stack spacing={2.2} className="parallax-layer">
-              <Chip label="Sample performance feedback" variant="outlined" color="secondary" sx={{ width: "fit-content" }} />
               <Paper variant="outlined" className="profile-review-card" sx={{ p: { xs: 2.2, md: 2.5 } }}>
                 <Stack spacing={1.15}>
                   <Typography className="profile-review-quote" variant="h3">
@@ -1536,7 +1535,7 @@ function AboutPage() {
         </section>
       </Reveal>
 
-      <Reveal rotate="left">
+      <Reveal>
         <section className="section">
           <div className="section-heading">
             <span className="eyebrow">Technical focus</span>
@@ -1625,7 +1624,7 @@ function AboutPage() {
         </section>
       </Reveal>
 
-      <Reveal>
+      <Reveal rotate="left">
         <section id="skills" className="section">
           <div className="section-heading">
             <span className="eyebrow">Tech stack</span>
@@ -1878,7 +1877,7 @@ function ContactPage() {
         </section>
       </Reveal>
 
-      <Reveal rotate="left">
+      <Reveal>
         <section className="section contact-panel-grid">
           <ContactFormCard />
           <InteractiveCard className="contact-copy-card" sx={{ p: { xs: 3, md: 4 } }}>
