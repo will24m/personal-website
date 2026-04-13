@@ -374,6 +374,22 @@ img {
   font-size: clamp(2.2rem, 6vw, 4.1rem);
 }
 
+.typed-title {
+  min-height: 1.1em;
+}
+
+.typed-title-caret {
+  display: inline-block;
+  width: 0.08em;
+  height: 0.9em;
+  margin-left: 0.08em;
+  border-radius: 999px;
+  background: currentColor;
+  vertical-align: -0.05em;
+  opacity: 0.86;
+  animation: caretBlink 1s steps(1, end) infinite;
+}
+
 .headline-rotator {
   display: inline-grid;
   min-width: 14ch;
@@ -1273,6 +1289,17 @@ img {
   }
 }
 
+@keyframes caretBlink {
+  0%,
+  45% {
+    opacity: 0.92;
+  }
+  46%,
+  100% {
+    opacity: 0.15;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
@@ -1288,6 +1315,11 @@ img {
   [data-reveal] {
     opacity: 1;
     transform: none;
+  }
+
+  .typed-title-caret {
+    animation: none;
+    opacity: 0.55;
   }
 }
 
