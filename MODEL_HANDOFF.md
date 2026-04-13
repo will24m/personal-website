@@ -55,9 +55,9 @@ Keep these removed unless user explicitly asks for them back:
 
 - If user still sees removed UI, assume stale cache first.
 - `index.html` currently uses cache-busting query params:
-  - `styles/revamp.css?v=20260413-7`
-  - `styles/dynamic-ui.css?v=20260413-7`
-  - `scripts/mui-app.js?v=20260413-7`
+  - `styles/revamp.css?v=20260413-9`
+  - `styles/dynamic-ui.css?v=20260413-9`
+  - `scripts/mui-app.js?v=20260413-9`
 - Keep version string updated when necessary.
 
 ## 6) Gallery Behavior
@@ -101,6 +101,8 @@ For deployment compatibility, prefer keeping `/api/gallery` available so folder 
   - Nodes are intentionally vertically offset to create a left-low to right-high slope.
   - Timeline rail is rendered as `.cv-timeline-rail` and rotated slightly upward toward the right.
   - Node pin/dot uses ring + inner-core styling via CSS variables (`--node-color`) for less awkward visuals.
+  - Node sizing is responsive (`clamp(...)`) and no longer hard-coded inline, so mobile breakpoints can actually apply.
+  - Timeline detail chips wrap on small screens (`.cv-timeline-detail__chips`) to avoid overflow.
 
 ## 8) Motion Preference
 
@@ -114,6 +116,12 @@ For deployment compatibility, prefer keeping `/api/gallery` available so folder 
   - `transform 620ms cubic-bezier(...) 90ms`
 
 Keep motion subtle and purposeful.
+
+Ambient pointer light behavior:
+
+- Global spotlight should track cursor precisely (no obvious lag or offset).
+- `useAmbientPointer()` listens to `pointermove` and `pointerrawupdate` (when supported) and writes exact viewport coordinates to CSS vars.
+- `body::after` now renders as a fixed, centered spotlight element (`left/top + translate(-50%, -50%)`) instead of a full-screen gradient anchored by background-position.
 
 ## 9) Accordion UX Rule (Technical Focus)
 
@@ -129,6 +137,10 @@ Keep motion subtle and purposeful.
 - When touching timeline, verify chronological order still holds.
 - When touching gallery, verify dynamic loading still handles spaces and mixed-case extensions.
 - Preserve mobile behavior when changing desktop layout.
+- Keep stack headers responsive:
+  - `hero-panel-header`, `hero-panel-role-header`, and `profile-gallery-meta` switch from row to column on small viewports.
+- Timeline mobile touch UX:
+  - Preserve horizontal scrolling with touch momentum (`-webkit-overflow-scrolling: touch`) and contained horizontal overscroll.
 
 ## 11) Quick Regression Checklist
 
