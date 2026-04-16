@@ -123,6 +123,7 @@ const site = {
   email: "will@williamwu.ca",
   linkedin: "https://www.linkedin.com/in/will24m",
   github: "https://github.com/will24m",
+  todo: "https://todo.williamwu.ca",
   location: "Toronto, ON",
   school: "Queen's University | Bachelor's of Computing (Honours), 2026",
   currentRole: "Technical Program Management Intern, Lockheed Martin",
@@ -720,6 +721,12 @@ const contactMethods = [
     meta: "will24m",
     href: site.github,
     description: "Best for code samples and projects.",
+  },
+  {
+    title: "Dodo List",
+    meta: "todo.williamwu.ca",
+    href: site.todo,
+    description: "Best for seeing what I'm tracking and working through.",
   },
 ];
 
@@ -2059,6 +2066,7 @@ function Footer() {
         <div className="footer-links">
           <a href={site.linkedin} target="_blank" rel="noreferrer">LinkedIn</a>
           <a href={site.github} target="_blank" rel="noreferrer">GitHub</a>
+          <a href={site.todo} target="_blank" rel="noreferrer">Dodo List</a>
           <a href={`mailto:${site.email}`}>Email</a>
         </div>
       </Paper>
