@@ -134,6 +134,7 @@ const navItems = [
   { href: "#profile", label: "Profile", key: "profile" },
   { href: "#timeline", label: "Timeline", key: "timeline" },
   { href: "#skills", label: "Skills", key: "skills" },
+  { href: "#projects", label: "Projects", key: "projects" },
   { href: "#contact", label: "Contact", key: "contact" },
 ];
 
@@ -722,11 +723,16 @@ const contactMethods = [
     href: site.github,
     description: "Best for code samples and projects.",
   },
+];
+
+const projects = [
   {
-    title: "download my online to-do list",
+    title: "Online to-do list",
     meta: "todo.williamwu.ca",
     href: site.todo,
-    description: "Best for seeing what I'm tracking and working through.",
+    description: "A live link to the online to-do list I use to keep work, tasks, and priorities organized.",
+    tags: ["Live", "Personal tool", "Productivity"],
+    cta: "download my online to-do list",
   },
 ];
 
@@ -1800,6 +1806,41 @@ function AboutPage() {
           </InteractiveCard>
         </section>
       </Reveal>
+
+      <Reveal>
+        <section id="projects" className="section">
+          <div className="section-heading">
+            <span className="eyebrow">Projects</span>
+            <TypedSectionTitle text="Selected live links and personal builds." />
+          </div>
+          <div className="experience-grid">
+            {projects.map((item) => (
+              <InteractiveCard key={item.title} className="mini-surface" sx={{ p: 2.4 }}>
+                <Stack spacing={1.5}>
+                  <Chip label="Live project" variant="outlined" color="secondary" sx={{ width: "fit-content" }} />
+                  <Typography variant="h5">{item.title}</Typography>
+                  <Typography className="panel-meta">{item.meta}</Typography>
+                  <Typography color="text.secondary">{item.description}</Typography>
+                  <div className="pill-cloud">
+                    {item.tags.map((tag) => (
+                      <Chip key={tag} label={tag} sx={{ bgcolor: "rgba(255,255,255,0.06)" }} />
+                    ))}
+                  </div>
+                  <Button
+                    variant="contained"
+                    href={item.href}
+                    target="_blank"
+                    rel="noreferrer"
+                    sx={{ alignSelf: "flex-start" }}
+                  >
+                    {item.cta}
+                  </Button>
+                </Stack>
+              </InteractiveCard>
+            ))}
+          </div>
+        </section>
+      </Reveal>
     </>
   );
 }
@@ -2066,7 +2107,6 @@ function Footer() {
         <div className="footer-links">
           <a href={site.linkedin} target="_blank" rel="noreferrer">LinkedIn</a>
           <a href={site.github} target="_blank" rel="noreferrer">GitHub</a>
-          <a href={site.todo} target="_blank" rel="noreferrer">download my online to-do list</a>
           <a href={`mailto:${site.email}`}>Email</a>
         </div>
       </Paper>
