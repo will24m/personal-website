@@ -723,7 +723,7 @@ const contactMethods = [
     description: "Best for code samples and projects.",
   },
   {
-    title: "Dodo List",
+    title: "download my online to-do list",
     meta: "todo.williamwu.ca",
     href: site.todo,
     description: "Best for seeing what I'm tracking and working through.",
@@ -2066,7 +2066,7 @@ function Footer() {
         <div className="footer-links">
           <a href={site.linkedin} target="_blank" rel="noreferrer">LinkedIn</a>
           <a href={site.github} target="_blank" rel="noreferrer">GitHub</a>
-          <a href={site.todo} target="_blank" rel="noreferrer">Dodo List</a>
+          <a href={site.todo} target="_blank" rel="noreferrer">download my online to-do list</a>
           <a href={`mailto:${site.email}`}>Email</a>
         </div>
       </Paper>
