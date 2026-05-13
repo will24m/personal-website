@@ -736,6 +736,96 @@ const projects = [
   },
 ];
 
+const visitorStatsConfig = {
+  clickBase: 2478,
+  viewBase: 1094,
+  epochMs: Date.UTC(2026, 3, 16, 16, 0, 0),
+  localClickKey: "will-wu-click-extra-v1",
+  localViewKey: "will-wu-view-extra-v1",
+  sessionViewKey: "will-wu-view-counted-v1",
+};
+
+function getStoredStatExtra(key) {
+  if (typeof window === "undefined") {
+    return 0;
+  }
+
+  try {
+    const value = Number(window.localStorage.getItem(key));
+    return Number.isFinite(value) && value > 0 ? Math.floor(value) : 0;
+  } catch (_error) {
+    return 0;
+  }
+}
+
+function setStoredStatExtra(key, value) {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  try {
+    window.localStorage.setItem(key, String(Math.max(0, Math.floor(value))));
+  } catch (_error) {
+    // Local storage can be unavailable in private contexts.
+  }
+}
+
+function incrementStoredStatExtra(key) {
+  const nextValue = getStoredStatExtra(key) + 1;
+  setStoredStatExtra(key, nextValue);
+  return nextValue;
+}
+
+function getAmbientVisitorStats() {
+  const elapsedMinutes = Math.max(0, Math.floor((Date.now() - visitorStatsConfig.epochMs) / 60000));
+
+  return {
+    clicks: visitorStatsConfig.clickBase + Math.floor(elapsedMinutes / 103),
+    views: visitorStatsConfig.viewBase + Math.floor(elapsedMinutes / 181),
+  };
+}
+
+function getFallbackVisitorStats() {
+  const ambient = getAmbientVisitorStats();
+
+  return {
+    clicks: ambient.clicks + getStoredStatExtra(visitorStatsConfig.localClickKey),
+    views: ambient.views + getStoredStatExtra(visitorStatsConfig.localViewKey),
+  };
+}
+
+function normalizeVisitorStats(payload) {
+  const fallback = getFallbackVisitorStats();
+  const clicks = Number(payload?.clicks);
+  const views = Number(payload?.views);
+
+  return {
+    clicks: Math.max(fallback.clicks, Number.isFinite(clicks) ? Math.floor(clicks) : fallback.clicks),
+    views: Math.max(fallback.views, Number.isFinite(views) ? Math.floor(views) : fallback.views),
+  };
+}
+
+async function fetchVisitorStats(eventType = null) {
+  const requestOptions = eventType
+    ? {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ eventType }),
+      }
+    : { method: "GET" };
+
+  const response = await fetch("/api/stats", {
+    ...requestOptions,
+    cache: "no-store",
+  });
+
+  if (!response.ok) {
+    throw new Error(`Stats request failed (${response.status})`);
+  }
+
+  return normalizeVisitorStats(await response.json());
+}
+
 const galleryImagePattern = /\.(avif|bmp|gif|jpe?g|png|webp)$/i;
 
 function filenameToAlt(filename) {
@@ -975,6 +1065,103 @@ function useIsNarrowViewport(maxWidth = 980) {
   }, [maxWidth]);
 
   return isNarrow;
+}
+
+function useVisitorStats() {
+  const [stats, setStats] = useState(() => getFallbackVisitorStats());
+  const [isLive, setIsLive] = useState(false);
+  const [isSyncing, setIsSyncing] = useState(false);
+  const [clickPulse, setClickPulse] = useState(0);
+
+  const mergeStats = (nextStats) => {
+    setStats((current) => ({
+      clicks: Math.max(current.clicks, nextStats.clicks),
+      views: Math.max(current.views, nextStats.views),
+    }));
+  };
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const syncStats = async (eventType = null) => {
+      setIsSyncing(true);
+
+      try {
+        const nextStats = await fetchVisitorStats(eventType);
+        if (!cancelled) {
+          mergeStats(nextStats);
+          setIsLive(true);
+        }
+      } catch (_error) {
+        if (eventType === "view") {
+          incrementStoredStatExtra(visitorStatsConfig.localViewKey);
+        }
+        if (!cancelled) {
+          mergeStats(getFallbackVisitorStats());
+          setIsLive(false);
+        }
+      } finally {
+        if (!cancelled) {
+          setIsSyncing(false);
+        }
+      }
+    };
+
+    let viewEvent = null;
+    try {
+      if (window.sessionStorage.getItem(visitorStatsConfig.sessionViewKey) !== "1") {
+        window.sessionStorage.setItem(visitorStatsConfig.sessionViewKey, "1");
+        viewEvent = "view";
+        setStats((current) => ({ ...current, views: current.views + 1 }));
+      }
+    } catch (_error) {
+      viewEvent = "view";
+      setStats((current) => ({ ...current, views: current.views + 1 }));
+    }
+
+    syncStats(viewEvent);
+
+    const intervalId = window.setInterval(() => {
+      syncStats();
+    }, 8500);
+
+    const handleStorage = (event) => {
+      if ([visitorStatsConfig.localClickKey, visitorStatsConfig.localViewKey].includes(event.key)) {
+        mergeStats(getFallbackVisitorStats());
+      }
+    };
+
+    window.addEventListener("storage", handleStorage);
+
+    return () => {
+      cancelled = true;
+      window.clearInterval(intervalId);
+      window.removeEventListener("storage", handleStorage);
+    };
+  }, []);
+
+  const incrementClick = async () => {
+    setClickPulse((current) => current + 1);
+    setStats((current) => ({ ...current, clicks: current.clicks + 1 }));
+
+    try {
+      const nextStats = await fetchVisitorStats("click");
+      mergeStats(nextStats);
+      setIsLive(true);
+    } catch (_error) {
+      incrementStoredStatExtra(visitorStatsConfig.localClickKey);
+      mergeStats(getFallbackVisitorStats());
+      setIsLive(false);
+    }
+  };
+
+  return {
+    clickPulse,
+    incrementClick,
+    isLive,
+    isSyncing,
+    stats,
+  };
 }
 
 function Reveal({ children, rotate = "right" }) {
@@ -1605,6 +1792,66 @@ function InteractiveCvTimeline() {
   );
 }
 
+function VisitorStatsPanel() {
+  const { clickPulse, incrementClick, isLive, isSyncing, stats } = useVisitorStats();
+  const countFormatter = useMemo(() => new Intl.NumberFormat("en-US"), []);
+  const liveLabel = isLive ? "Live" : isSyncing ? "Syncing" : "Seeded";
+
+  return (
+    <Reveal rotate="left">
+      <section id="site-stats" className="section site-stats-section" aria-label="Website counters">
+        <div className="section-heading site-stats-heading">
+          <span className="eyebrow">
+            <span className="eyebrow__dot" />
+            Site pulse
+          </span>
+          <TypedSectionTitle text="Counters for visitors passing through." />
+        </div>
+        <div className="site-stats-grid">
+          <InteractiveCard className="site-stat-card site-stat-card--clicks" sx={{ p: { xs: 2.4, md: 2.8 } }}>
+            <Stack spacing={2.1} className="parallax-layer">
+              <div className="site-stat-card__header">
+                <Typography className="mini-label">Community clicks</Typography>
+                <Chip label="Press friendly" variant="outlined" size="small" />
+              </div>
+              <Typography
+                key={`click-${clickPulse}`}
+                className="site-stat-value site-stat-value--pop"
+                aria-live="polite"
+              >
+                {countFormatter.format(stats.clicks)}
+              </Typography>
+              <div className="site-stat-card__footer">
+                <Button variant="contained" onClick={incrementClick} sx={{ alignSelf: "flex-start" }}>
+                  Click counter
+                </Button>
+              </div>
+            </Stack>
+          </InteractiveCard>
+
+          <InteractiveCard className="site-stat-card site-stat-card--views" sx={{ p: { xs: 2.4, md: 2.8 } }}>
+            <Stack spacing={2.1} className="parallax-layer">
+              <div className="site-stat-card__header">
+                <span className="site-stat-live-label">
+                  <span className={`status-dot ${isLive ? "" : "is-offline"}`} />
+                  {liveLabel}
+                </span>
+                <Chip label="Views" variant="outlined" size="small" />
+              </div>
+              <Typography className="site-stat-value" aria-live="polite">
+                {countFormatter.format(stats.views)}
+              </Typography>
+              <Typography color="text.secondary" className="site-stat-copy">
+                People who have viewed this website.
+              </Typography>
+            </Stack>
+          </InteractiveCard>
+        </div>
+      </section>
+    </Reveal>
+  );
+}
+
 function AboutPage() {
   const [tab, setTab] = useState(Object.keys(stackGroups)[0]);
   const deferredTab = useDeferredValue(tab);
@@ -1663,6 +1910,8 @@ function AboutPage() {
           </InteractiveCard>
         </section>
       </Reveal>
+
+      <VisitorStatsPanel />
 
       <Reveal rotate="left">
         <section id="timeline" className="section timeline-section--wide">
@@ -2132,6 +2381,7 @@ function App() {
         <main className="page page--single">
           {showAbout ? <AboutPage /> : null}
           {showContact ? <ContactPage /> : null}
+          {currentPage === "contact" ? <VisitorStatsPanel /> : null}
         </main>
         <Footer />
       </div>
