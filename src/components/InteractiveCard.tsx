@@ -2,9 +2,6 @@ import { Card, type CardProps } from "@mui/material";
 import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
 import type React from "react";
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const MotionCard = motion(Card as any) as typeof Card;
-
 export function InteractiveCard({ children, className = "", sx = {}, ...props }: CardProps) {
   const x = useMotionValue(0);
   const y = useMotionValue(0);
@@ -39,16 +36,15 @@ export function InteractiveCard({ children, className = "", sx = {}, ...props }:
   }
 
   return (
-    <MotionCard
+    <motion.div
       className={`mouse-stage ${className}`.trim()}
-      // @ts-expect-error — Framer Motion motion values accepted at runtime
       style={{ rotateX, rotateY, transformPerspective: 1100, transformStyle: "preserve-3d" }}
-      sx={{ overflow: "hidden", ...sx }}
       onPointerMove={handleMove}
       onPointerLeave={handleLeave}
-      {...props}
     >
-      {children}
-    </MotionCard>
+      <Card sx={{ overflow: "hidden", ...sx }} {...props}>
+        {children}
+      </Card>
+    </motion.div>
   );
 }

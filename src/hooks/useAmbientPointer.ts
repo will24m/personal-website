@@ -1,5 +1,12 @@
 import { useEffect } from "react";
 
+// pointerrawupdate is a non-standard high-frequency PointerEvent available in Chromium
+declare global {
+  interface WindowEventMap {
+    pointerrawupdate: PointerEvent;
+  }
+}
+
 export function useAmbientPointer(): void {
   useEffect(() => {
     const setPointer = (x: number, y: number) => {
@@ -12,7 +19,7 @@ export function useAmbientPointer(): void {
 
     window.addEventListener("pointermove", handleMove, { passive: true });
     if ("onpointerrawupdate" in window) {
-      window.addEventListener("pointerrawupdate" as "pointermove", handleMove, { passive: true });
+      window.addEventListener("pointerrawupdate", handleMove, { passive: true });
     }
     window.addEventListener("pointerleave", handleLeave);
     window.addEventListener("blur", handleLeave);
@@ -20,7 +27,7 @@ export function useAmbientPointer(): void {
     return () => {
       window.removeEventListener("pointermove", handleMove);
       if ("onpointerrawupdate" in window) {
-        window.removeEventListener("pointerrawupdate" as "pointermove", handleMove);
+        window.removeEventListener("pointerrawupdate", handleMove);
       }
       window.removeEventListener("pointerleave", handleLeave);
       window.removeEventListener("blur", handleLeave);

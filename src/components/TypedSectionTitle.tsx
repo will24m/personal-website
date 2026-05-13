@@ -17,6 +17,8 @@ export function TypedSectionTitle({
   const ref = useRef<HTMLElement>(null);
   const visible = useInView(ref, { amount: 0.3, margin: "0px 0px -40px 0px" });
   const [displayText, setDisplayText] = useState("");
+  const displayTextRef = useRef("");
+  displayTextRef.current = displayText;
   const timerRef = useRef<number>(0);
   const typingFrames = useMemo(() => buildTypingFrames(text), [text]);
 
@@ -46,7 +48,7 @@ export function TypedSectionTitle({
       setDisplayText("");
       runTyping();
     } else {
-      let current = displayText;
+      let current = displayTextRef.current;
       const erase = () => {
         if (!current.length) {
           setDisplayText("");
@@ -60,8 +62,6 @@ export function TypedSectionTitle({
     }
 
     return () => window.clearTimeout(timerRef.current);
-    // displayText intentionally excluded — we capture it at effect start
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [visible, text, typingFrames]);
 
   return (
