@@ -8,7 +8,6 @@ export function useIsNarrowViewport(maxWidth = 980): boolean {
 
   useEffect(() => {
     const onResize = () => setIsNarrow(window.innerWidth <= maxWidth);
-    onResize();
     window.addEventListener("resize", onResize);
     return () => window.removeEventListener("resize", onResize);
   }, [maxWidth]);

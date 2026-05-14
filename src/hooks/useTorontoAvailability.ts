@@ -7,32 +7,33 @@ export interface TorontoAvailability {
   statusLabel: string;
 }
 
+const TZ = "America/Toronto";
+const weekdayFormatter = new Intl.DateTimeFormat("en-CA", { timeZone: TZ, weekday: "short" });
+const hourFormatter = new Intl.DateTimeFormat("en-CA", {
+  timeZone: TZ,
+  hour: "numeric",
+  hour12: false,
+});
+const timeFormatter = new Intl.DateTimeFormat("en-CA", {
+  timeZone: TZ,
+  hour: "numeric",
+  minute: "2-digit",
+});
+const dateFormatter = new Intl.DateTimeFormat("en-CA", {
+  timeZone: TZ,
+  month: "short",
+  day: "numeric",
+});
+const workDays = new Set(["Mon", "Tue", "Wed", "Thu", "Fri"]);
+
 export function useTorontoAvailability(now: Date): TorontoAvailability {
   return useMemo(() => {
-    const weekday = new Intl.DateTimeFormat("en-CA", {
-      timeZone: "America/Toronto",
-      weekday: "short",
-    }).format(now);
-    const hour = Number(
-      new Intl.DateTimeFormat("en-CA", {
-        timeZone: "America/Toronto",
-        hour: "numeric",
-        hour12: false,
-      }).format(now)
-    );
-    const timeLabel = new Intl.DateTimeFormat("en-CA", {
-      timeZone: "America/Toronto",
-      hour: "numeric",
-      minute: "2-digit",
-    }).format(now);
-    const dateLabel = new Intl.DateTimeFormat("en-CA", {
-      timeZone: "America/Toronto",
-      month: "short",
-      day: "numeric",
-    }).format(now);
+    const weekday = weekdayFormatter.format(now);
+    const hour = Number(hourFormatter.format(now));
+    const timeLabel = timeFormatter.format(now);
+    const dateLabel = dateFormatter.format(now);
 
-    const isLive =
-      ["Mon", "Tue", "Wed", "Thu", "Fri"].includes(weekday) && hour >= 10 && hour < 18;
+    const isLive = workDays.has(weekday) && hour >= 10 && hour < 18;
     return {
       dateLabel,
       timeLabel,

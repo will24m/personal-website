@@ -28,10 +28,11 @@ import { RotatingPhotoGallery } from "./RotatingPhotoGallery.js";
 import { InteractiveCvTimeline } from "./InteractiveCvTimeline.js";
 import { VisitorStatsPanel } from "./VisitorStatsPanel.js";
 
+const defaultStackKey = Object.keys(stackGroups)[0] ?? "";
+
 export function AboutPage() {
-  const [tab, setTab] = useState(Object.keys(stackGroups)[0] ?? "");
+  const [tab, setTab] = useState(defaultStackKey);
   const deferredTab = useDeferredValue(tab);
-  const defaultStackKey = Object.keys(stackGroups)[0] ?? "";
   const stackContext = stackNarratives[deferredTab] ?? stackNarratives[defaultStackKey];
   const [profileReviewIndex, setProfileReviewIndex] = useState(0);
   const activeProfileReview =

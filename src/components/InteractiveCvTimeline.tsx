@@ -67,18 +67,18 @@ export function InteractiveCvTimeline() {
     [filteredEntries, selectedId]
   );
 
-  const nodeSlopeStepPx =
-    filteredEntries.length > 1
-      ? Math.min(5.4, maxSlopeDropPx / (filteredEntries.length - 1))
-      : 0;
-  const totalSlopeDropPx = nodeSlopeStepPx * Math.max(filteredEntries.length - 1, 0);
-  const railTiltDeg =
-    filteredEntries.length > 1
-      ? (Math.atan2(totalSlopeDropPx, Math.max(1, filteredEntries.length * laneWidthPx)) * 180) /
-        Math.PI
-      : 0;
-  const effectiveSlopeDropPx = isNarrowViewport ? 0 : totalSlopeDropPx;
-  const effectiveRailTiltDeg = isNarrowViewport ? 0 : railTiltDeg;
+  const { nodeSlopeStepPx, effectiveSlopeDropPx, effectiveRailTiltDeg } = useMemo(() => {
+    const n = filteredEntries.length;
+    const stepPx = n > 1 ? Math.min(5.4, maxSlopeDropPx / (n - 1)) : 0;
+    const dropPx = stepPx * Math.max(n - 1, 0);
+    const tiltDeg =
+      n > 1 ? (Math.atan2(dropPx, Math.max(1, n * laneWidthPx)) * 180) / Math.PI : 0;
+    return {
+      nodeSlopeStepPx: stepPx,
+      effectiveSlopeDropPx: isNarrowViewport ? 0 : dropPx,
+      effectiveRailTiltDeg: isNarrowViewport ? 0 : tiltDeg,
+    };
+  }, [filteredEntries.length, isNarrowViewport]);
 
   if (!activeEntry) return null;
 
@@ -138,7 +138,7 @@ export function InteractiveCvTimeline() {
               const itemType = typeConfig[item.type] ?? typeConfig.extracurricular;
               const verticalOffsetPx = isNarrowViewport
                 ? 0
-                : Number((totalSlopeDropPx - i * nodeSlopeStepPx).toFixed(2));
+                : Number((effectiveSlopeDropPx - i * nodeSlopeStepPx).toFixed(2));
 
               return (
                 <button
