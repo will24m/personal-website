@@ -60,10 +60,11 @@ interface MovementConfig {
   maxSpeed: number;
   acceleration: number;
 }
-const MOVEMENT_FOLLOW: MovementConfig = { maxSpeed: 91, acceleration: 312 };
-const MOVEMENT_EXCITED: MovementConfig = { maxSpeed: 110, acceleration: 360 };
-const MOVEMENT_POUNCE: MovementConfig = { maxSpeed: 125, acceleration: 408 };
-const MOVEMENT_WANDER: MovementConfig = { maxSpeed: 70, acceleration: 264 };
+// Speeds are 1.4x the original tuning so the pet keeps up with quick cursor moves.
+const MOVEMENT_FOLLOW: MovementConfig = { maxSpeed: 127, acceleration: 437 };
+const MOVEMENT_EXCITED: MovementConfig = { maxSpeed: 154, acceleration: 504 };
+const MOVEMENT_POUNCE: MovementConfig = { maxSpeed: 175, acceleration: 571 };
+const MOVEMENT_WANDER: MovementConfig = { maxSpeed: 98, acceleration: 370 };
 const TICK_MS = 120;
 const CLOSE_DISTANCE = 112;
 const FAST_POINTER_SPEED = 980;
@@ -78,6 +79,10 @@ const PAGE_EDGE_MARGIN = PET_RADIUS * 1.6;
 const COMPONENT_NUDGE_MAX = 40;
 const COMPONENT_NUDGE_RADIUS = PET_RADIUS * 3.2;
 const EMERGENCY_ROUTE_DISTANCE = 140;
+// Once the pet is this close to the cursor it stops short, resting on the side
+// it approached from so it hugs the pointer without ever covering it.
+const SETTLE_OFFSET = 36;
+const SETTLE_ENGAGE_DISTANCE = 96;
 const OBSTACLE_SELECTOR = [
   ".site-header__inner",
   ".site-footer__inner",
@@ -545,6 +550,30 @@ function pickWanderTarget(bondLevel: BondLevel): Point {
   });
 }
 
+// True when the cursor is resting on a component the pet must respect (header,
+// footer, links, buttons, inputs — anything non-shiftable). When this is the
+// case the pet keeps a polite distance instead of forcing its way on top.
+function cursorOverBlockingElement(cursor: Point, obstacles: ObstacleRect[]): boolean {
+  return obstacles.some((obstacle) => !obstacle.shiftable && pointInRect(cursor, obstacle.base));
+}
+
+// Rest point beside the cursor: back off along the pet's own approach direction
+// so it hugs the pointer from whichever side it travelled in from, never
+// covering the exact cursor point.
+function settleBesideCursor(pet: Point, cursor: Point): Point {
+  const dx = cursor.x - pet.x;
+  const dy = cursor.y - pet.y;
+  const dist = Math.hypot(dx, dy);
+  if (dist <= SETTLE_OFFSET) {
+    // Already within arm's reach — hold position rather than backing away.
+    return pet;
+  }
+  return {
+    x: cursor.x - (dx / dist) * SETTLE_OFFSET,
+    y: cursor.y - (dy / dist) * SETTLE_OFFSET,
+  };
+}
+
 function deriveEyeShape(
   state: PetState,
   dist: number,
@@ -599,6 +628,9 @@ export function usePetBrain(): PetBrainOutput {
   const lastFrameAt = useRef<number | null>(null);
   const pendingViewportSyncFrame = useRef<number | null>(null);
   const nudgedElementsRef = useRef<Set<HTMLElement>>(new Set());
+  // True while the pet's target is the live cursor (any following state), so the
+  // movement frame knows to apply settle-beside and guaranteed-reach behavior.
+  const followingCursorRef = useRef(true);
 
   const transitionTo = useCallback(
     (next: PetState) => {
@@ -838,7 +870,16 @@ export function usePetBrain(): PetBrainOutput {
       }
 
       const cfg = movementConfigRef.current;
-      const desired = clampToPage(targetRef.current);
+      const followingCursor = followingCursorRef.current;
+      // While following, steer toward the live cursor (fresher than the 120ms
+      // state-machine target) and settle just beside it from the approach side.
+      const liveCursor = clampToPage({ x: cursorX.current, y: cursorY.current });
+      const cursorBlocked = followingCursor && cursorOverBlockingElement(liveCursor, obstacles);
+      const followTarget =
+        distance(current, liveCursor) < SETTLE_ENGAGE_DISTANCE
+          ? settleBesideCursor(current, liveCursor)
+          : liveCursor;
+      const desired = clampToPage(followingCursor ? followTarget : targetRef.current);
       const desiredDistance = distance(current, desired);
       const hardCurrentBlocked = isBlocked(current, obstacles);
       const hardRouteTarget = hardCurrentBlocked
@@ -869,7 +910,13 @@ export function usePetBrain(): PetBrainOutput {
       }
 
       const routeImprovement = desiredDistance - distance(routeTarget, desired);
-      if (desiredDistance > 16 && (distance(current, routeTarget) < 3 || (directBlocked && routeImprovement < 12))) {
+      const routeStalled = distance(current, routeTarget) < 3 || (directBlocked && routeImprovement < 12);
+      // Guarantee the pet reaches the cursor when it sits in open space: if normal
+      // routing has stalled, push straight through obstacles (which still spring
+      // out of the way). When the cursor rests on a component we must respect, the
+      // pet holds at the nearest reachable point instead of forcing onto it.
+      const forceReach = followingCursor && !cursorBlocked && routeStalled;
+      if (desiredDistance > 16 && (forceReach || (!followingCursor && routeStalled))) {
         routeTarget = stepToward(current, desired, EMERGENCY_ROUTE_DISTANCE);
         movementObstacles = [];
         isSqueezing = true;
@@ -1089,6 +1136,8 @@ export function usePetBrain(): PetBrainOutput {
 
       targetRef.current = clampToPage({ x: targetX, y: targetY });
       movementConfigRef.current = movementCfg;
+      const activeState = stateRef.current;
+      followingCursorRef.current = activeState !== "WANDERING" && activeState !== "SLEEPING";
 
       // Update eye shape
       setEyeShape(deriveEyeShape(stateRef.current, dist, bond));
