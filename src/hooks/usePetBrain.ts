@@ -76,8 +76,10 @@ const SQUEEZE_INFLATE = PET_RADIUS * 0.34;
 const ROUTE_CLEARANCE = 6;
 const OBSTACLE_REFRESH_MS = 160;
 const PAGE_EDGE_MARGIN = PET_RADIUS * 1.6;
-const COMPONENT_NUDGE_MAX = 40;
-const COMPONENT_NUDGE_RADIUS = PET_RADIUS * 3.2;
+// Components only shift when the pet is actually squeezing through them, and
+// only by a hair — the nudge should read as a gentle brush, never a shove.
+const COMPONENT_NUDGE_MAX = 12;
+const COMPONENT_NUDGE_RADIUS = PET_RADIUS * 1.4;
 const EMERGENCY_ROUTE_DISTANCE = 140;
 // Once the pet is this close to the cursor it stops short, resting on the side
 // it approached from so it hugs the pointer without ever covering it.
@@ -429,8 +431,7 @@ function computeComponentNudges(
   current: Point,
   desired: Point,
   routeTarget: Point,
-  obstacles: ObstacleRect[],
-  isSqueezing: boolean
+  obstacles: ObstacleRect[]
 ): Map<HTMLElement, Point> {
   const nudges = new Map<HTMLElement, Point>();
   const pathEnd = distance(current, routeTarget) > 8 ? routeTarget : desired;
@@ -466,10 +467,13 @@ function computeComponentNudges(
       awayLength = 1;
     }
 
+    // Only move a component when the pet's actual route runs through it (a real
+    // squeeze). Components the pet merely passes near are left alone so cursor
+    // movement on its own never disturbs the layout.
     const directHit = segmentHitsRect(current, desired, obstacle.base) || segmentHitsRect(current, pathEnd, obstacle.base);
+    if (!directHit) continue;
     const pressure = clamp((COMPONENT_NUDGE_RADIUS - pathDistance) / COMPONENT_NUDGE_RADIUS, 0, 1);
-    const boost = directHit ? 1 : isSqueezing ? 0.78 : 0.52;
-    const amount = COMPONENT_NUDGE_MAX * pressure * boost;
+    const amount = COMPONENT_NUDGE_MAX * pressure;
     if (amount < 0.5) continue;
 
     nudges.set(obstacle.element, {
@@ -890,7 +894,6 @@ export function usePetBrain(): PetBrainOutput {
       const squeezeObstacles = relaxedObstacles(obstacles);
       let movementObstacles: ObstacleRect[] = obstacles;
       let routeTarget = hardRouteTarget;
-      let isSqueezing = false;
 
       if (directBlocked || (desiredDistance > CLOSE_DISTANCE && hardRouteDistance < 8)) {
         const squeezeCurrentBlocked = isBlocked(current, squeezeObstacles);
@@ -905,7 +908,6 @@ export function usePetBrain(): PetBrainOutput {
         ) {
           routeTarget = squeezeRouteTarget;
           movementObstacles = squeezeObstacles;
-          isSqueezing = true;
         }
       }
 
@@ -919,10 +921,9 @@ export function usePetBrain(): PetBrainOutput {
       if (desiredDistance > 16 && (forceReach || (!followingCursor && routeStalled))) {
         routeTarget = stepToward(current, desired, EMERGENCY_ROUTE_DISTANCE);
         movementObstacles = [];
-        isSqueezing = true;
       }
 
-      const nudges = computeComponentNudges(current, desired, routeTarget, obstacles, directBlocked || isSqueezing);
+      const nudges = computeComponentNudges(current, desired, routeTarget, obstacles);
       for (const element of nudgedElementsRef.current) {
         if (!nudges.has(element)) {
           clearComponentNudge(element);
