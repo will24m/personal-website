@@ -1,8 +1,4 @@
-<<<<<<< HEAD
 import { Avatar, Button, CardContent, Chip, Stack, Typography } from "@mui/material";
-=======
-import { Avatar, Box, Button, CardContent, Chip, Stack, Typography } from "@mui/material";
->>>>>>> c5b46901e4d7907adbefa27f467635d0cdbc2e28
 import { contactMethods } from "../data/content.js";
 import { InteractiveCard } from "./InteractiveCard.js";
 import { Reveal } from "./Reveal.js";
