@@ -1,9 +1,10 @@
 .virtual-pet-layer {
-  position: fixed;
+  position: absolute;
   inset: 0;
+  min-height: 100%;
   pointer-events: none;
-  z-index: 9999;
-  overflow: hidden;
+  z-index: 0;
+  overflow: visible;
 }
 
 .virtual-pet {

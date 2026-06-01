@@ -18,7 +18,7 @@
   --line: rgba(255, 255, 255, 0.08);
   --radius-md: 24px;
   --radius-lg: 36px;
-  --max-width: 1180px;
+  --max-width: 1100px;
   --font-body: "Sora", sans-serif;
   --font-display: "Fraunces", serif;
   --transition: 220ms ease;
@@ -103,6 +103,13 @@ img {
   isolation: isolate;
 }
 
+.site-header,
+.page,
+.site-footer {
+  position: relative;
+  z-index: 2;
+}
+
 .ambient-orb {
   position: fixed;
   z-index: -1;
@@ -143,7 +150,7 @@ img {
   position: sticky;
   top: 0;
   z-index: 20;
-  padding: 1.1rem 1.4rem 0;
+  padding: 1.1rem clamp(1.7rem, 4.8vw, 4.4rem) 0;
 }
 
 .site-header__inner {
@@ -251,11 +258,11 @@ img {
 .page {
   max-width: var(--max-width);
   margin: 0 auto;
-  padding: 2.4rem 1.4rem 4.5rem;
+  padding: 2.7rem clamp(1.7rem, 4.8vw, 4.4rem) 5rem;
 }
 
 .section {
-  margin-top: 1.6rem;
+  margin-top: 2.2rem;
 }
 
 .section[id] {
@@ -268,8 +275,8 @@ img {
 }
 
 .timeline-section--wide {
-  width: min(1480px, calc(100vw - 2.8rem));
-  margin-left: calc(50% - min(1480px, calc(100vw - 2.8rem)) / 2);
+  width: min(1360px, calc(100vw - clamp(3.4rem, 9.6vw, 8.8rem)));
+  margin-left: calc(50% - min(1360px, calc(100vw - clamp(3.4rem, 9.6vw, 8.8rem))) / 2);
 }
 
 .timeline-section--wide .section-heading {
@@ -324,7 +331,7 @@ img {
 .contact-grid {
   display: grid;
   grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.95fr);
-  gap: 1.4rem;
+  gap: clamp(1.65rem, 3vw, 2.15rem);
   align-items: start;
 }
 
@@ -492,7 +499,7 @@ img {
 .stack-panel,
 .availability-card {
   display: grid;
-  gap: 0.9rem;
+  gap: 1.05rem;
 }
 
 .panel-top {
@@ -776,7 +783,7 @@ img {
 .method-grid,
 .form-grid {
   display: grid;
-  gap: 1rem;
+  gap: clamp(1.2rem, 2.3vw, 1.55rem);
 }
 
 .service-grid {
@@ -785,7 +792,7 @@ img {
 
 .technical-focus-shell {
   display: grid;
-  gap: 1rem;
+  gap: 1.25rem;
 }
 
 .technical-focus-intro {
@@ -1004,7 +1011,7 @@ img {
 .site-stats-grid {
   display: grid;
   grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
-  gap: 1rem;
+  gap: clamp(1.2rem, 2.3vw, 1.55rem);
 }
 
 .site-stat-card {
@@ -1095,7 +1102,7 @@ img {
 .cv-timeline-track {
   position: relative;
   display: flex;
-  gap: 0.95rem;
+  gap: 1.2rem;
   min-width: max-content;
   padding: 0.2rem 0.2rem 0.35rem;
   align-items: flex-start;
@@ -1299,7 +1306,7 @@ img {
 .site-footer {
   max-width: var(--max-width);
   margin: 0 auto;
-  padding: 0 1.4rem 2.4rem;
+  padding: 0 clamp(1.7rem, 4.8vw, 4.4rem) 2.6rem;
 }
 
 .site-footer__inner {
@@ -1507,7 +1514,7 @@ img {
   .site-header,
   .page,
   .site-footer {
-    padding-inline: 0.9rem;
+    padding-inline: 1.1rem;
   }
 
   .hero-copy,

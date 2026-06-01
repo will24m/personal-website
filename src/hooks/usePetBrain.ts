@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from "react";
-import { useMotionValue, animate } from "framer-motion";
+import { useMotionValue } from "framer-motion";
 import type { MotionValue } from "framer-motion";
 import {
   loadRelationship,
@@ -26,6 +26,18 @@ export interface CursorVector {
   distance: number;
 }
 
+interface Point {
+  x: number;
+  y: number;
+}
+
+interface ObstacleRect {
+  left: number;
+  top: number;
+  right: number;
+  bottom: number;
+}
+
 export interface PetBrainOutput {
   petX: MotionValue<number>;
   petY: MotionValue<number>;
@@ -38,15 +50,312 @@ export interface PetBrainOutput {
   cursorVector: CursorVector;
 }
 
-interface SpringConfig { stiffness: number; damping: number }
-const SPRING_FOLLOW: SpringConfig  = { stiffness: 150, damping: 19 };
-const SPRING_EXCITED: SpringConfig = { stiffness: 520, damping: 16 };
-const SPRING_POUNCE: SpringConfig  = { stiffness: 720, damping: 13 };
-const SPRING_WANDER: SpringConfig  = { stiffness: 60,  damping: 24 };
-const TICK_MS = 180;
+interface MovementConfig {
+  maxSpeed: number;
+  acceleration: number;
+}
+const MOVEMENT_FOLLOW: MovementConfig = { maxSpeed: 91, acceleration: 312 };
+const MOVEMENT_EXCITED: MovementConfig = { maxSpeed: 110, acceleration: 360 };
+const MOVEMENT_POUNCE: MovementConfig = { maxSpeed: 125, acceleration: 408 };
+const MOVEMENT_WANDER: MovementConfig = { maxSpeed: 70, acceleration: 264 };
+const TICK_MS = 120;
 const CLOSE_DISTANCE = 112;
 const FAST_POINTER_SPEED = 980;
 const DEFAULT_CURSOR_VECTOR: CursorVector = { x: 0, y: 0, distance: 0 };
+const PET_RADIUS = 46;
+const OBSTACLE_GAP = 10;
+const OBSTACLE_INFLATE = PET_RADIUS + OBSTACLE_GAP;
+const ROUTE_CLEARANCE = 6;
+const OBSTACLE_REFRESH_MS = 160;
+const PAGE_EDGE_MARGIN = PET_RADIUS * 1.6;
+const OBSTACLE_SELECTOR = [
+  ".site-header__inner",
+  ".site-footer__inner",
+  ".mouse-stage",
+  ".MuiPaper-root",
+  ".MuiCard-root",
+  ".MuiAccordion-root",
+  ".hero-copy",
+  ".hero-panel",
+  ".surface-card",
+  ".contact-form-card",
+  ".timeline-card",
+  ".about-copy-card",
+  ".contact-copy-card",
+  ".metric-card",
+  ".feature-card",
+  ".principle-card",
+  ".stack-panel",
+  ".availability-card",
+  ".contact-method",
+  ".mini-surface",
+  ".site-stat-card",
+  ".portrait-frame",
+  ".profile-gallery-panel",
+  ".cv-timeline-node",
+  ".cv-timeline-detail",
+  ".technical-focus-intro",
+  ".gallery-controls",
+  "input",
+  "textarea",
+  "select",
+  "button:not(.virtual-pet)",
+  "a.nav-link",
+].join(",");
+
+function clamp(value: number, min: number, max: number): number {
+  return Math.min(max, Math.max(min, value));
+}
+
+function distance(a: Point, b: Point): number {
+  return Math.hypot(a.x - b.x, a.y - b.y);
+}
+
+function getPageBounds(): { width: number; height: number } {
+  const documentElement = document.documentElement;
+  return {
+    width: Math.max(documentElement.scrollWidth, documentElement.clientWidth, window.innerWidth),
+    height: Math.max(documentElement.scrollHeight, documentElement.clientHeight, window.innerHeight),
+  };
+}
+
+function clampToPage(point: Point): Point {
+  const { width, height } = getPageBounds();
+  return {
+    x: clamp(point.x, -PAGE_EDGE_MARGIN, width + PAGE_EDGE_MARGIN),
+    y: clamp(point.y, -PAGE_EDGE_MARGIN, height + PAGE_EDGE_MARGIN),
+  };
+}
+
+function pointInRect(point: Point, rect: ObstacleRect): boolean {
+  return point.x >= rect.left && point.x <= rect.right && point.y >= rect.top && point.y <= rect.bottom;
+}
+
+function isBlocked(point: Point, obstacles: ObstacleRect[]): boolean {
+  return obstacles.some((rect) => pointInRect(point, rect));
+}
+
+function collectObstacleRects(): ObstacleRect[] {
+  if (typeof document === "undefined") return [];
+
+  const { width: pageWidth, height: pageHeight } = getPageBounds();
+  const scrollX = window.scrollX;
+  const scrollY = window.scrollY;
+  const elements = Array.from(document.querySelectorAll(OBSTACLE_SELECTOR));
+
+  return elements.flatMap((element) => {
+    if (!(element instanceof HTMLElement)) return [];
+    if (element.closest(".virtual-pet-layer")) return [];
+
+    const styles = window.getComputedStyle(element);
+    if (styles.display === "none" || styles.visibility === "hidden" || Number(styles.opacity) < 0.05) {
+      return [];
+    }
+
+    const rect = element.getBoundingClientRect();
+    if (rect.width < 8 || rect.height < 8) return [];
+
+    const docRect = {
+      left: rect.left + scrollX,
+      top: rect.top + scrollY,
+      right: rect.right + scrollX,
+      bottom: rect.bottom + scrollY,
+    };
+
+    const inflated = {
+      left: clamp(docRect.left - OBSTACLE_INFLATE, -PAGE_EDGE_MARGIN, pageWidth + PAGE_EDGE_MARGIN),
+      top: clamp(docRect.top - OBSTACLE_INFLATE, -PAGE_EDGE_MARGIN, pageHeight + PAGE_EDGE_MARGIN),
+      right: clamp(docRect.right + OBSTACLE_INFLATE, -PAGE_EDGE_MARGIN, pageWidth + PAGE_EDGE_MARGIN),
+      bottom: clamp(docRect.bottom + OBSTACLE_INFLATE, -PAGE_EDGE_MARGIN, pageHeight + PAGE_EDGE_MARGIN),
+    };
+
+    const inflatedWidth = inflated.right - inflated.left;
+    const inflatedHeight = inflated.bottom - inflated.top;
+    if (inflatedWidth > pageWidth * 0.96 && inflatedHeight > pageHeight * 0.72) return [];
+
+    return [inflated];
+  });
+}
+
+function pushOutOfObstacles(point: Point, obstacles: ObstacleRect[]): Point {
+  let next = clampToPage(point);
+
+  for (let iteration = 0; iteration < 6; iteration += 1) {
+    const rect = obstacles.find((obstacle) => pointInRect(next, obstacle));
+    if (!rect) return next;
+
+    const candidates = [
+      { x: rect.left - ROUTE_CLEARANCE, y: next.y },
+      { x: rect.right + ROUTE_CLEARANCE, y: next.y },
+      { x: next.x, y: rect.top - ROUTE_CLEARANCE },
+      { x: next.x, y: rect.bottom + ROUTE_CLEARANCE },
+    ].map(clampToPage);
+
+    next = candidates.reduce((best, candidate) => {
+      const candidatePenalty = isBlocked(candidate, obstacles) ? 1000 : 0;
+      const bestPenalty = isBlocked(best, obstacles) ? 1000 : 0;
+      const candidateScore = distance(candidate, point) + candidatePenalty;
+      const bestScore = distance(best, point) + bestPenalty;
+      return candidateScore < bestScore ? candidate : best;
+    }, candidates[0]);
+  }
+
+  return next;
+}
+
+function segmentHitsRect(start: Point, end: Point, rect: ObstacleRect): boolean {
+  const length = distance(start, end);
+  const steps = Math.max(2, Math.ceil(length / 12));
+
+  for (let step = 1; step <= steps; step += 1) {
+    const t = step / steps;
+    if (
+      pointInRect(
+        {
+          x: start.x + (end.x - start.x) * t,
+          y: start.y + (end.y - start.y) * t,
+        },
+        rect
+      )
+    ) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+function hasClearSegment(start: Point, end: Point, obstacles: ObstacleRect[]): boolean {
+  return obstacles.every((rect) => !segmentHitsRect(start, end, rect));
+}
+
+function findBlockingRect(start: Point, end: Point, obstacles: ObstacleRect[]): ObstacleRect | null {
+  let blockingRect: ObstacleRect | null = null;
+  let bestDistance = Number.POSITIVE_INFINITY;
+
+  for (const rect of obstacles) {
+    if (!segmentHitsRect(start, end, rect)) continue;
+    const center = { x: (rect.left + rect.right) / 2, y: (rect.top + rect.bottom) / 2 };
+    const rectDistance = distance(start, center);
+    if (rectDistance < bestDistance) {
+      blockingRect = rect;
+      bestDistance = rectDistance;
+    }
+  }
+
+  return blockingRect;
+}
+
+function getRectSkirtCandidates(rect: ObstacleRect, current: Point, desired: Point): Point[] {
+  const xSamples = [current.x, desired.x, (current.x + desired.x) / 2].map((x) =>
+    clamp(x, rect.left - OBSTACLE_GAP, rect.right + OBSTACLE_GAP)
+  );
+  const ySamples = [current.y, desired.y, (current.y + desired.y) / 2].map((y) =>
+    clamp(y, rect.top - OBSTACLE_GAP, rect.bottom + OBSTACLE_GAP)
+  );
+
+  return [
+    { x: rect.left - ROUTE_CLEARANCE, y: ySamples[0] },
+    { x: rect.left - ROUTE_CLEARANCE, y: ySamples[1] },
+    { x: rect.right + ROUTE_CLEARANCE, y: ySamples[0] },
+    { x: rect.right + ROUTE_CLEARANCE, y: ySamples[1] },
+    { x: xSamples[0], y: rect.top - ROUTE_CLEARANCE },
+    { x: xSamples[1], y: rect.top - ROUTE_CLEARANCE },
+    { x: xSamples[0], y: rect.bottom + ROUTE_CLEARANCE },
+    { x: xSamples[1], y: rect.bottom + ROUTE_CLEARANCE },
+    { x: rect.left - ROUTE_CLEARANCE, y: rect.top - ROUTE_CLEARANCE },
+    { x: rect.right + ROUTE_CLEARANCE, y: rect.top - ROUTE_CLEARANCE },
+    { x: rect.left - ROUTE_CLEARANCE, y: rect.bottom + ROUTE_CLEARANCE },
+    { x: rect.right + ROUTE_CLEARANCE, y: rect.bottom + ROUTE_CLEARANCE },
+  ].map(clampToPage);
+}
+
+function findNavigableTarget(current: Point, desired: Point, obstacles: ObstacleRect[]): Point {
+  const safeCurrent = pushOutOfObstacles(current, obstacles);
+  const safeDesired = pushOutOfObstacles(desired, obstacles);
+
+  if (hasClearSegment(safeCurrent, safeDesired, obstacles)) {
+    return safeDesired;
+  }
+
+  const desiredAngle = Math.atan2(safeDesired.y - safeCurrent.y, safeDesired.x - safeCurrent.x);
+  const desiredDistance = distance(safeCurrent, safeDesired);
+  const stepDistance = clamp(desiredDistance, 24, 64);
+  const angleOffsets = [0, -0.28, 0.28, -0.58, 0.58, -0.9, 0.9, -1.24, 1.24, -1.57, 1.57, Math.PI];
+  const localCandidates = angleOffsets.map((offset) =>
+    clampToPage({
+      x: safeCurrent.x + Math.cos(desiredAngle + offset) * stepDistance,
+      y: safeCurrent.y + Math.sin(desiredAngle + offset) * stepDistance,
+    })
+  );
+  const blockingRect = findBlockingRect(safeCurrent, safeDesired, obstacles);
+  const nearbyObstacleCandidates = obstacles
+    .map((rect) => ({
+      rect,
+      score:
+        distance(safeCurrent, { x: (rect.left + rect.right) / 2, y: (rect.top + rect.bottom) / 2 }) +
+        distance(safeDesired, { x: (rect.left + rect.right) / 2, y: (rect.top + rect.bottom) / 2 }),
+    }))
+    .filter(({ rect, score }) => segmentHitsRect(safeCurrent, safeDesired, rect) || score < desiredDistance + 760)
+    .sort((a, b) => a.score - b.score)
+    .slice(0, 10)
+    .flatMap(({ rect }) => getRectSkirtCandidates(rect, safeCurrent, safeDesired));
+  const blockingSkirtCandidates = blockingRect ? getRectSkirtCandidates(blockingRect, safeCurrent, safeDesired) : [];
+  const radialEscapeCandidates = [88, 150, 230, 340].flatMap((radius) =>
+    angleOffsets.map((offset) =>
+      clampToPage({
+        x: safeCurrent.x + Math.cos(desiredAngle + offset) * radius,
+        y: safeCurrent.y + Math.sin(desiredAngle + offset) * radius,
+      })
+    )
+  );
+  const candidates = [
+    safeDesired,
+    ...localCandidates,
+    ...blockingSkirtCandidates,
+    ...nearbyObstacleCandidates,
+    ...radialEscapeCandidates,
+  ].map((candidate) =>
+    pushOutOfObstacles(candidate, obstacles)
+  );
+
+  let best = safeCurrent;
+  let bestScore = Number.POSITIVE_INFINITY;
+
+  for (const candidate of candidates) {
+    if (isBlocked(candidate, obstacles)) continue;
+    if (desiredDistance > 8 && distance(safeCurrent, candidate) < 4) continue;
+    const blockedPathPenalty = hasClearSegment(safeCurrent, candidate, obstacles) ? 0 : 5000;
+    if (blockedPathPenalty > 0) continue;
+
+    const candidateAngle = Math.atan2(candidate.y - safeCurrent.y, candidate.x - safeCurrent.x);
+    const turnPenalty = Math.abs(Math.atan2(Math.sin(candidateAngle - desiredAngle), Math.cos(candidateAngle - desiredAngle))) * 24;
+    const score = distance(candidate, safeDesired) + distance(safeCurrent, candidate) * 0.18 + turnPenalty;
+    if (score < bestScore) {
+      best = candidate;
+      bestScore = score;
+    }
+  }
+
+  return best;
+}
+
+function stepToward(current: Point, target: Point, maxStep: number): Point {
+  const targetDistance = distance(current, target);
+  if (targetDistance <= maxStep) return target;
+
+  return {
+    x: current.x + ((target.x - current.x) / targetDistance) * maxStep,
+    y: current.y + ((target.y - current.y) / targetDistance) * maxStep,
+  };
+}
+
+function toDocumentPoint(clientX: number, clientY: number): Point {
+  return {
+    x: clientX + window.scrollX,
+    y: clientY + window.scrollY,
+  };
+}
 
 function shouldUpdateCursorVector(previous: CursorVector, next: CursorVector): boolean {
   return (
@@ -56,26 +365,27 @@ function shouldUpdateCursorVector(previous: CursorVector, next: CursorVector): b
   );
 }
 
-function pickWanderTarget(bondLevel: BondLevel): { x: number; y: number } {
-  const pad = 60;
-  const w = window.innerWidth - pad * 2;
-  const h = window.innerHeight - pad * 2;
+function pickWanderTarget(bondLevel: BondLevel): Point {
+  const pad = PAGE_EDGE_MARGIN;
+  const { width, height } = getPageBounds();
+  const wanderWidth = Math.max(1, width - pad * 2);
+  const wanderHeight = Math.max(1, height - pad * 2);
 
   if (bondLevel >= 2) {
-    // Stay within 40% of viewport center
-    const cx = window.innerWidth / 2;
-    const cy = window.innerHeight / 2;
+    // Stay near the visible area, but use document coordinates so scrolling does not jump the pet.
+    const cx = window.scrollX + window.innerWidth / 2;
+    const cy = window.scrollY + window.innerHeight / 2;
     const rx = window.innerWidth * 0.4;
     const ry = window.innerHeight * 0.4;
-    return {
+    return clampToPage({
       x: cx + (Math.random() * 2 - 1) * rx,
       y: cy + (Math.random() * 2 - 1) * ry,
-    };
+    });
   }
-  return {
-    x: pad + Math.random() * w,
-    y: pad + Math.random() * h,
-  };
+  return clampToPage({
+    x: pad + Math.random() * wanderWidth,
+    y: pad + Math.random() * wanderHeight,
+  });
 }
 
 function deriveEyeShape(
@@ -93,8 +403,8 @@ function deriveEyeShape(
 }
 
 export function usePetBrain(): PetBrainOutput {
-  const petX = useMotionValue(typeof window !== "undefined" ? window.innerWidth / 2 : 400);
-  const petY = useMotionValue(typeof window !== "undefined" ? window.innerHeight + 80 : 600);
+  const petX = useMotionValue(typeof window !== "undefined" ? window.scrollX + window.innerWidth / 2 : 400);
+  const petY = useMotionValue(typeof window !== "undefined" ? window.scrollY + window.innerHeight + 80 : 600);
   const gazeX = useMotionValue(0);
   const gazeY = useMotionValue(-0.18);
 
@@ -105,8 +415,10 @@ export function usePetBrain(): PetBrainOutput {
 
   const stateRef = useRef<PetState>("FOLLOWING");
   const stateEnteredAt = useRef(Date.now());
-  const cursorX = useRef(typeof window !== "undefined" ? window.innerWidth / 2 : 400);
-  const cursorY = useRef(typeof window !== "undefined" ? window.innerHeight / 2 : 300);
+  const cursorX = useRef(typeof window !== "undefined" ? window.scrollX + window.innerWidth / 2 : 400);
+  const cursorY = useRef(typeof window !== "undefined" ? window.scrollY + window.innerHeight / 2 : 300);
+  const cursorClientX = useRef(typeof window !== "undefined" ? window.innerWidth / 2 : 400);
+  const cursorClientY = useRef(typeof window !== "undefined" ? window.innerHeight / 2 : 300);
   const lastCursorMoveTime = useRef(Date.now());
   const lastPointerSampleTime = useRef(Date.now());
   const pointerSpeed = useRef(0);
@@ -121,8 +433,14 @@ export function usePetBrain(): PetBrainOutput {
   const pettingAccumulatorMs = useRef(0);
   const pendingNearMs = useRef(0);
   const nearProximityStart = useRef<number | null>(null);
-  const animControls = useRef<{ stop: () => void } | null>(null);
   const cursorVectorRef = useRef<CursorVector>(DEFAULT_CURSOR_VECTOR);
+  const obstaclesRef = useRef<ObstacleRect[]>([]);
+  const lastObstacleRefreshAt = useRef(0);
+  const targetRef = useRef<Point>({ x: cursorX.current, y: cursorY.current });
+  const movementConfigRef = useRef<MovementConfig>(MOVEMENT_FOLLOW);
+  const velocityRef = useRef<Point>({ x: 0, y: 0 });
+  const lastFrameAt = useRef<number | null>(null);
+  const pendingViewportSyncFrame = useRef<number | null>(null);
 
   const transitionTo = useCallback(
     (next: PetState) => {
@@ -138,20 +456,10 @@ export function usePetBrain(): PetBrainOutput {
     []
   );
 
-  const animatePet = useCallback(
-    (tx: number, ty: number, cfg: SpringConfig) => {
-      animControls.current?.stop();
-      const cx = animate(petX, tx, { type: "spring", ...cfg });
-      const cy = animate(petY, ty, { type: "spring", ...cfg });
-      animControls.current = {
-        stop: () => {
-          cx.stop();
-          cy.stop();
-        },
-      };
-    },
-    [petX, petY]
-  );
+  const refreshObstacles = useCallback(() => {
+    obstaclesRef.current = collectObstacleRects();
+    lastObstacleRefreshAt.current = Date.now();
+  }, []);
 
   const updateGaze = useCallback(
     (targetX = cursorX.current, targetY = cursorY.current) => {
@@ -192,25 +500,23 @@ export function usePetBrain(): PetBrainOutput {
   // The page spotlight follows the pet's center, not the pointer.
   useEffect(() => {
     const root = document.documentElement;
-    const syncX = (x: number) => root.style.setProperty("--spotlight-x", `${x}px`);
-    const syncY = (y: number) => root.style.setProperty("--spotlight-y", `${y - 4}px`);
-    const syncPetMotion = () => updateGaze();
+    const syncPetMotion = () => {
+      root.style.setProperty("--spotlight-x", `${petX.get() - window.scrollX}px`);
+      root.style.setProperty("--spotlight-y", `${petY.get() - window.scrollY - 4}px`);
+      updateGaze();
+    };
 
-    syncX(petX.get());
-    syncY(petY.get());
     syncPetMotion();
 
-    const unsubscribeX = petX.on("change", (x) => {
-      syncX(x);
-      syncPetMotion();
-    });
-    const unsubscribeY = petY.on("change", (y) => {
-      syncY(y);
-      syncPetMotion();
-    });
+    const unsubscribeX = petX.on("change", syncPetMotion);
+    const unsubscribeY = petY.on("change", syncPetMotion);
+    window.addEventListener("scroll", syncPetMotion, { passive: true });
+    window.addEventListener("resize", syncPetMotion);
     return () => {
       unsubscribeX();
       unsubscribeY();
+      window.removeEventListener("scroll", syncPetMotion);
+      window.removeEventListener("resize", syncPetMotion);
     };
   }, [petX, petY, updateGaze]);
 
@@ -229,33 +535,49 @@ export function usePetBrain(): PetBrainOutput {
 
   // Cursor tracking
   useEffect(() => {
-    const handleMove = (e: PointerEvent) => {
+    const setImmediateCursorTarget = (documentPoint: Point) => {
+      if (stateRef.current !== "WANDERING" && stateRef.current !== "SLEEPING") {
+        targetRef.current = clampToPage(documentPoint);
+      }
+    };
+
+    const updateCursorDocumentPoint = (documentPoint: Point, markActive: boolean) => {
       const now = Date.now();
-      const dx = e.clientX - cursorX.current;
-      const dy = e.clientY - cursorY.current;
+      const dx = documentPoint.x - cursorX.current;
+      const dy = documentPoint.y - cursorY.current;
       const moved = Math.hypot(dx, dy);
+
+      if (moved > 0) {
+        pointerDirection.current = { x: dx / moved, y: dy / moved };
+      }
+
+      cursorX.current = documentPoint.x;
+      cursorY.current = documentPoint.y;
+      updateGaze(documentPoint.x, documentPoint.y);
+
+      if (markActive && moved > 2) {
+        lastCursorMoveTime.current = now;
+      }
+
+      setImmediateCursorTarget(documentPoint);
+      return { moved, now };
+    };
+
+    const handleMove = (e: PointerEvent) => {
+      cursorClientX.current = e.clientX;
+      cursorClientY.current = e.clientY;
+
+      const documentPoint = toDocumentPoint(e.clientX, e.clientY);
+      const { moved, now } = updateCursorDocumentPoint(documentPoint, true);
       const dtSeconds = Math.max(16, now - lastPointerSampleTime.current) / 1000;
       const instantSpeed = moved / dtSeconds;
 
       pointerSpeed.current = pointerSpeed.current * 0.32 + instantSpeed * 0.68;
-      if (moved > 0) {
-        pointerDirection.current = { x: dx / moved, y: dy / moved };
-      }
       lastPointerSampleTime.current = now;
-      cursorX.current = e.clientX;
-      cursorY.current = e.clientY;
-      updateGaze(e.clientX, e.clientY);
-
-      if (moved > 2) {
-        lastCursorMoveTime.current = now;
-      }
 
       // First pointer enter — trigger greeting
       if (!hasGreeted.current) {
         hasGreeted.current = true;
-        // Start pet near cursor's entry point at bottom
-        petX.set(e.clientX);
-        petY.set(window.innerHeight + 80);
         transitionTo("GREETING");
       }
 
@@ -263,8 +585,11 @@ export function usePetBrain(): PetBrainOutput {
       if (stateRef.current === "SLEEPING") {
         const sleepStartX = petX.get();
         const sleepStartY = petY.get();
-        const dist = Math.hypot(e.clientX - sleepStartX, e.clientY - sleepStartY);
-        if (dist > 28 || pointerSpeed.current > 120) transitionTo("FOLLOWING");
+        const dist = Math.hypot(documentPoint.x - sleepStartX, documentPoint.y - sleepStartY);
+        if (dist > 28 || pointerSpeed.current > 120) {
+          transitionTo("FOLLOWING");
+          setImmediateCursorTarget(documentPoint);
+        }
       } else if (
         hasGreeted.current &&
         pointerSpeed.current > FAST_POINTER_SPEED &&
@@ -272,7 +597,7 @@ export function usePetBrain(): PetBrainOutput {
         stateRef.current !== "GREETING"
       ) {
         lastReactiveMoveTime.current = now;
-        const dist = Math.hypot(e.clientX - petX.get(), e.clientY - petY.get());
+        const dist = Math.hypot(documentPoint.x - petX.get(), documentPoint.y - petY.get());
         transitionTo(dist < CLOSE_DISTANCE ? "POUNCING" : "EXCITED");
       }
     };
@@ -282,12 +607,13 @@ export function usePetBrain(): PetBrainOutput {
       const interactiveTarget = target?.closest(
         "a, button, input, textarea, select, summary, [role='button']"
       );
-      const dist = Math.hypot(e.clientX - petX.get(), e.clientY - petY.get());
+      const documentPoint = toDocumentPoint(e.clientX, e.clientY);
+      const dist = Math.hypot(documentPoint.x - petX.get(), documentPoint.y - petY.get());
 
-      cursorX.current = e.clientX;
-      cursorY.current = e.clientY;
+      cursorClientX.current = e.clientX;
+      cursorClientY.current = e.clientY;
+      updateCursorDocumentPoint(documentPoint, true);
       lastCursorMoveTime.current = Date.now();
-      updateGaze(e.clientX, e.clientY);
 
       if (dist < CLOSE_DISTANCE) {
         playWithPet();
@@ -297,13 +623,122 @@ export function usePetBrain(): PetBrainOutput {
       }
     };
 
+    const syncCursorAfterViewportChange = () => {
+      pendingViewportSyncFrame.current = null;
+      const documentPoint = toDocumentPoint(cursorClientX.current, cursorClientY.current);
+      const { moved } = updateCursorDocumentPoint(documentPoint, true);
+      if (moved > 0) {
+        pointerSpeed.current *= 0.42;
+      }
+      refreshObstacles();
+    };
+
+    const handleViewportChange = () => {
+      if (pendingViewportSyncFrame.current !== null) return;
+      pendingViewportSyncFrame.current = window.requestAnimationFrame(syncCursorAfterViewportChange);
+    };
+
     window.addEventListener("pointermove", handleMove, { passive: true });
     window.addEventListener("pointerdown", handlePointerDown, { passive: true });
+    window.addEventListener("scroll", handleViewportChange, { passive: true });
+    window.addEventListener("resize", handleViewportChange);
     return () => {
       window.removeEventListener("pointermove", handleMove);
       window.removeEventListener("pointerdown", handlePointerDown);
+      window.removeEventListener("scroll", handleViewportChange);
+      window.removeEventListener("resize", handleViewportChange);
+      if (pendingViewportSyncFrame.current !== null) {
+        window.cancelAnimationFrame(pendingViewportSyncFrame.current);
+        pendingViewportSyncFrame.current = null;
+      }
     };
-  }, [petX, petY, playWithPet, transitionTo, updateGaze]);
+  }, [petX, petY, playWithPet, refreshObstacles, transitionTo, updateGaze]);
+
+  // Smooth page-space steering. The pet never teleports toward a new target; even after
+  // fast scrolls or delayed frames, it advances by a small capped distance.
+  useEffect(() => {
+    refreshObstacles();
+
+    let frameId = 0;
+    const moveFrame = (timestamp: number) => {
+      const previousTimestamp = lastFrameAt.current ?? timestamp;
+      const dt = clamp((timestamp - previousTimestamp) / 1000, 0, 0.04);
+      lastFrameAt.current = timestamp;
+
+      if (Date.now() - lastObstacleRefreshAt.current > OBSTACLE_REFRESH_MS) {
+        refreshObstacles();
+      }
+
+      const current = { x: petX.get(), y: petY.get() };
+      const obstacles = obstaclesRef.current;
+      const currentBlocked = isBlocked(current, obstacles);
+
+      if (stateRef.current === "SLEEPING" || dt <= 0) {
+        velocityRef.current = stepToward(velocityRef.current, { x: 0, y: 0 }, MOVEMENT_FOLLOW.acceleration * dt);
+        frameId = window.requestAnimationFrame(moveFrame);
+        return;
+      }
+
+      const cfg = movementConfigRef.current;
+      const desired = clampToPage(targetRef.current);
+      const routeTarget = currentBlocked
+        ? pushOutOfObstacles(current, obstacles)
+        : findNavigableTarget(current, desired, obstacles);
+      const routeDistance = distance(current, routeTarget);
+      let nextVelocity = velocityRef.current;
+      let nextPosition = current;
+
+      if (routeDistance < 0.5) {
+        nextVelocity = stepToward(nextVelocity, { x: 0, y: 0 }, cfg.acceleration * dt);
+      } else {
+        const desiredVelocity = {
+          x: ((routeTarget.x - current.x) / routeDistance) * cfg.maxSpeed,
+          y: ((routeTarget.y - current.y) / routeDistance) * cfg.maxSpeed,
+        };
+        nextVelocity = stepToward(nextVelocity, desiredVelocity, cfg.acceleration * dt);
+        nextPosition = {
+          x: current.x + nextVelocity.x * dt,
+          y: current.y + nextVelocity.y * dt,
+        };
+
+        if (distance(current, nextPosition) > routeDistance) {
+          nextPosition = routeTarget;
+          nextVelocity = { x: 0, y: 0 };
+        }
+
+        if (!currentBlocked && (isBlocked(nextPosition, obstacles) || !hasClearSegment(current, nextPosition, obstacles))) {
+          const fallback = stepToward(current, routeTarget, cfg.maxSpeed * dt);
+          if (!isBlocked(fallback, obstacles) && hasClearSegment(current, fallback, obstacles)) {
+            nextPosition = fallback;
+            nextVelocity =
+              dt > 0
+                ? {
+                    x: (nextPosition.x - current.x) / dt,
+                    y: (nextPosition.y - current.y) / dt,
+                  }
+                : { x: 0, y: 0 };
+          } else {
+            nextPosition = current;
+            nextVelocity = { x: 0, y: 0 };
+          }
+        }
+      }
+
+      if (distance(current, nextPosition) > 0.01) {
+        petX.set(nextPosition.x);
+        petY.set(nextPosition.y);
+      }
+      velocityRef.current = nextVelocity;
+      frameId = window.requestAnimationFrame(moveFrame);
+    };
+
+    frameId = window.requestAnimationFrame(moveFrame);
+    return () => {
+      window.cancelAnimationFrame(frameId);
+      lastFrameAt.current = null;
+      velocityRef.current = { x: 0, y: 0 };
+    };
+  }, [petX, petY, refreshObstacles]);
 
   // State machine tick
   useEffect(() => {
@@ -333,7 +768,7 @@ export function usePetBrain(): PetBrainOutput {
 
       let targetX = px;
       let targetY = py;
-      let springCfg: SpringConfig = SPRING_FOLLOW;
+      let movementCfg: MovementConfig = MOVEMENT_FOLLOW;
 
       if (idleMs > 260) {
         pointerSpeed.current *= 0.72;
@@ -342,26 +777,13 @@ export function usePetBrain(): PetBrainOutput {
       switch (current) {
         case "GREETING": {
           if (stateAge > 2000) transitionTo("FOLLOWING");
-          targetX = cx - toCursor.x * 18;
-          targetY = cy + 58;
-          springCfg = SPRING_EXCITED;
+          targetX = cx;
+          targetY = cy;
+          movementCfg = MOVEMENT_EXCITED;
           break;
         }
 
         case "FOLLOWING": {
-          // → SLEEPING: cursor idle
-          if (idleMs > 9000) {
-            transitionTo("SLEEPING");
-            break;
-          }
-          // → WANDERING
-          if (stateAge > 8000) {
-            const wanderProb = Math.max(0.02, 0.08 - 0.015 * bond);
-            if (Math.random() < wanderProb) {
-              transitionTo("WANDERING");
-              break;
-            }
-          }
           // → EXCITED
           if (stateAge > 2200 && idleMs < 1000) {
             const excitedProb = 0.08 + 0.01 * bond;
@@ -379,13 +801,9 @@ export function usePetBrain(): PetBrainOutput {
               break;
             }
           }
-          {
-            const stalkDistance = speed > FAST_POINTER_SPEED ? 74 : 54 + bond * 3;
-            const sideStep = Math.sin(now / 420) * (speed > 360 ? 16 : 8);
-            targetX = cx - pointerDirection.current.x * stalkDistance - pointerDirection.current.y * sideStep;
-            targetY = cy - pointerDirection.current.y * stalkDistance + pointerDirection.current.x * sideStep;
-            springCfg = speed > FAST_POINTER_SPEED ? SPRING_EXCITED : SPRING_FOLLOW;
-          }
+          targetX = cx;
+          targetY = cy;
+          movementCfg = speed > FAST_POINTER_SPEED ? MOVEMENT_EXCITED : MOVEMENT_FOLLOW;
           break;
         }
 
@@ -405,7 +823,7 @@ export function usePetBrain(): PetBrainOutput {
             targetX = wt.x;
             targetY = wt.y;
           }
-          springCfg = SPRING_WANDER;
+          movementCfg = MOVEMENT_WANDER;
           break;
         }
 
@@ -418,9 +836,9 @@ export function usePetBrain(): PetBrainOutput {
             transitionTo("POUNCING");
             break;
           }
-          targetX = cx - pointerDirection.current.x * 30 - pointerDirection.current.y * 10;
-          targetY = cy - pointerDirection.current.y * 30 + pointerDirection.current.x * 10;
-          springCfg = SPRING_EXCITED;
+          targetX = cx;
+          targetY = cy;
+          movementCfg = MOVEMENT_EXCITED;
           break;
         }
 
@@ -429,9 +847,9 @@ export function usePetBrain(): PetBrainOutput {
             transitionTo(dist < CLOSE_DISTANCE ? "PLAYING" : "FOLLOWING");
             break;
           }
-          targetX = cx - toCursor.x * 10;
-          targetY = cy - toCursor.y * 10;
-          springCfg = SPRING_POUNCE;
+          targetX = cx;
+          targetY = cy;
+          movementCfg = MOVEMENT_POUNCE;
           break;
         }
 
@@ -439,7 +857,7 @@ export function usePetBrain(): PetBrainOutput {
           // Wake handled by pointermove listener; keep still
           targetX = px;
           targetY = py;
-          springCfg = SPRING_FOLLOW;
+          movementCfg = MOVEMENT_FOLLOW;
           break;
         }
 
@@ -452,16 +870,15 @@ export function usePetBrain(): PetBrainOutput {
             transitionTo("FOLLOWING");
             break;
           }
-          const angle = ((now / 1200) % (2 * Math.PI));
-          const radius = Math.max(18, 42 - bond * 5);
-          targetX = cx + Math.cos(angle) * radius;
-          targetY = cy + Math.sin(angle) * radius;
-          springCfg = speed > 520 ? SPRING_EXCITED : SPRING_FOLLOW;
+          targetX = cx;
+          targetY = cy;
+          movementCfg = speed > 520 ? MOVEMENT_EXCITED : MOVEMENT_FOLLOW;
           break;
         }
       }
 
-      animatePet(targetX, targetY, springCfg);
+      targetRef.current = clampToPage({ x: targetX, y: targetY });
+      movementConfigRef.current = movementCfg;
 
       // Update eye shape
       setEyeShape(deriveEyeShape(stateRef.current, dist, bond));
@@ -476,7 +893,7 @@ export function usePetBrain(): PetBrainOutput {
 
     const id = setInterval(tick, TICK_MS);
     return () => clearInterval(id);
-  }, [petX, petY, transitionTo, animatePet]);
+  }, [petX, petY, transitionTo]);
 
   // Relationship accumulation (200ms)
   useEffect(() => {
