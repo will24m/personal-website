@@ -36,7 +36,6 @@ export interface PetBrainOutput {
   eyeShape: EyeShape;
   isWagging: boolean;
   cursorVector: CursorVector;
-  playWithPet: () => void;
 }
 
 interface SpringConfig { stiffness: number; damping: number }
@@ -556,5 +555,5 @@ export function usePetBrain(): PetBrainOutput {
 
   const isWagging = state !== "SLEEPING" && state !== "WANDERING";
 
-  return { petX, petY, gazeX, gazeY, state, bondLevel, eyeShape, isWagging, cursorVector, playWithPet };
+  return { petX, petY, gazeX, gazeY, state, bondLevel, eyeShape, isWagging, cursorVector };
 }

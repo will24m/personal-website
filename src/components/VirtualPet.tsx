@@ -334,26 +334,17 @@ function ReactionSparks({ state }: { state: PetState }) {
 }
 
 export function VirtualPet() {
-  const { petX, petY, gazeX, gazeY, state, bondLevel, eyeShape, isWagging, cursorVector, playWithPet } = usePetBrain();
+  const { petX, petY, gazeX, gazeY, state, bondLevel, eyeShape, isWagging, cursorVector } = usePetBrain();
 
   const bodyColor = BODY_COLORS[bondLevel];
   const strokeColor =
     bondLevel >= 3 ? "rgba(190,200,215,0.85)" : "rgba(170,185,200,0.7)";
 
   return (
-    <div className="virtual-pet-layer">
-      <motion.button
-        type="button"
-        aria-label="Play with the virtual pet"
+    <div className="virtual-pet-layer" aria-hidden="true">
+      <motion.div
         className={`virtual-pet virtual-pet--${state.toLowerCase()}`}
         style={{ x: petX, y: petY }}
-        whileHover={{ scale: 1.08 }}
-        whileTap={{ scale: 0.88 }}
-        onPointerDown={(event) => {
-          event.stopPropagation();
-          playWithPet();
-        }}
-        onClick={playWithPet}
       >
         <motion.svg
           width="72"
@@ -448,7 +439,7 @@ export function VirtualPet() {
             </motion.text>
           )}
         </motion.svg>
-      </motion.button>
+      </motion.div>
     </div>
   );
 }
