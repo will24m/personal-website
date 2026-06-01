@@ -354,6 +354,12 @@ img {
   box-shadow: var(--surface-shadow);
 }
 
+.pet-soft-obstacle {
+  translate: var(--pet-nudge-x, 0px) var(--pet-nudge-y, 0px);
+  transition: translate 160ms ease, transform var(--transition), box-shadow var(--transition), border-color var(--transition), background var(--transition), color var(--transition);
+  will-change: translate;
+}
+
 .hero-copy,
 .about-copy-card,
 .contact-copy-card,

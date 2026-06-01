@@ -31,11 +31,17 @@ interface Point {
   y: number;
 }
 
-interface ObstacleRect {
+interface RectBounds {
   left: number;
   top: number;
   right: number;
   bottom: number;
+}
+
+interface ObstacleRect extends RectBounds {
+  base: RectBounds;
+  element: HTMLElement | null;
+  shiftable: boolean;
 }
 
 export interface PetBrainOutput {
@@ -65,9 +71,13 @@ const DEFAULT_CURSOR_VECTOR: CursorVector = { x: 0, y: 0, distance: 0 };
 const PET_RADIUS = 46;
 const OBSTACLE_GAP = 10;
 const OBSTACLE_INFLATE = PET_RADIUS + OBSTACLE_GAP;
+const SQUEEZE_INFLATE = PET_RADIUS * 0.34;
 const ROUTE_CLEARANCE = 6;
 const OBSTACLE_REFRESH_MS = 160;
 const PAGE_EDGE_MARGIN = PET_RADIUS * 1.6;
+const COMPONENT_NUDGE_MAX = 40;
+const COMPONENT_NUDGE_RADIUS = PET_RADIUS * 3.2;
+const EMERGENCY_ROUTE_DISTANCE = 140;
 const OBSTACLE_SELECTOR = [
   ".site-header__inner",
   ".site-footer__inner",
@@ -127,12 +137,40 @@ function clampToPage(point: Point): Point {
   };
 }
 
-function pointInRect(point: Point, rect: ObstacleRect): boolean {
+function pointInRect(point: Point, rect: RectBounds): boolean {
   return point.x >= rect.left && point.x <= rect.right && point.y >= rect.top && point.y <= rect.bottom;
 }
 
-function isBlocked(point: Point, obstacles: ObstacleRect[]): boolean {
+function isBlocked(point: Point, obstacles: RectBounds[]): boolean {
   return obstacles.some((rect) => pointInRect(point, rect));
+}
+
+function isShiftableObstacle(element: HTMLElement): boolean {
+  if (element.closest(".site-header") || element.closest(".site-footer")) return false;
+  if (element.matches("input, textarea, select, button, a, summary, [role='button']")) return false;
+  if (element.closest("input, textarea, select, button, a, summary, [role='button']")) return false;
+  return true;
+}
+
+function inflateBounds(base: RectBounds, amount: number): RectBounds {
+  const { width: pageWidth, height: pageHeight } = getPageBounds();
+  return {
+    left: clamp(base.left - amount, -PAGE_EDGE_MARGIN, pageWidth + PAGE_EDGE_MARGIN),
+    top: clamp(base.top - amount, -PAGE_EDGE_MARGIN, pageHeight + PAGE_EDGE_MARGIN),
+    right: clamp(base.right + amount, -PAGE_EDGE_MARGIN, pageWidth + PAGE_EDGE_MARGIN),
+    bottom: clamp(base.bottom + amount, -PAGE_EDGE_MARGIN, pageHeight + PAGE_EDGE_MARGIN),
+  };
+}
+
+function withInflatedObstacle(obstacle: ObstacleRect, amount: number): ObstacleRect {
+  return {
+    ...obstacle,
+    ...inflateBounds(obstacle.base, amount),
+  };
+}
+
+function relaxedObstacles(obstacles: ObstacleRect[]): ObstacleRect[] {
+  return obstacles.map((obstacle) => withInflatedObstacle(obstacle, SQUEEZE_INFLATE));
 }
 
 function collectObstacleRects(): ObstacleRect[] {
@@ -162,18 +200,20 @@ function collectObstacleRects(): ObstacleRect[] {
       bottom: rect.bottom + scrollY,
     };
 
-    const inflated = {
-      left: clamp(docRect.left - OBSTACLE_INFLATE, -PAGE_EDGE_MARGIN, pageWidth + PAGE_EDGE_MARGIN),
-      top: clamp(docRect.top - OBSTACLE_INFLATE, -PAGE_EDGE_MARGIN, pageHeight + PAGE_EDGE_MARGIN),
-      right: clamp(docRect.right + OBSTACLE_INFLATE, -PAGE_EDGE_MARGIN, pageWidth + PAGE_EDGE_MARGIN),
-      bottom: clamp(docRect.bottom + OBSTACLE_INFLATE, -PAGE_EDGE_MARGIN, pageHeight + PAGE_EDGE_MARGIN),
-    };
+    const inflated = inflateBounds(docRect, OBSTACLE_INFLATE);
 
     const inflatedWidth = inflated.right - inflated.left;
     const inflatedHeight = inflated.bottom - inflated.top;
     if (inflatedWidth > pageWidth * 0.96 && inflatedHeight > pageHeight * 0.72) return [];
 
-    return [inflated];
+    return [
+      {
+        ...inflated,
+        base: docRect,
+        element,
+        shiftable: isShiftableObstacle(element),
+      },
+    ];
   });
 }
 
@@ -203,7 +243,7 @@ function pushOutOfObstacles(point: Point, obstacles: ObstacleRect[]): Point {
   return next;
 }
 
-function segmentHitsRect(start: Point, end: Point, rect: ObstacleRect): boolean {
+function segmentHitsRect(start: Point, end: Point, rect: RectBounds): boolean {
   const length = distance(start, end);
   const steps = Math.max(2, Math.ceil(length / 12));
 
@@ -246,7 +286,7 @@ function findBlockingRect(start: Point, end: Point, obstacles: ObstacleRect[]): 
   return blockingRect;
 }
 
-function getRectSkirtCandidates(rect: ObstacleRect, current: Point, desired: Point): Point[] {
+function getRectSkirtCandidates(rect: RectBounds, current: Point, desired: Point): Point[] {
   const xSamples = [current.x, desired.x, (current.x + desired.x) / 2].map((x) =>
     clamp(x, rect.left - OBSTACLE_GAP, rect.right + OBSTACLE_GAP)
   );
@@ -338,6 +378,123 @@ function findNavigableTarget(current: Point, desired: Point, obstacles: Obstacle
   }
 
   return best;
+}
+
+function closestPointOnSegment(point: Point, start: Point, end: Point): Point {
+  const dx = end.x - start.x;
+  const dy = end.y - start.y;
+  const lengthSquared = dx * dx + dy * dy;
+  if (lengthSquared <= 0.001) return start;
+
+  const t = clamp(((point.x - start.x) * dx + (point.y - start.y) * dy) / lengthSquared, 0, 1);
+  return {
+    x: start.x + dx * t,
+    y: start.y + dy * t,
+  };
+}
+
+function pointToSegmentDistance(point: Point, start: Point, end: Point): number {
+  return distance(point, closestPointOnSegment(point, start, end));
+}
+
+function pointToRectDistance(point: Point, rect: RectBounds): number {
+  const dx = Math.max(rect.left - point.x, 0, point.x - rect.right);
+  const dy = Math.max(rect.top - point.y, 0, point.y - rect.bottom);
+  return Math.hypot(dx, dy);
+}
+
+function segmentDistanceToRect(start: Point, end: Point, rect: RectBounds): number {
+  if (segmentHitsRect(start, end, rect)) return 0;
+
+  const corners = [
+    { x: rect.left, y: rect.top },
+    { x: rect.right, y: rect.top },
+    { x: rect.left, y: rect.bottom },
+    { x: rect.right, y: rect.bottom },
+  ];
+
+  return Math.min(
+    pointToRectDistance(start, rect),
+    pointToRectDistance(end, rect),
+    ...corners.map((corner) => pointToSegmentDistance(corner, start, end))
+  );
+}
+
+function computeComponentNudges(
+  current: Point,
+  desired: Point,
+  routeTarget: Point,
+  obstacles: ObstacleRect[],
+  isSqueezing: boolean
+): Map<HTMLElement, Point> {
+  const nudges = new Map<HTMLElement, Point>();
+  const pathEnd = distance(current, routeTarget) > 8 ? routeTarget : desired;
+  const routeLength = distance(current, pathEnd);
+  if (routeLength < 4) return nudges;
+
+  const pathDirection = {
+    x: (pathEnd.x - current.x) / routeLength,
+    y: (pathEnd.y - current.y) / routeLength,
+  };
+  const perpendicular = { x: -pathDirection.y, y: pathDirection.x };
+
+  for (const obstacle of obstacles) {
+    if (!obstacle.shiftable || !obstacle.element) continue;
+
+    const pathDistance = Math.min(
+      segmentDistanceToRect(current, pathEnd, obstacle.base),
+      segmentDistanceToRect(current, desired, obstacle.base)
+    );
+    if (pathDistance > COMPONENT_NUDGE_RADIUS) continue;
+
+    const center = {
+      x: (obstacle.base.left + obstacle.base.right) / 2,
+      y: (obstacle.base.top + obstacle.base.bottom) / 2,
+    };
+    const closest = closestPointOnSegment(center, current, pathEnd);
+    let away = { x: center.x - closest.x, y: center.y - closest.y };
+    let awayLength = Math.hypot(away.x, away.y);
+
+    if (awayLength < 0.001) {
+      const side = Math.sign((center.x - current.x) * perpendicular.x + (center.y - current.y) * perpendicular.y) || 1;
+      away = { x: perpendicular.x * side, y: perpendicular.y * side };
+      awayLength = 1;
+    }
+
+    const directHit = segmentHitsRect(current, desired, obstacle.base) || segmentHitsRect(current, pathEnd, obstacle.base);
+    const pressure = clamp((COMPONENT_NUDGE_RADIUS - pathDistance) / COMPONENT_NUDGE_RADIUS, 0, 1);
+    const boost = directHit ? 1 : isSqueezing ? 0.78 : 0.52;
+    const amount = COMPONENT_NUDGE_MAX * pressure * boost;
+    if (amount < 0.5) continue;
+
+    nudges.set(obstacle.element, {
+      x: (away.x / awayLength) * amount,
+      y: (away.y / awayLength) * amount,
+    });
+  }
+
+  return nudges;
+}
+
+function setComponentNudge(element: HTMLElement, nudge: Point): void {
+  element.classList.add("pet-soft-obstacle");
+  element.style.setProperty("--pet-nudge-x", `${nudge.x.toFixed(2)}px`);
+  element.style.setProperty("--pet-nudge-y", `${nudge.y.toFixed(2)}px`);
+}
+
+function clearComponentNudge(element: HTMLElement): void {
+  element.style.setProperty("--pet-nudge-x", "0px");
+  element.style.setProperty("--pet-nudge-y", "0px");
+}
+
+function clearAllComponentNudges(elements: Set<HTMLElement>): void {
+  for (const element of elements) {
+    clearComponentNudge(element);
+    element.classList.remove("pet-soft-obstacle");
+    element.style.removeProperty("--pet-nudge-x");
+    element.style.removeProperty("--pet-nudge-y");
+  }
+  elements.clear();
 }
 
 function stepToward(current: Point, target: Point, maxStep: number): Point {
@@ -441,6 +598,7 @@ export function usePetBrain(): PetBrainOutput {
   const velocityRef = useRef<Point>({ x: 0, y: 0 });
   const lastFrameAt = useRef<number | null>(null);
   const pendingViewportSyncFrame = useRef<number | null>(null);
+  const nudgedElementsRef = useRef<Set<HTMLElement>>(new Set());
 
   const transitionTo = useCallback(
     (next: PetState) => {
@@ -671,19 +829,67 @@ export function usePetBrain(): PetBrainOutput {
 
       const current = { x: petX.get(), y: petY.get() };
       const obstacles = obstaclesRef.current;
-      const currentBlocked = isBlocked(current, obstacles);
 
       if (stateRef.current === "SLEEPING" || dt <= 0) {
         velocityRef.current = stepToward(velocityRef.current, { x: 0, y: 0 }, MOVEMENT_FOLLOW.acceleration * dt);
+        clearAllComponentNudges(nudgedElementsRef.current);
         frameId = window.requestAnimationFrame(moveFrame);
         return;
       }
 
       const cfg = movementConfigRef.current;
       const desired = clampToPage(targetRef.current);
-      const routeTarget = currentBlocked
+      const desiredDistance = distance(current, desired);
+      const hardCurrentBlocked = isBlocked(current, obstacles);
+      const hardRouteTarget = hardCurrentBlocked
         ? pushOutOfObstacles(current, obstacles)
         : findNavigableTarget(current, desired, obstacles);
+      const hardRouteDistance = distance(current, hardRouteTarget);
+      const directBlocked = !hasClearSegment(current, desired, obstacles);
+      const squeezeObstacles = relaxedObstacles(obstacles);
+      let movementObstacles: ObstacleRect[] = obstacles;
+      let routeTarget = hardRouteTarget;
+      let isSqueezing = false;
+
+      if (directBlocked || (desiredDistance > CLOSE_DISTANCE && hardRouteDistance < 8)) {
+        const squeezeCurrentBlocked = isBlocked(current, squeezeObstacles);
+        const squeezeRouteTarget = squeezeCurrentBlocked
+          ? pushOutOfObstacles(current, squeezeObstacles)
+          : findNavigableTarget(current, desired, squeezeObstacles);
+        const squeezeRouteDistance = distance(current, squeezeRouteTarget);
+
+        if (
+          squeezeRouteDistance > hardRouteDistance + 1 ||
+          distance(squeezeRouteTarget, desired) < distance(hardRouteTarget, desired)
+        ) {
+          routeTarget = squeezeRouteTarget;
+          movementObstacles = squeezeObstacles;
+          isSqueezing = true;
+        }
+      }
+
+      const routeImprovement = desiredDistance - distance(routeTarget, desired);
+      if (desiredDistance > 16 && (distance(current, routeTarget) < 3 || (directBlocked && routeImprovement < 12))) {
+        routeTarget = stepToward(current, desired, EMERGENCY_ROUTE_DISTANCE);
+        movementObstacles = [];
+        isSqueezing = true;
+      }
+
+      const nudges = computeComponentNudges(current, desired, routeTarget, obstacles, directBlocked || isSqueezing);
+      for (const element of nudgedElementsRef.current) {
+        if (!nudges.has(element)) {
+          clearComponentNudge(element);
+        }
+      }
+      for (const [element, nudge] of nudges) {
+        setComponentNudge(element, nudge);
+      }
+      nudgedElementsRef.current = new Set([...nudgedElementsRef.current, ...nudges.keys()]);
+
+      const currentBlocked = isBlocked(current, movementObstacles);
+      routeTarget = currentBlocked
+        ? pushOutOfObstacles(current, movementObstacles)
+        : routeTarget;
       const routeDistance = distance(current, routeTarget);
       let nextVelocity = velocityRef.current;
       let nextPosition = current;
@@ -706,9 +912,12 @@ export function usePetBrain(): PetBrainOutput {
           nextVelocity = { x: 0, y: 0 };
         }
 
-        if (!currentBlocked && (isBlocked(nextPosition, obstacles) || !hasClearSegment(current, nextPosition, obstacles))) {
+        if (
+          !currentBlocked &&
+          (isBlocked(nextPosition, movementObstacles) || !hasClearSegment(current, nextPosition, movementObstacles))
+        ) {
           const fallback = stepToward(current, routeTarget, cfg.maxSpeed * dt);
-          if (!isBlocked(fallback, obstacles) && hasClearSegment(current, fallback, obstacles)) {
+          if (!isBlocked(fallback, movementObstacles) && hasClearSegment(current, fallback, movementObstacles)) {
             nextPosition = fallback;
             nextVelocity =
               dt > 0
@@ -737,6 +946,7 @@ export function usePetBrain(): PetBrainOutput {
       window.cancelAnimationFrame(frameId);
       lastFrameAt.current = null;
       velocityRef.current = { x: 0, y: 0 };
+      clearAllComponentNudges(nudgedElementsRef.current);
     };
   }, [petX, petY, refreshObstacles]);
 
