@@ -1,0 +1,27 @@
+.virtual-pet-layer {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9999;
+  overflow: hidden;
+}
+
+.virtual-pet {
+  position: absolute;
+  width: 72px;
+  height: 72px;
+  pointer-events: auto;
+  cursor: pointer;
+  will-change: transform;
+  transform-origin: center bottom;
+  touch-action: none;
+  /* Offset so the pet's feet touch the cursor, not its top-left corner */
+  translate: -36px -36px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .virtual-pet * {
+    transition: none !important;
+    animation: none !important;
+  }
+}
