@@ -14,24 +14,48 @@ export type PetState =
   | "FOLLOWING"
   | "WANDERING"
   | "EXCITED"
+  | "POUNCING"
   | "SLEEPING"
   | "PLAYING";
 
 export type EyeShape = "normal" | "wide" | "sleepy" | "heart" | "squint";
 
+export interface CursorVector {
+  x: number;
+  y: number;
+  distance: number;
+}
+
 export interface PetBrainOutput {
   petX: MotionValue<number>;
   petY: MotionValue<number>;
+  gazeX: MotionValue<number>;
+  gazeY: MotionValue<number>;
   state: PetState;
   bondLevel: BondLevel;
   eyeShape: EyeShape;
   isWagging: boolean;
+  cursorVector: CursorVector;
+  playWithPet: () => void;
 }
 
 interface SpringConfig { stiffness: number; damping: number }
-const SPRING_FOLLOW: SpringConfig  = { stiffness: 80,  damping: 20 };
-const SPRING_EXCITED: SpringConfig = { stiffness: 400, damping: 15 };
-const SPRING_WANDER: SpringConfig  = { stiffness: 40,  damping: 25 };
+const SPRING_FOLLOW: SpringConfig  = { stiffness: 150, damping: 19 };
+const SPRING_EXCITED: SpringConfig = { stiffness: 520, damping: 16 };
+const SPRING_POUNCE: SpringConfig  = { stiffness: 720, damping: 13 };
+const SPRING_WANDER: SpringConfig  = { stiffness: 60,  damping: 24 };
+const TICK_MS = 180;
+const CLOSE_DISTANCE = 112;
+const FAST_POINTER_SPEED = 980;
+const DEFAULT_CURSOR_VECTOR: CursorVector = { x: 0, y: 0, distance: 0 };
+
+function shouldUpdateCursorVector(previous: CursorVector, next: CursorVector): boolean {
+  return (
+    Math.abs(previous.x - next.x) > 0.04 ||
+    Math.abs(previous.y - next.y) > 0.04 ||
+    Math.abs(previous.distance - next.distance) > 6
+  );
+}
 
 function pickWanderTarget(bondLevel: BondLevel): { x: number; y: number } {
   const pad = 60;
@@ -61,6 +85,7 @@ function deriveEyeShape(
   bondLevel: BondLevel
 ): EyeShape {
   if (state === "SLEEPING") return "sleepy";
+  if (state === "POUNCING") return "wide";
   if (state === "EXCITED") return dist < 60 ? "heart" : "wide";
   if (state === "PLAYING") return "wide";
   if (state === "GREETING") return bondLevel >= 3 ? "heart" : "wide";
@@ -71,18 +96,24 @@ function deriveEyeShape(
 export function usePetBrain(): PetBrainOutput {
   const petX = useMotionValue(typeof window !== "undefined" ? window.innerWidth / 2 : 400);
   const petY = useMotionValue(typeof window !== "undefined" ? window.innerHeight + 80 : 600);
+  const gazeX = useMotionValue(0);
+  const gazeY = useMotionValue(-0.18);
 
   const [state, setState] = useState<PetState>("FOLLOWING");
   const [eyeShape, setEyeShape] = useState<EyeShape>("normal");
   const [bondLevel, setBondLevel] = useState<BondLevel>(0);
+  const [cursorVector, setCursorVector] = useState<CursorVector>(DEFAULT_CURSOR_VECTOR);
 
   const stateRef = useRef<PetState>("FOLLOWING");
   const stateEnteredAt = useRef(Date.now());
   const cursorX = useRef(typeof window !== "undefined" ? window.innerWidth / 2 : 400);
   const cursorY = useRef(typeof window !== "undefined" ? window.innerHeight / 2 : 300);
   const lastCursorMoveTime = useRef(Date.now());
-  const lastCursorX = useRef(cursorX.current);
-  const lastCursorY = useRef(cursorY.current);
+  const lastPointerSampleTime = useRef(Date.now());
+  const pointerSpeed = useRef(0);
+  const pointerDirection = useRef({ x: 0, y: 0 });
+  const lastReactiveMoveTime = useRef(0);
+  const lastBoopAt = useRef(0);
   const wanderTarget = useRef<{ x: number; y: number } | null>(null);
   const hasGreeted = useRef(false);
   const relationship = useRef<PetRelationship>(loadRelationship());
@@ -92,6 +123,7 @@ export function usePetBrain(): PetBrainOutput {
   const pendingNearMs = useRef(0);
   const nearProximityStart = useRef<number | null>(null);
   const animControls = useRef<{ stop: () => void } | null>(null);
+  const cursorVectorRef = useRef<CursorVector>(DEFAULT_CURSOR_VECTOR);
 
   const transitionTo = useCallback(
     (next: PetState) => {
@@ -108,7 +140,7 @@ export function usePetBrain(): PetBrainOutput {
   );
 
   const animatePet = useCallback(
-    (tx: number, ty: number, cfg: typeof SPRING_FOLLOW) => {
+    (tx: number, ty: number, cfg: SpringConfig) => {
       animControls.current?.stop();
       const cx = animate(petX, tx, { type: "spring", ...cfg });
       const cy = animate(petY, ty, { type: "spring", ...cfg });
@@ -122,18 +154,101 @@ export function usePetBrain(): PetBrainOutput {
     [petX, petY]
   );
 
+  const updateGaze = useCallback(
+    (targetX = cursorX.current, targetY = cursorY.current) => {
+      const dx = targetX - petX.get();
+      const dy = targetY - petY.get();
+      const dist = Math.hypot(dx, dy);
+
+      if (dist < 1) {
+        gazeX.set(0);
+        gazeY.set(0);
+        return;
+      }
+
+      gazeX.set(dx / dist);
+      gazeY.set(dy / dist);
+    },
+    [gazeX, gazeY, petX, petY]
+  );
+
+  const rewardInteraction = useCallback(() => {
+    relationship.current.pettingCount++;
+    const newBond = computeBondLevel(relationship.current);
+    if (newBond !== bondLevelRef.current) {
+      bondLevelRef.current = newBond;
+      setBondLevel(newBond);
+    }
+  }, []);
+
+  const playWithPet = useCallback(() => {
+    const now = Date.now();
+    if (now - lastBoopAt.current < 420) return;
+    lastBoopAt.current = now;
+    lastReactiveMoveTime.current = now;
+    rewardInteraction();
+    transitionTo("POUNCING");
+  }, [rewardInteraction, transitionTo]);
+
+  // The page spotlight follows the pet's center, not the pointer.
+  useEffect(() => {
+    const root = document.documentElement;
+    const syncX = (x: number) => root.style.setProperty("--spotlight-x", `${x}px`);
+    const syncY = (y: number) => root.style.setProperty("--spotlight-y", `${y - 4}px`);
+    const syncPetMotion = () => updateGaze();
+
+    syncX(petX.get());
+    syncY(petY.get());
+    syncPetMotion();
+
+    const unsubscribeX = petX.on("change", (x) => {
+      syncX(x);
+      syncPetMotion();
+    });
+    const unsubscribeY = petY.on("change", (y) => {
+      syncY(y);
+      syncPetMotion();
+    });
+    return () => {
+      unsubscribeX();
+      unsubscribeY();
+    };
+  }, [petX, petY, updateGaze]);
+
+  useEffect(() => {
+    const root = document.documentElement;
+    const active = state === "GREETING" || state === "EXCITED" || state === "POUNCING" || state === "PLAYING";
+    root.style.setProperty(
+      "--spotlight-size",
+      active ? "clamp(340px, 38vw, 620px)" : "clamp(280px, 32vw, 520px)"
+    );
+    root.style.setProperty(
+      "--spotlight-opacity",
+      state === "SLEEPING" ? "0.5" : active ? "0.96" : "0.82"
+    );
+  }, [state]);
+
   // Cursor tracking
   useEffect(() => {
     const handleMove = (e: PointerEvent) => {
+      const now = Date.now();
+      const dx = e.clientX - cursorX.current;
+      const dy = e.clientY - cursorY.current;
+      const moved = Math.hypot(dx, dy);
+      const dtSeconds = Math.max(16, now - lastPointerSampleTime.current) / 1000;
+      const instantSpeed = moved / dtSeconds;
+
+      pointerSpeed.current = pointerSpeed.current * 0.32 + instantSpeed * 0.68;
+      if (moved > 0) {
+        pointerDirection.current = { x: dx / moved, y: dy / moved };
+      }
+      lastPointerSampleTime.current = now;
       cursorX.current = e.clientX;
       cursorY.current = e.clientY;
+      updateGaze(e.clientX, e.clientY);
 
-      const dx = e.clientX - lastCursorX.current;
-      const dy = e.clientY - lastCursorY.current;
-      if (Math.hypot(dx, dy) > 4) {
-        lastCursorMoveTime.current = Date.now();
-        lastCursorX.current = e.clientX;
-        lastCursorY.current = e.clientY;
+      if (moved > 2) {
+        lastCursorMoveTime.current = now;
       }
 
       // First pointer enter — trigger greeting
@@ -150,15 +265,48 @@ export function usePetBrain(): PetBrainOutput {
         const sleepStartX = petX.get();
         const sleepStartY = petY.get();
         const dist = Math.hypot(e.clientX - sleepStartX, e.clientY - sleepStartY);
-        if (dist > 40) transitionTo("FOLLOWING");
+        if (dist > 28 || pointerSpeed.current > 120) transitionTo("FOLLOWING");
+      } else if (
+        hasGreeted.current &&
+        pointerSpeed.current > FAST_POINTER_SPEED &&
+        now - lastReactiveMoveTime.current > 780 &&
+        stateRef.current !== "GREETING"
+      ) {
+        lastReactiveMoveTime.current = now;
+        const dist = Math.hypot(e.clientX - petX.get(), e.clientY - petY.get());
+        transitionTo(dist < CLOSE_DISTANCE ? "POUNCING" : "EXCITED");
+      }
+    };
+
+    const handlePointerDown = (e: PointerEvent) => {
+      const target = e.target instanceof Element ? e.target : null;
+      const interactiveTarget = target?.closest(
+        "a, button, input, textarea, select, summary, [role='button']"
+      );
+      const dist = Math.hypot(e.clientX - petX.get(), e.clientY - petY.get());
+
+      cursorX.current = e.clientX;
+      cursorY.current = e.clientY;
+      lastCursorMoveTime.current = Date.now();
+      updateGaze(e.clientX, e.clientY);
+
+      if (dist < CLOSE_DISTANCE) {
+        playWithPet();
+      } else if (!interactiveTarget) {
+        lastReactiveMoveTime.current = Date.now();
+        transitionTo("POUNCING");
       }
     };
 
     window.addEventListener("pointermove", handleMove, { passive: true });
-    return () => window.removeEventListener("pointermove", handleMove);
-  }, [petX, petY, transitionTo]);
+    window.addEventListener("pointerdown", handlePointerDown, { passive: true });
+    return () => {
+      window.removeEventListener("pointermove", handleMove);
+      window.removeEventListener("pointerdown", handlePointerDown);
+    };
+  }, [petX, petY, playWithPet, transitionTo, updateGaze]);
 
-  // State machine tick (500ms)
+  // State machine tick
   useEffect(() => {
     const tick = () => {
       const now = Date.now();
@@ -171,23 +319,39 @@ export function usePetBrain(): PetBrainOutput {
       const dist = Math.hypot(cx - px, cy - py);
       const idleMs = now - lastCursorMoveTime.current;
       const bond = bondLevelRef.current;
+      const speed = pointerSpeed.current;
+      const fallbackDirection = pointerDirection.current;
+      const toCursor =
+        dist > 1
+          ? { x: (cx - px) / dist, y: (cy - py) / dist }
+          : { x: fallbackDirection.x, y: fallbackDirection.y };
+      const nextCursorVector = { ...toCursor, distance: dist };
+
+      if (shouldUpdateCursorVector(cursorVectorRef.current, nextCursorVector)) {
+        cursorVectorRef.current = nextCursorVector;
+        setCursorVector(nextCursorVector);
+      }
 
       let targetX = px;
       let targetY = py;
-      let springCfg: typeof SPRING_FOLLOW = SPRING_FOLLOW;
+      let springCfg: SpringConfig = SPRING_FOLLOW;
+
+      if (idleMs > 260) {
+        pointerSpeed.current *= 0.72;
+      }
 
       switch (current) {
         case "GREETING": {
           if (stateAge > 2000) transitionTo("FOLLOWING");
-          targetX = cx;
-          targetY = cy + 60;
+          targetX = cx - toCursor.x * 18;
+          targetY = cy + 58;
           springCfg = SPRING_EXCITED;
           break;
         }
 
         case "FOLLOWING": {
           // → SLEEPING: cursor idle
-          if (idleMs > 8000) {
+          if (idleMs > 9000) {
             transitionTo("SLEEPING");
             break;
           }
@@ -200,15 +364,11 @@ export function usePetBrain(): PetBrainOutput {
             }
           }
           // → EXCITED
-          if (stateAge > 5000 && idleMs < 1000) {
-            const excitedProb = 0.05 + 0.008 * bond;
-            const cursorVelocity = Math.hypot(
-              cx - lastCursorX.current,
-              cy - lastCursorY.current
-            );
-            const boost = cursorVelocity > 20 && dist > 200 ? 2 : 1;
+          if (stateAge > 2200 && idleMs < 1000) {
+            const excitedProb = 0.08 + 0.01 * bond;
+            const boost = speed > FAST_POINTER_SPEED && dist > 160 ? 2.6 : 1;
             if (Math.random() < excitedProb * boost) {
-              transitionTo("EXCITED");
+              transitionTo(speed > FAST_POINTER_SPEED ? "POUNCING" : "EXCITED");
               break;
             }
           }
@@ -220,9 +380,13 @@ export function usePetBrain(): PetBrainOutput {
               break;
             }
           }
-          targetX = cx;
-          targetY = cy;
-          springCfg = SPRING_FOLLOW;
+          {
+            const stalkDistance = speed > FAST_POINTER_SPEED ? 74 : 54 + bond * 3;
+            const sideStep = Math.sin(now / 420) * (speed > 360 ? 16 : 8);
+            targetX = cx - pointerDirection.current.x * stalkDistance - pointerDirection.current.y * sideStep;
+            targetY = cy - pointerDirection.current.y * stalkDistance + pointerDirection.current.x * sideStep;
+            springCfg = speed > FAST_POINTER_SPEED ? SPRING_EXCITED : SPRING_FOLLOW;
+          }
           break;
         }
 
@@ -247,17 +411,28 @@ export function usePetBrain(): PetBrainOutput {
         }
 
         case "EXCITED": {
-          if (stateAge > 3000) {
+          if (stateAge > 3400) {
             transitionTo("FOLLOWING");
             break;
           }
-          if (stateAge > 1500 && dist < 60 && Math.random() < 0.3) {
-            transitionTo("PLAYING");
+          if (stateAge > 900 && dist < CLOSE_DISTANCE && Math.random() < 0.42) {
+            transitionTo("POUNCING");
             break;
           }
-          targetX = cx;
-          targetY = cy;
+          targetX = cx - pointerDirection.current.x * 30 - pointerDirection.current.y * 10;
+          targetY = cy - pointerDirection.current.y * 30 + pointerDirection.current.x * 10;
           springCfg = SPRING_EXCITED;
+          break;
+        }
+
+        case "POUNCING": {
+          if (stateAge > 720) {
+            transitionTo(dist < CLOSE_DISTANCE ? "PLAYING" : "FOLLOWING");
+            break;
+          }
+          targetX = cx - toCursor.x * 10;
+          targetY = cy - toCursor.y * 10;
+          springCfg = SPRING_POUNCE;
           break;
         }
 
@@ -279,10 +454,10 @@ export function usePetBrain(): PetBrainOutput {
             break;
           }
           const angle = ((now / 1200) % (2 * Math.PI));
-          const radius = Math.max(15, 35 - bond * 4);
+          const radius = Math.max(18, 42 - bond * 5);
           targetX = cx + Math.cos(angle) * radius;
           targetY = cy + Math.sin(angle) * radius;
-          springCfg = SPRING_FOLLOW;
+          springCfg = speed > 520 ? SPRING_EXCITED : SPRING_FOLLOW;
           break;
         }
       }
@@ -300,7 +475,7 @@ export function usePetBrain(): PetBrainOutput {
       }
     };
 
-    const id = setInterval(tick, 500);
+    const id = setInterval(tick, TICK_MS);
     return () => clearInterval(id);
   }, [petX, petY, transitionTo, animatePet]);
 
@@ -339,14 +514,11 @@ export function usePetBrain(): PetBrainOutput {
       }
 
       // Petting detection: slow movement while close
-      const cursorVelocity = Math.hypot(
-        cx - lastCursorX.current,
-        cy - lastCursorY.current
-      );
-      if (dist < 80 && cursorVelocity < 2) {
+      const cursorVelocity = pointerSpeed.current;
+      if (dist < 80 && cursorVelocity < 160) {
         pettingAccumulatorMs.current += 200;
         if (pettingAccumulatorMs.current > 600) {
-          relationship.current.pettingCount++;
+          rewardInteraction();
           pettingAccumulatorMs.current = 0;
         }
       } else {
@@ -356,7 +528,7 @@ export function usePetBrain(): PetBrainOutput {
 
     const id = setInterval(accumulateTick, 200);
     return () => clearInterval(id);
-  }, [petX, petY]);
+  }, [petX, petY, rewardInteraction]);
 
   // Persist relationship on hide/unload
   useEffect(() => {
@@ -382,7 +554,7 @@ export function usePetBrain(): PetBrainOutput {
     setBondLevel(initialBond);
   }, []);
 
-  const isWagging = state === "EXCITED" || state === "PLAYING" || state === "GREETING";
+  const isWagging = state !== "SLEEPING" && state !== "WANDERING";
 
-  return { petX, petY, state, bondLevel, eyeShape, isWagging };
+  return { petX, petY, gazeX, gazeY, state, bondLevel, eyeShape, isWagging, cursorVector, playWithPet };
 }

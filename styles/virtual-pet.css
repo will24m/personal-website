@@ -10,6 +10,10 @@
   position: absolute;
   width: 72px;
   height: 72px;
+  display: block;
+  padding: 0;
+  border: 0;
+  background: transparent;
   pointer-events: auto;
   cursor: pointer;
   will-change: transform;
@@ -19,9 +23,66 @@
   translate: -36px -36px;
 }
 
+.virtual-pet::before,
+.virtual-pet::after {
+  content: "";
+  position: absolute;
+  inset: -10px;
+  border-radius: 999px;
+  pointer-events: none;
+  opacity: 0;
+}
+
+.virtual-pet::before {
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.18), transparent 64%);
+  filter: blur(8px);
+  transition: opacity 180ms ease;
+}
+
+.virtual-pet::after {
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  transform: scale(0.72);
+}
+
+.virtual-pet--greeting::before,
+.virtual-pet--excited::before,
+.virtual-pet--pouncing::before,
+.virtual-pet--playing::before {
+  opacity: 1;
+}
+
+.virtual-pet--greeting::after,
+.virtual-pet--excited::after,
+.virtual-pet--pouncing::after,
+.virtual-pet--playing::after {
+  animation: petReactionRing 780ms ease-out infinite;
+}
+
+.virtual-pet--sleeping {
+  cursor: default;
+}
+
+@keyframes petReactionRing {
+  0% {
+    opacity: 0.7;
+    transform: scale(0.72);
+  }
+
+  100% {
+    opacity: 0;
+    transform: scale(1.24);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .virtual-pet * {
     transition: none !important;
     animation: none !important;
+  }
+
+  .virtual-pet::before,
+  .virtual-pet::after {
+    animation: none !important;
+    transition: none !important;
   }
 }

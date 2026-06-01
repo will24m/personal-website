@@ -2,7 +2,6 @@ import { CssBaseline, ThemeProvider } from "@mui/material";
 import ReactDOM from "react-dom/client";
 import { MotionConfig } from "framer-motion";
 import { theme } from "./theme.js";
-import { useAmbientPointer } from "./hooks/useAmbientPointer.js";
 import { Header } from "./components/Header.js";
 import { AboutPage } from "./components/AboutPage.js";
 import { ContactPage } from "./components/ContactPage.js";
@@ -14,7 +13,6 @@ import "../styles/revamp.css";
 import "../styles/dynamic-ui.css";
 
 function App() {
-  useAmbientPointer();
   const currentPage = ((document.body?.dataset?.page) ?? "home").toLowerCase();
   const showAbout = currentPage === "home" || currentPage === "about";
   const showContact = currentPage === "home" || currentPage === "contact";
