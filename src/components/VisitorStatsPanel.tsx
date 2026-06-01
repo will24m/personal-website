@@ -3,6 +3,10 @@ import { Button, Chip, Stack, Typography } from "@mui/material";
 import { useVisitorStats } from "../hooks/useVisitorStats.js";
 import { InteractiveCard } from "./InteractiveCard.js";
 import { Reveal } from "./Reveal.js";
+<<<<<<< HEAD
+=======
+import { TypedSectionTitle } from "./TypedSectionTitle.js";
+>>>>>>> c5b46901e4d7907adbefa27f467635d0cdbc2e28
 
 export function VisitorStatsPanel() {
   const { clickPulse, incrementClick, isLive, isSyncing, stats } = useVisitorStats();
@@ -12,6 +16,16 @@ export function VisitorStatsPanel() {
   return (
     <Reveal rotate="left">
       <section id="site-stats" className="section site-stats-section" aria-label="Website counters">
+<<<<<<< HEAD
+=======
+        <div className="section-heading site-stats-heading">
+          <span className="eyebrow">
+            <span className="eyebrow__dot" />
+            Site pulse
+          </span>
+          <TypedSectionTitle text="Counters for visitors passing through." />
+        </div>
+>>>>>>> c5b46901e4d7907adbefa27f467635d0cdbc2e28
         <div className="site-stats-grid">
           <InteractiveCard
             className="site-stat-card site-stat-card--clicks"

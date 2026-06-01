@@ -9,7 +9,10 @@ import { ContactPage } from "./components/ContactPage.js";
 import { Footer } from "./components/Footer.js";
 import { ScrollProgressBar } from "./components/ScrollProgressBar.js";
 import { VisitorStatsPanel } from "./components/VisitorStatsPanel.js";
+<<<<<<< HEAD
 import { VirtualPet } from "./components/VirtualPet.js";
+=======
+>>>>>>> c5b46901e4d7907adbefa27f467635d0cdbc2e28
 import "../styles/revamp.css";
 import "../styles/dynamic-ui.css";
 
@@ -35,7 +38,10 @@ function App() {
             {currentPage === "contact" ? <VisitorStatsPanel /> : null}
           </main>
           <Footer />
+<<<<<<< HEAD
           <VirtualPet />
+=======
+>>>>>>> c5b46901e4d7907adbefa27f467635d0cdbc2e28
         </div>
       </ThemeProvider>
     </MotionConfig>
