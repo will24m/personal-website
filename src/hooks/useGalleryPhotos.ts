@@ -2,13 +2,18 @@ import { useState, useEffect } from "react";
 import {
   fetchGalleryPhotosFromApi,
   fetchGalleryPhotosFromDirectoryIndex,
+  getStaticGalleryPhotos,
   type GalleryPhoto,
 } from "../utils/gallery.js";
 
+const staticGalleryPhotos = getStaticGalleryPhotos();
+
 export function useGalleryPhotos(): GalleryPhoto[] {
-  const [photos, setPhotos] = useState<GalleryPhoto[]>([]);
+  const [photos, setPhotos] = useState<GalleryPhoto[]>(() => staticGalleryPhotos);
 
   useEffect(() => {
+    if (staticGalleryPhotos.length) return undefined;
+
     const controller = new AbortController();
 
     const loadPhotos = async () => {

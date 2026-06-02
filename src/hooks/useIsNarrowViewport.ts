@@ -7,9 +7,12 @@ export function useIsNarrowViewport(maxWidth = 980): boolean {
   });
 
   useEffect(() => {
-    const onResize = () => setIsNarrow(window.innerWidth <= maxWidth);
-    window.addEventListener("resize", onResize);
-    return () => window.removeEventListener("resize", onResize);
+    const mediaQuery = window.matchMedia(`(max-width: ${maxWidth}px)`);
+    const onChange = () => setIsNarrow(mediaQuery.matches);
+
+    onChange();
+    mediaQuery.addEventListener("change", onChange);
+    return () => mediaQuery.removeEventListener("change", onChange);
   }, [maxWidth]);
 
   return isNarrow;

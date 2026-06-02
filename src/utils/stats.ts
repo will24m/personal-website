@@ -73,7 +73,18 @@ export function normalizeVisitorStats(payload: unknown): VisitorStats {
   };
 }
 
+export function canUseVisitorStatsApi(): boolean {
+  if (typeof window === "undefined") return true;
+
+  const { hostname } = window.location;
+  return hostname !== "localhost" && hostname !== "127.0.0.1" && hostname !== "::1";
+}
+
 export async function fetchVisitorStats(eventType: string | null = null): Promise<VisitorStats> {
+  if (!canUseVisitorStatsApi()) {
+    throw new Error("Stats API disabled for local fallback mode.");
+  }
+
   const requestOptions: RequestInit = eventType
     ? {
         method: "POST",

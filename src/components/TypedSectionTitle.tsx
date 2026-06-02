@@ -17,8 +17,7 @@ export function TypedSectionTitle({
   const ref = useRef<HTMLElement>(null);
   const visible = useInView(ref, { amount: 0.3, margin: "0px 0px -40px 0px" });
   const [displayText, setDisplayText] = useState("");
-  const displayTextRef = useRef("");
-  displayTextRef.current = displayText;
+  const hasTypedRef = useRef(false);
   const timerRef = useRef<number>(0);
   const typingFrames = useMemo(() => buildTypingFrames(text), [text]);
 
@@ -31,35 +30,33 @@ export function TypedSectionTitle({
     window.clearTimeout(timerRef.current);
 
     if (prefersReducedMotion) {
+      hasTypedRef.current = true;
       setDisplayText(text);
       return undefined;
     }
 
-    if (visible) {
-      let frameIndex = 0;
-      const runTyping = () => {
-        if (frameIndex >= typingFrames.length) return;
-        const currentFrame = typingFrames[frameIndex];
-        const nextFrame = typingFrames[frameIndex + 1];
-        setDisplayText(currentFrame);
-        frameIndex += 1;
-        timerRef.current = window.setTimeout(runTyping, typingDelay(currentFrame, nextFrame));
-      };
-      setDisplayText("");
-      runTyping();
-    } else {
-      let current = displayTextRef.current;
-      const erase = () => {
-        if (!current.length) {
-          setDisplayText("");
-          return;
-        }
-        current = current.slice(0, -1);
-        setDisplayText(current);
-        timerRef.current = window.setTimeout(erase, 14);
-      };
-      erase();
+    if (hasTypedRef.current) {
+      setDisplayText(text);
+      return undefined;
     }
+
+    if (!visible) return undefined;
+
+    let frameIndex = 0;
+    const runTyping = () => {
+      if (frameIndex >= typingFrames.length) {
+        hasTypedRef.current = true;
+        setDisplayText(text);
+        return;
+      }
+      const currentFrame = typingFrames[frameIndex];
+      const nextFrame = typingFrames[frameIndex + 1];
+      setDisplayText(currentFrame);
+      frameIndex += 1;
+      timerRef.current = window.setTimeout(runTyping, typingDelay(currentFrame, nextFrame));
+    };
+    setDisplayText("");
+    runTyping();
 
     return () => window.clearTimeout(timerRef.current);
   }, [visible, text, typingFrames]);

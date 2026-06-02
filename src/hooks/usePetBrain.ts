@@ -75,7 +75,7 @@ const PET_RADIUS = 46;
 const OBSTACLE_GAP = 10;
 const OBSTACLE_INFLATE = PET_RADIUS + OBSTACLE_GAP;
 const ROUTE_CLEARANCE = 6;
-const OBSTACLE_REFRESH_MS = 160;
+const OBSTACLE_REFRESH_MS = 280;
 const PAGE_EDGE_MARGIN = PET_RADIUS * 1.6;
 // Components only shift when the pet is actually squeezing through them, and
 // only by a hair — the nudge should read as a gentle brush, never a shove.
@@ -636,6 +636,7 @@ export function usePetBrain(): PetBrainOutput {
   const movementConfigRef = useRef<MovementConfig>(MOVEMENT_FOLLOW);
   const velocityRef = useRef<Point>({ x: 0, y: 0 });
   const lastFrameAt = useRef<number | null>(null);
+  const pendingSpotlightFrame = useRef<number | null>(null);
   const pendingViewportSyncFrame = useRef<number | null>(null);
   const nudgedElementsRef = useRef<Set<HTMLElement>>(new Set());
   // True while the pet's target is the live cursor (any following state), so the
@@ -701,22 +702,31 @@ export function usePetBrain(): PetBrainOutput {
   useEffect(() => {
     const root = document.documentElement;
     const syncPetMotion = () => {
+      pendingSpotlightFrame.current = null;
       root.style.setProperty("--spotlight-x", `${petX.get() - window.scrollX}px`);
       root.style.setProperty("--spotlight-y", `${petY.get() - window.scrollY - 4}px`);
       updateGaze();
     };
+    const schedulePetMotionSync = () => {
+      if (pendingSpotlightFrame.current !== null) return;
+      pendingSpotlightFrame.current = window.requestAnimationFrame(syncPetMotion);
+    };
 
     syncPetMotion();
 
-    const unsubscribeX = petX.on("change", syncPetMotion);
-    const unsubscribeY = petY.on("change", syncPetMotion);
-    window.addEventListener("scroll", syncPetMotion, { passive: true });
-    window.addEventListener("resize", syncPetMotion);
+    const unsubscribeX = petX.on("change", schedulePetMotionSync);
+    const unsubscribeY = petY.on("change", schedulePetMotionSync);
+    window.addEventListener("scroll", schedulePetMotionSync, { passive: true });
+    window.addEventListener("resize", schedulePetMotionSync);
     return () => {
       unsubscribeX();
       unsubscribeY();
-      window.removeEventListener("scroll", syncPetMotion);
-      window.removeEventListener("resize", syncPetMotion);
+      window.removeEventListener("scroll", schedulePetMotionSync);
+      window.removeEventListener("resize", schedulePetMotionSync);
+      if (pendingSpotlightFrame.current !== null) {
+        window.cancelAnimationFrame(pendingSpotlightFrame.current);
+        pendingSpotlightFrame.current = null;
+      }
     };
   }, [petX, petY, updateGaze]);
 
@@ -861,6 +871,14 @@ export function usePetBrain(): PetBrainOutput {
 
     let frameId = 0;
     const moveFrame = (timestamp: number) => {
+      if (document.visibilityState === "hidden") {
+        lastFrameAt.current = timestamp;
+        velocityRef.current = { x: 0, y: 0 };
+        clearAllComponentNudges(nudgedElementsRef.current);
+        frameId = window.requestAnimationFrame(moveFrame);
+        return;
+      }
+
       const previousTimestamp = lastFrameAt.current ?? timestamp;
       const dt = clamp((timestamp - previousTimestamp) / 1000, 0, 0.04);
       lastFrameAt.current = timestamp;
@@ -1000,6 +1018,8 @@ export function usePetBrain(): PetBrainOutput {
   // State machine tick
   useEffect(() => {
     const tick = () => {
+      if (document.visibilityState === "hidden") return;
+
       const now = Date.now();
       const current = stateRef.current;
       const stateAge = now - stateEnteredAt.current;
@@ -1157,6 +1177,8 @@ export function usePetBrain(): PetBrainOutput {
   // Relationship accumulation (200ms)
   useEffect(() => {
     const accumulateTick = () => {
+      if (document.visibilityState === "hidden") return;
+
       const cx = cursorX.current;
       const cy = cursorY.current;
       const px = petX.get();

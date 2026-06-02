@@ -33,8 +33,20 @@ export function RotatingPhotoGallery({
     startY: 0,
     startIndex: 0,
   });
+  const lastPointerStyleRef = useRef({ x: "50%", y: "50%" });
   const hasPhotos = galleryPhotos.length > 0;
   const activePhoto = galleryPhotos[index] ?? galleryPhotos[0];
+
+  const setGalleryCursor = (element: HTMLElement, x: string, y: string) => {
+    if (lastPointerStyleRef.current.x !== x) {
+      element.style.setProperty("--gallery-cursor-x", x);
+      lastPointerStyleRef.current.x = x;
+    }
+    if (lastPointerStyleRef.current.y !== y) {
+      element.style.setProperty("--gallery-cursor-y", y);
+      lastPointerStyleRef.current.y = y;
+    }
+  };
 
   useEffect(() => {
     if (!hasPhotos) return;
@@ -44,6 +56,27 @@ export function RotatingPhotoGallery({
   useEffect(() => {
     if (typeof onIndexChange === "function") onIndexChange(index);
   }, [index, onIndexChange]);
+
+  useEffect(() => {
+    if (!hasPhotos) return;
+
+    const preloadTimer = window.setTimeout(() => {
+      const preloadIndexes = [
+        (index + 1) % galleryPhotos.length,
+        (index - 1 + galleryPhotos.length) % galleryPhotos.length,
+      ];
+
+      for (const preloadIndex of preloadIndexes) {
+        const photo = galleryPhotos[preloadIndex];
+        if (!photo) continue;
+        const image = new Image();
+        image.decoding = "async";
+        image.src = photo.src;
+      }
+    }, 900);
+
+    return () => window.clearTimeout(preloadTimer);
+  }, [galleryPhotos, hasPhotos, index]);
 
   const syncIndexToPointer = (event: React.PointerEvent<HTMLDivElement>) => {
     if (!hasPhotos) return;
@@ -56,8 +89,7 @@ export function RotatingPhotoGallery({
     const verticalOffset = y > 0.62 ? 1 : 0;
     const nextIndex = (horizontalIndex + verticalOffset) % galleryPhotos.length;
 
-    event.currentTarget.style.setProperty("--gallery-cursor-x", `${(x * 100).toFixed(2)}%`);
-    event.currentTarget.style.setProperty("--gallery-cursor-y", `${(y * 100).toFixed(2)}%`);
+    setGalleryCursor(event.currentTarget, `${(x * 100).toFixed(1)}%`, `${(y * 100).toFixed(1)}%`);
     setIndex((current) => (current === nextIndex ? current : nextIndex));
   };
 
@@ -115,8 +147,7 @@ export function RotatingPhotoGallery({
       startIndex: 0,
     };
     setIsHovering(false);
-    event.currentTarget.style.setProperty("--gallery-cursor-x", "50%");
-    event.currentTarget.style.setProperty("--gallery-cursor-y", "50%");
+    setGalleryCursor(event.currentTarget, "50%", "50%");
   };
 
   const handlePointerLeave = (event: React.PointerEvent<HTMLDivElement>) => {
@@ -128,8 +159,7 @@ export function RotatingPhotoGallery({
       startY: 0,
       startIndex: 0,
     };
-    event.currentTarget.style.setProperty("--gallery-cursor-x", "50%");
-    event.currentTarget.style.setProperty("--gallery-cursor-y", "50%");
+    setGalleryCursor(event.currentTarget, "50%", "50%");
   };
 
   if (!hasPhotos) {
@@ -172,6 +202,7 @@ export function RotatingPhotoGallery({
         className="portrait-image portrait-image--rotating"
         src={activePhoto.src}
         alt={activePhoto.alt}
+        decoding="async"
       />
       {topChip ? <span className="portrait-chip portrait-chip--top">{topChip}</span> : null}
       {bottomChip ? (

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import {
   visitorStatsConfig,
+  canUseVisitorStatsApi,
   incrementStoredStatExtra,
   getFallbackVisitorStats,
   fetchVisitorStats,
@@ -30,8 +31,16 @@ export function useVisitorStats(): UseVisitorStatsReturn {
 
   useEffect(() => {
     let cancelled = false;
+    const canUseApi = canUseVisitorStatsApi();
 
     const syncStats = async (eventType: string | null = null) => {
+      if (!canUseApi || document.visibilityState === "hidden") {
+        if (eventType === "view") incrementStoredStatExtra(visitorStatsConfig.localViewKey);
+        mergeStats(getFallbackVisitorStats());
+        setIsLive(false);
+        return;
+      }
+
       setIsSyncing(true);
       try {
         const nextStats = await fetchVisitorStats(eventType);
@@ -64,7 +73,11 @@ export function useVisitorStats(): UseVisitorStatsReturn {
 
     void syncStats(viewEvent);
 
-    const intervalId = window.setInterval(() => void syncStats(), 8500);
+    const intervalId = canUseApi ? window.setInterval(() => void syncStats(), 30000) : 0;
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") void syncStats();
+    };
+    document.addEventListener("visibilitychange", handleVisibilityChange);
 
     const handleStorage = (event: StorageEvent) => {
       if (
@@ -79,7 +92,8 @@ export function useVisitorStats(): UseVisitorStatsReturn {
 
     return () => {
       cancelled = true;
-      window.clearInterval(intervalId);
+      if (intervalId) window.clearInterval(intervalId);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
       window.removeEventListener("storage", handleStorage);
     };
   }, []);
@@ -87,6 +101,13 @@ export function useVisitorStats(): UseVisitorStatsReturn {
   const incrementClick = async (): Promise<void> => {
     setClickPulse((current) => current + 1);
     setStats((current) => ({ ...current, clicks: current.clicks + 1 }));
+    if (!canUseVisitorStatsApi()) {
+      incrementStoredStatExtra(visitorStatsConfig.localClickKey);
+      mergeStats(getFallbackVisitorStats());
+      setIsLive(false);
+      return;
+    }
+
     try {
       const nextStats = await fetchVisitorStats("click");
       mergeStats(nextStats);
