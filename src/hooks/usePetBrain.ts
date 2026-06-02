@@ -60,11 +60,13 @@ interface MovementConfig {
   maxSpeed: number;
   acceleration: number;
 }
-// Speeds are 1.4x the original tuning so the pet keeps up with quick cursor moves.
-const MOVEMENT_FOLLOW: MovementConfig = { maxSpeed: 127, acceleration: 437 };
-const MOVEMENT_EXCITED: MovementConfig = { maxSpeed: 154, acceleration: 504 };
-const MOVEMENT_POUNCE: MovementConfig = { maxSpeed: 175, acceleration: 571 };
-const MOVEMENT_WANDER: MovementConfig = { maxSpeed: 98, acceleration: 370 };
+// On-screen the pet ambles calmly toward the cursor while routing around
+// components. When it falls off-screen it gets a 2x boost to catch back up.
+const MOVEMENT_FOLLOW: MovementConfig = { maxSpeed: 90, acceleration: 320 };
+const MOVEMENT_EXCITED: MovementConfig = { maxSpeed: 110, acceleration: 360 };
+const MOVEMENT_POUNCE: MovementConfig = { maxSpeed: 125, acceleration: 408 };
+const MOVEMENT_WANDER: MovementConfig = { maxSpeed: 70, acceleration: 264 };
+const OFFSCREEN_SPEED_MULTIPLIER = 2;
 const TICK_MS = 120;
 const CLOSE_DISTANCE = 112;
 const FAST_POINTER_SPEED = 980;
@@ -72,7 +74,6 @@ const DEFAULT_CURSOR_VECTOR: CursorVector = { x: 0, y: 0, distance: 0 };
 const PET_RADIUS = 46;
 const OBSTACLE_GAP = 10;
 const OBSTACLE_INFLATE = PET_RADIUS + OBSTACLE_GAP;
-const SQUEEZE_INFLATE = PET_RADIUS * 0.34;
 const ROUTE_CLEARANCE = 6;
 const OBSTACLE_REFRESH_MS = 160;
 const PAGE_EDGE_MARGIN = PET_RADIUS * 1.6;
@@ -80,7 +81,6 @@ const PAGE_EDGE_MARGIN = PET_RADIUS * 1.6;
 // only by a hair — the nudge should read as a gentle brush, never a shove.
 const COMPONENT_NUDGE_MAX = 12;
 const COMPONENT_NUDGE_RADIUS = PET_RADIUS * 1.4;
-const EMERGENCY_ROUTE_DISTANCE = 140;
 // Once the pet is this close to the cursor it stops short, resting on the side
 // it approached from so it hugs the pointer without ever covering it.
 const SETTLE_OFFSET = 36;
@@ -144,6 +144,17 @@ function clampToPage(point: Point): Point {
   };
 }
 
+// True when the pet (document coords) sits outside the current viewport, so it
+// can sprint back into view at the off-screen speed.
+function isPetOffscreen(point: Point): boolean {
+  if (typeof window === "undefined") return false;
+  const left = window.scrollX;
+  const top = window.scrollY;
+  const right = left + window.innerWidth;
+  const bottom = top + window.innerHeight;
+  return point.x < left || point.x > right || point.y < top || point.y > bottom;
+}
+
 function pointInRect(point: Point, rect: RectBounds): boolean {
   return point.x >= rect.left && point.x <= rect.right && point.y >= rect.top && point.y <= rect.bottom;
 }
@@ -167,17 +178,6 @@ function inflateBounds(base: RectBounds, amount: number): RectBounds {
     right: clamp(base.right + amount, -PAGE_EDGE_MARGIN, pageWidth + PAGE_EDGE_MARGIN),
     bottom: clamp(base.bottom + amount, -PAGE_EDGE_MARGIN, pageHeight + PAGE_EDGE_MARGIN),
   };
-}
-
-function withInflatedObstacle(obstacle: ObstacleRect, amount: number): ObstacleRect {
-  return {
-    ...obstacle,
-    ...inflateBounds(obstacle.base, amount),
-  };
-}
-
-function relaxedObstacles(obstacles: ObstacleRect[]): ObstacleRect[] {
-  return obstacles.map((obstacle) => withInflatedObstacle(obstacle, SQUEEZE_INFLATE));
 }
 
 function collectObstacleRects(): ObstacleRect[] {
@@ -554,13 +554,6 @@ function pickWanderTarget(bondLevel: BondLevel): Point {
   });
 }
 
-// True when the cursor is resting on a component the pet must respect (header,
-// footer, links, buttons, inputs — anything non-shiftable). When this is the
-// case the pet keeps a polite distance instead of forcing its way on top.
-function cursorOverBlockingElement(cursor: Point, obstacles: ObstacleRect[]): boolean {
-  return obstacles.some((obstacle) => !obstacle.shiftable && pointInRect(cursor, obstacle.base));
-}
-
 // Rest point beside the cursor: back off along the pet's own approach direction
 // so it hugs the pointer from whichever side it travelled in from, never
 // covering the exact cursor point.
@@ -873,55 +866,34 @@ export function usePetBrain(): PetBrainOutput {
         return;
       }
 
-      const cfg = movementConfigRef.current;
+      const baseCfg = movementConfigRef.current;
+      // Off-screen the pet doubles its pace to rejoin the viewport; on-screen it
+      // ambles toward the cursor at the calm base speed.
+      const offscreen = isPetOffscreen(current);
+      const cfg: MovementConfig = offscreen
+        ? {
+            maxSpeed: baseCfg.maxSpeed * OFFSCREEN_SPEED_MULTIPLIER,
+            acceleration: baseCfg.acceleration * OFFSCREEN_SPEED_MULTIPLIER,
+          }
+        : baseCfg;
       const followingCursor = followingCursorRef.current;
       // While following, steer toward the live cursor (fresher than the 120ms
       // state-machine target) and settle just beside it from the approach side.
       const liveCursor = clampToPage({ x: cursorX.current, y: cursorY.current });
-      const cursorBlocked = followingCursor && cursorOverBlockingElement(liveCursor, obstacles);
       const followTarget =
         distance(current, liveCursor) < SETTLE_ENGAGE_DISTANCE
           ? settleBesideCursor(current, liveCursor)
           : liveCursor;
       const desired = clampToPage(followingCursor ? followTarget : targetRef.current);
-      const desiredDistance = distance(current, desired);
-      const hardCurrentBlocked = isBlocked(current, obstacles);
-      const hardRouteTarget = hardCurrentBlocked
-        ? pushOutOfObstacles(current, obstacles)
-        : findNavigableTarget(current, desired, obstacles);
-      const hardRouteDistance = distance(current, hardRouteTarget);
-      const directBlocked = !hasClearSegment(current, desired, obstacles);
-      const squeezeObstacles = relaxedObstacles(obstacles);
-      let movementObstacles: ObstacleRect[] = obstacles;
-      let routeTarget = hardRouteTarget;
-
-      if (directBlocked || (desiredDistance > CLOSE_DISTANCE && hardRouteDistance < 8)) {
-        const squeezeCurrentBlocked = isBlocked(current, squeezeObstacles);
-        const squeezeRouteTarget = squeezeCurrentBlocked
-          ? pushOutOfObstacles(current, squeezeObstacles)
-          : findNavigableTarget(current, desired, squeezeObstacles);
-        const squeezeRouteDistance = distance(current, squeezeRouteTarget);
-
-        if (
-          squeezeRouteDistance > hardRouteDistance + 1 ||
-          distance(squeezeRouteTarget, desired) < distance(hardRouteTarget, desired)
-        ) {
-          routeTarget = squeezeRouteTarget;
-          movementObstacles = squeezeObstacles;
-        }
-      }
-
-      const routeImprovement = desiredDistance - distance(routeTarget, desired);
-      const routeStalled = distance(current, routeTarget) < 3 || (directBlocked && routeImprovement < 12);
-      // Guarantee the pet reaches the cursor when it sits in open space: if normal
-      // routing has stalled, push straight through obstacles (which still spring
-      // out of the way). When the cursor rests on a component we must respect, the
-      // pet holds at the nearest reachable point instead of forcing onto it.
-      const forceReach = followingCursor && !cursorBlocked && routeStalled;
-      if (desiredDistance > 16 && (forceReach || (!followingCursor && routeStalled))) {
-        routeTarget = stepToward(current, desired, EMERGENCY_ROUTE_DISTANCE);
-        movementObstacles = [];
-      }
+      // The pet ALWAYS routes around components and never overlaps them. When the
+      // cursor sits on/behind a component (or is otherwise unreachable by going
+      // around), the route resolves to the nearest reachable open point and the
+      // pet simply waits there — it never cuts through.
+      const movementObstacles = obstacles;
+      const currentBlocked = isBlocked(current, movementObstacles);
+      const routeTarget = currentBlocked
+        ? pushOutOfObstacles(current, movementObstacles)
+        : findNavigableTarget(current, desired, movementObstacles);
 
       const nudges = computeComponentNudges(current, desired, routeTarget, obstacles);
       for (const element of nudgedElementsRef.current) {
@@ -934,10 +906,6 @@ export function usePetBrain(): PetBrainOutput {
       }
       nudgedElementsRef.current = new Set([...nudgedElementsRef.current, ...nudges.keys()]);
 
-      const currentBlocked = isBlocked(current, movementObstacles);
-      routeTarget = currentBlocked
-        ? pushOutOfObstacles(current, movementObstacles)
-        : routeTarget;
       const routeDistance = distance(current, routeTarget);
       let nextVelocity = velocityRef.current;
       let nextPosition = current;
