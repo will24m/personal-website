@@ -62,10 +62,10 @@ interface MovementConfig {
 }
 // On-screen the pet ambles calmly toward the cursor while routing around
 // components. When it falls off-screen it gets a 2x boost to catch back up.
-const MOVEMENT_FOLLOW: MovementConfig = { maxSpeed: 90, acceleration: 320 };
-const MOVEMENT_EXCITED: MovementConfig = { maxSpeed: 110, acceleration: 360 };
-const MOVEMENT_POUNCE: MovementConfig = { maxSpeed: 125, acceleration: 408 };
-const MOVEMENT_WANDER: MovementConfig = { maxSpeed: 70, acceleration: 264 };
+const MOVEMENT_FOLLOW: MovementConfig = { maxSpeed: 126, acceleration: 448 };
+const MOVEMENT_EXCITED: MovementConfig = { maxSpeed: 154, acceleration: 504 };
+const MOVEMENT_POUNCE: MovementConfig = { maxSpeed: 175, acceleration: 571 };
+const MOVEMENT_WANDER: MovementConfig = { maxSpeed: 98, acceleration: 370 };
 const OFFSCREEN_SPEED_MULTIPLIER = 2;
 const TICK_MS = 120;
 const CLOSE_DISTANCE = 112;
@@ -81,6 +81,7 @@ const PAGE_EDGE_MARGIN = PET_RADIUS * 1.6;
 // only by a hair — the nudge should read as a gentle brush, never a shove.
 const COMPONENT_NUDGE_MAX = 12;
 const COMPONENT_NUDGE_RADIUS = PET_RADIUS * 1.4;
+const COMPONENT_NUDGE_LOOKAHEAD = PET_RADIUS * 2.2;
 // Once the pet is this close to the cursor it stops short, resting on the side
 // it approached from so it hugs the pointer without ever covering it.
 const SETTLE_OFFSET = 36;
@@ -430,14 +431,16 @@ function segmentDistanceToRect(start: Point, end: Point, rect: RectBounds): numb
   );
 }
 
-function computeComponentNudges(
-  current: Point,
-  desired: Point,
-  routeTarget: Point,
-  obstacles: ObstacleRect[]
-): Map<HTMLElement, Point> {
+function computeComponentNudges(current: Point, routeTarget: Point, obstacles: ObstacleRect[]): Map<HTMLElement, Point> {
   const nudges = new Map<HTMLElement, Point>();
-  const pathEnd = distance(current, routeTarget) > 8 ? routeTarget : desired;
+  const fullRouteLength = distance(current, routeTarget);
+  const pathEnd =
+    fullRouteLength > COMPONENT_NUDGE_LOOKAHEAD
+      ? {
+          x: current.x + ((routeTarget.x - current.x) / fullRouteLength) * COMPONENT_NUDGE_LOOKAHEAD,
+          y: current.y + ((routeTarget.y - current.y) / fullRouteLength) * COMPONENT_NUDGE_LOOKAHEAD,
+        }
+      : routeTarget;
   const routeLength = distance(current, pathEnd);
   if (routeLength < 4) return nudges;
 
@@ -450,10 +453,7 @@ function computeComponentNudges(
   for (const obstacle of obstacles) {
     if (!obstacle.shiftable || !obstacle.element) continue;
 
-    const pathDistance = Math.min(
-      segmentDistanceToRect(current, pathEnd, obstacle.base),
-      segmentDistanceToRect(current, desired, obstacle.base)
-    );
+    const pathDistance = segmentDistanceToRect(current, pathEnd, obstacle.base);
     if (pathDistance > COMPONENT_NUDGE_RADIUS) continue;
 
     const center = {
@@ -473,7 +473,7 @@ function computeComponentNudges(
     // Only move a component when the pet's actual route runs through it (a real
     // squeeze). Components the pet merely passes near are left alone so cursor
     // movement on its own never disturbs the layout.
-    const directHit = segmentHitsRect(current, desired, obstacle.base) || segmentHitsRect(current, pathEnd, obstacle.base);
+    const directHit = segmentHitsRect(current, pathEnd, obstacle.base);
     if (!directHit) continue;
     const pressure = clamp((COMPONENT_NUDGE_RADIUS - pathDistance) / COMPONENT_NUDGE_RADIUS, 0, 1);
     const amount = COMPONENT_NUDGE_MAX * pressure;
@@ -497,6 +497,13 @@ function setComponentNudge(element: HTMLElement, nudge: Point): void {
 function clearComponentNudge(element: HTMLElement): void {
   element.style.setProperty("--pet-nudge-x", "0px");
   element.style.setProperty("--pet-nudge-y", "0px");
+  window.setTimeout(() => {
+    if (element.style.getPropertyValue("--pet-nudge-x") !== "0px") return;
+    if (element.style.getPropertyValue("--pet-nudge-y") !== "0px") return;
+    element.classList.remove("pet-soft-obstacle");
+    element.style.removeProperty("--pet-nudge-x");
+    element.style.removeProperty("--pet-nudge-y");
+  }, 220);
 }
 
 function clearAllComponentNudges(elements: Set<HTMLElement>): void {
@@ -919,7 +926,7 @@ export function usePetBrain(): PetBrainOutput {
       }
       smoothTargetRef.current = routeTarget;
 
-      const nudges = computeComponentNudges(current, desired, routeTarget, obstacles);
+      const nudges = computeComponentNudges(current, routeTarget, obstacles);
       for (const element of nudgedElementsRef.current) {
         if (!nudges.has(element)) {
           clearComponentNudge(element);
@@ -928,7 +935,7 @@ export function usePetBrain(): PetBrainOutput {
       for (const [element, nudge] of nudges) {
         setComponentNudge(element, nudge);
       }
-      nudgedElementsRef.current = new Set([...nudgedElementsRef.current, ...nudges.keys()]);
+      nudgedElementsRef.current = new Set(nudges.keys());
 
       const routeDistance = distance(current, routeTarget);
       let nextVelocity = velocityRef.current;

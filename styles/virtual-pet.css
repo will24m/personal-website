@@ -3,10 +3,7 @@
   inset: 0;
   min-height: 100%;
   pointer-events: none;
-  /* Above page content (which shares z-index 2 with its sibling stacking
-     context) so the pet always renders on top of cards as it squeezes past,
-     never behind them. pointer-events:none keeps clicks passing through. */
-  z-index: 3;
+  z-index: 2;
   overflow: visible;
 }
 

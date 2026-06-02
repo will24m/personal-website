@@ -41,7 +41,7 @@ export function AboutPage() {
   return (
     <>
       <Reveal>
-        <section id="profile" className="section contact-panel-grid">
+        <section id="profile" className="section contact-panel-grid profile-grid">
           <InteractiveCard className="about-copy-card" sx={{ p: { xs: 3, md: 4 } }}>
             <Stack spacing={2.2} className="parallax-layer">
               <Paper
