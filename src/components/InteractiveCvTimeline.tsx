@@ -235,7 +235,9 @@ export function InteractiveCvTimeline() {
               gap={1}
             >
               <div>
-                <Typography variant="h6">{activeEntry.role}</Typography>
+                <Typography className="cv-timeline-detail__title" variant="h6">
+                  {activeEntry.role}
+                </Typography>
                 <Typography className="panel-meta">{activeEntry.org}</Typography>
               </div>
               <Stack className="cv-timeline-detail__chips" direction="row" gap={0.8}>
@@ -251,13 +253,15 @@ export function InteractiveCvTimeline() {
                 <Chip size="small" label={activeEntry.date} variant="outlined" />
               </Stack>
             </Stack>
-            <Typography color="text.secondary">{activeEntry.summary}</Typography>
+            <Typography className="cv-timeline-detail__summary" color="text.secondary">
+              {activeEntry.summary}
+            </Typography>
             <div className="dynamic-divider" />
-            {activeEntry.bullets.map((bullet) => (
-              <Typography key={bullet} color="text.secondary">
-                - {bullet}
-              </Typography>
-            ))}
+            <ul className="cv-timeline-detail__list">
+              {activeEntry.bullets.map((bullet) => (
+                <li key={bullet}>{bullet}</li>
+              ))}
+            </ul>
           </Stack>
         </Paper>
       </Stack>

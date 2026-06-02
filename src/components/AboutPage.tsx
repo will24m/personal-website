@@ -97,9 +97,8 @@ export function AboutPage() {
 
       <Reveal rotate="left">
         <section id="timeline" className="section timeline-section--wide">
-          <div className="section-heading">
+          <div className="section-heading section-heading--compact">
             <span className="eyebrow">CV timeline</span>
-            <TypedSectionTitle text="Timeline of work and extracurricular experience." />
           </div>
           <InteractiveCvTimeline />
         </section>

@@ -3,7 +3,6 @@ import { Button, Chip, Stack, Typography } from "@mui/material";
 import { useVisitorStats } from "../hooks/useVisitorStats.js";
 import { InteractiveCard } from "./InteractiveCard.js";
 import { Reveal } from "./Reveal.js";
-import { TypedSectionTitle } from "./TypedSectionTitle.js";
 
 export function VisitorStatsPanel() {
   const { clickPulse, incrementClick, isLive, isSyncing, stats } = useVisitorStats();
@@ -18,7 +17,6 @@ export function VisitorStatsPanel() {
             <span className="eyebrow__dot" />
             Site pulse
           </span>
-          <TypedSectionTitle text="Counters for visitors passing through." />
         </div>
         <div className="site-stats-grid">
           <InteractiveCard

@@ -151,6 +151,8 @@ img {
   top: 0;
   z-index: 20;
   padding: 1.1rem clamp(1.7rem, 4.8vw, 4.4rem) 0;
+  background: linear-gradient(180deg, rgba(9, 10, 13, 0.96) 0%, rgba(9, 10, 13, 0.82) 72%, rgba(9, 10, 13, 0) 100%);
+  backdrop-filter: blur(10px);
 }
 
 .site-header__inner {
@@ -274,6 +276,10 @@ img {
   margin-bottom: 1.5rem;
 }
 
+.section-heading--compact {
+  margin-bottom: 0.85rem;
+}
+
 .timeline-section--wide {
   width: min(1360px, calc(100vw - clamp(3.4rem, 9.6vw, 8.8rem)));
   margin-left: calc(50% - min(1360px, calc(100vw - clamp(3.4rem, 9.6vw, 8.8rem))) / 2);
@@ -285,6 +291,7 @@ img {
 
 .site-stats-heading {
   max-width: 56rem;
+  margin-bottom: 0.9rem;
 }
 
 .eyebrow {
@@ -1208,9 +1215,37 @@ img {
   animation: timelineDetailIn 240ms ease;
 }
 
+.cv-timeline-detail__header {
+  align-items: flex-start;
+}
+
 .cv-timeline-detail__chips {
   flex-wrap: wrap;
   justify-content: flex-end;
+}
+
+.cv-timeline-detail__title {
+  margin: 0;
+  font-size: clamp(1.05rem, 1.8vw, 1.35rem);
+  line-height: 1.25;
+}
+
+.cv-timeline-detail__summary {
+  max-width: 78ch;
+  line-height: 1.68;
+}
+
+.cv-timeline-detail__list {
+  display: grid;
+  gap: 0.58rem;
+  margin: 0;
+  padding-left: 1.1rem;
+  color: var(--text-muted);
+  line-height: 1.62;
+}
+
+.cv-timeline-detail__list li::marker {
+  color: rgba(255, 255, 255, 0.58);
 }
 
 .availability-status {
