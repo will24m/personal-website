@@ -85,6 +85,9 @@ const COMPONENT_NUDGE_RADIUS = PET_RADIUS * 1.4;
 // it approached from so it hugs the pointer without ever covering it.
 const SETTLE_OFFSET = 36;
 const SETTLE_ENGAGE_DISTANCE = 96;
+// Fraction of the gap to the freshly computed route waypoint that the eased
+// steering target closes each frame. Lower = smoother/floatier glide.
+const TARGET_SMOOTHING = 0.12;
 const OBSTACLE_SELECTOR = [
   ".site-header__inner",
   ".site-footer__inner",
@@ -620,6 +623,9 @@ export function usePetBrain(): PetBrainOutput {
   const obstaclesRef = useRef<ObstacleRect[]>([]);
   const lastObstacleRefreshAt = useRef(0);
   const targetRef = useRef<Point>({ x: cursorX.current, y: cursorY.current });
+  // Eased steering target: the raw pathfinder waypoint can flip between frames
+  // near obstacle edges, so we glide this toward it to keep motion smooth.
+  const smoothTargetRef = useRef<Point | null>(null);
   const movementConfigRef = useRef<MovementConfig>(MOVEMENT_FOLLOW);
   const velocityRef = useRef<Point>({ x: 0, y: 0 });
   const lastFrameAt = useRef<number | null>(null);
@@ -891,9 +897,27 @@ export function usePetBrain(): PetBrainOutput {
       // pet simply waits there — it never cuts through.
       const movementObstacles = obstacles;
       const currentBlocked = isBlocked(current, movementObstacles);
-      const routeTarget = currentBlocked
+      const rawRouteTarget = currentBlocked
         ? pushOutOfObstacles(current, movementObstacles)
         : findNavigableTarget(current, desired, movementObstacles);
+
+      // Glide the steering target toward the raw waypoint so frame-to-frame
+      // flips near obstacle edges don't make the pet jerk. If the eased target
+      // would land inside an obstacle, snap it back out so we never steer into one.
+      // Re-anchor the eased target near the pet after big discontinuities (scroll
+      // jumps, target teleports) so it never crawls across the whole page.
+      const previousSmooth =
+        smoothTargetRef.current && distance(smoothTargetRef.current, current) < 800
+          ? smoothTargetRef.current
+          : current;
+      let routeTarget = {
+        x: previousSmooth.x + (rawRouteTarget.x - previousSmooth.x) * TARGET_SMOOTHING,
+        y: previousSmooth.y + (rawRouteTarget.y - previousSmooth.y) * TARGET_SMOOTHING,
+      };
+      if (isBlocked(routeTarget, movementObstacles)) {
+        routeTarget = rawRouteTarget;
+      }
+      smoothTargetRef.current = routeTarget;
 
       const nudges = computeComponentNudges(current, desired, routeTarget, obstacles);
       for (const element of nudgedElementsRef.current) {
@@ -910,43 +934,42 @@ export function usePetBrain(): PetBrainOutput {
       let nextVelocity = velocityRef.current;
       let nextPosition = current;
 
-      if (routeDistance < 0.5) {
-        nextVelocity = stepToward(nextVelocity, { x: 0, y: 0 }, cfg.acceleration * dt);
-      } else {
-        const desiredVelocity = {
-          x: ((routeTarget.x - current.x) / routeDistance) * cfg.maxSpeed,
-          y: ((routeTarget.y - current.y) / routeDistance) * cfg.maxSpeed,
-        };
-        nextVelocity = stepToward(nextVelocity, desiredVelocity, cfg.acceleration * dt);
-        nextPosition = {
-          x: current.x + nextVelocity.x * dt,
-          y: current.y + nextVelocity.y * dt,
-        };
+      // Always blend velocity toward the desired heading and decelerate smoothly
+      // near the target — never hard-zero it, which is what caused the stutter.
+      const desiredVelocity =
+        routeDistance < 0.5
+          ? { x: 0, y: 0 }
+          : {
+              x: ((routeTarget.x - current.x) / routeDistance) * cfg.maxSpeed,
+              y: ((routeTarget.y - current.y) / routeDistance) * cfg.maxSpeed,
+            };
+      nextVelocity = stepToward(nextVelocity, desiredVelocity, cfg.acceleration * dt);
+      nextPosition = {
+        x: current.x + nextVelocity.x * dt,
+        y: current.y + nextVelocity.y * dt,
+      };
 
-        if (distance(current, nextPosition) > routeDistance) {
-          nextPosition = routeTarget;
-          nextVelocity = { x: 0, y: 0 };
-        }
+      // Don't overshoot the target.
+      if (routeDistance > 0.5 && distance(current, nextPosition) > routeDistance) {
+        nextPosition = routeTarget;
+      }
 
-        if (
-          !currentBlocked &&
-          (isBlocked(nextPosition, movementObstacles) || !hasClearSegment(current, nextPosition, movementObstacles))
-        ) {
-          const fallback = stepToward(current, routeTarget, cfg.maxSpeed * dt);
-          if (!isBlocked(fallback, movementObstacles) && hasClearSegment(current, fallback, movementObstacles)) {
-            nextPosition = fallback;
-            nextVelocity =
-              dt > 0
-                ? {
-                    x: (nextPosition.x - current.x) / dt,
-                    y: (nextPosition.y - current.y) / dt,
-                  }
-                : { x: 0, y: 0 };
-          } else {
-            nextPosition = current;
-            nextVelocity = { x: 0, y: 0 };
-          }
+      // If the step would clip an obstacle, slide to the last clear point along
+      // the way instead of stopping dead — keeps the glide continuous.
+      if (!currentBlocked && (isBlocked(nextPosition, movementObstacles) || !hasClearSegment(current, nextPosition, movementObstacles))) {
+        const stepLength = distance(current, nextPosition);
+        let safe = current;
+        const probes = 6;
+        for (let p = 1; p <= probes; p += 1) {
+          const t = p / probes;
+          const probe = { x: current.x + (nextPosition.x - current.x) * t, y: current.y + (nextPosition.y - current.y) * t };
+          if (isBlocked(probe, movementObstacles) || !hasClearSegment(current, probe, movementObstacles)) break;
+          safe = probe;
         }
+        nextPosition = safe;
+        // Bleed off velocity gently rather than snapping to zero.
+        const reached = stepLength > 0.001 ? distance(current, safe) / stepLength : 0;
+        nextVelocity = { x: nextVelocity.x * reached * 0.5, y: nextVelocity.y * reached * 0.5 };
       }
 
       if (distance(current, nextPosition) > 0.01) {
@@ -962,6 +985,7 @@ export function usePetBrain(): PetBrainOutput {
       window.cancelAnimationFrame(frameId);
       lastFrameAt.current = null;
       velocityRef.current = { x: 0, y: 0 };
+      smoothTargetRef.current = null;
       clearAllComponentNudges(nudgedElementsRef.current);
     };
   }, [petX, petY, refreshObstacles]);

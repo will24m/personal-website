@@ -1,4 +1,4 @@
-import { motion, useTransform } from "framer-motion";
+import { motion, useSpring, useTransform } from "framer-motion";
 import type { MotionValue, TargetAndTransition } from "framer-motion";
 import { usePetBrain, type PetState, type EyeShape, type CursorVector } from "../hooks/usePetBrain.js";
 import type { BondLevel } from "../utils/petStorage.js";
@@ -333,8 +333,15 @@ function ReactionSparks({ state }: { state: PetState }) {
   );
 }
 
+// Render the pet through a soft spring so its visual position glides smoothly,
+// absorbing any per-frame jitter from the path-following brain.
+const POSITION_SPRING = { stiffness: 90, damping: 26, mass: 1.1 } as const;
+
 export function VirtualPet() {
   const { petX, petY, gazeX, gazeY, state, bondLevel, eyeShape, isWagging, cursorVector } = usePetBrain();
+
+  const smoothX = useSpring(petX, POSITION_SPRING);
+  const smoothY = useSpring(petY, POSITION_SPRING);
 
   const bodyColor = BODY_COLORS[bondLevel];
   const strokeColor =
@@ -344,7 +351,7 @@ export function VirtualPet() {
     <div className="virtual-pet-layer" aria-hidden="true">
       <motion.div
         className={`virtual-pet virtual-pet--${state.toLowerCase()}`}
-        style={{ x: petX, y: petY }}
+        style={{ x: smoothX, y: smoothY }}
       >
         <motion.svg
           width="72"
