@@ -96,3 +96,15 @@ jspm_packages/
 
 # TernJS port file
 .tern-port 
+# Personal documents (kept local, not published)
+*.docx
+*.pdf
+cv_extract/
+
+# SSH keys — never commit
+key.md
+key.md.pub
+*.pem
+id_*
+.baseline-screens/
+.playwright-mcp/

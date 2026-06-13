@@ -81,9 +81,8 @@ export function useVisitorStats(): UseVisitorStatsReturn {
 
     const handleStorage = (event: StorageEvent) => {
       if (
-        [visitorStatsConfig.localClickKey, visitorStatsConfig.localViewKey].includes(
-          event.key ?? ""
-        )
+        event.key === visitorStatsConfig.localClickKey ||
+        event.key === visitorStatsConfig.localViewKey
       ) {
         mergeStats(getFallbackVisitorStats());
       }

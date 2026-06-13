@@ -148,7 +148,7 @@ function FrontPaw({
     ease: "easeInOut",
     repeat: state === "PLAYING" ? Infinity : 0,
     repeatDelay: state === "PLAYING" ? 0.2 : 0,
-  };
+  } as const;
 
   return (
     <motion.g>
