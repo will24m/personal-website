@@ -1,38 +1,30 @@
-import { CssBaseline, ThemeProvider } from "@mui/material";
 import { MotionConfig } from "framer-motion";
-import { AboutPage } from "./components/AboutPage.js";
-import { ContactPage } from "./components/ContactPage.js";
+import { ContactSidebar } from "./components/ContactSidebar.js";
 import { Footer } from "./components/Footer.js";
 import { Header } from "./components/Header.js";
-import { ScrollProgressBar } from "./components/ScrollProgressBar.js";
+import { IntroSection } from "./components/IntroSection.js";
+import { PhotoQuotes } from "./components/PhotoQuotes.js";
 import { VirtualPet } from "./components/VirtualPet.js";
 import { VisitorStatsPanel } from "./components/VisitorStatsPanel.js";
-import { theme } from "./theme.js";
+import { WorkSection } from "./components/WorkSection.js";
 
 export function App() {
-  const currentPage = ((document.body?.dataset?.page) ?? "home").toLowerCase();
-  const showAbout = currentPage === "home" || currentPage === "about";
-  const showContact = currentPage === "home" || currentPage === "contact";
-
   return (
     <MotionConfig reducedMotion="user">
-      <ThemeProvider theme={theme}>
-        <CssBaseline />
-        <div className="site-root mui-shell">
-          <ScrollProgressBar />
-          <span className="ambient-orb ambient-orb--a" />
-          <span className="ambient-orb ambient-orb--b" />
-          <span className="ambient-orb ambient-orb--c" />
-          <Header />
-          <main className="page page--single">
-            {showAbout ? <AboutPage /> : null}
-            {showContact ? <ContactPage /> : null}
-            {currentPage === "contact" ? <VisitorStatsPanel /> : null}
+      <div className="site-root">
+        <Header />
+        <div className="site-layout">
+          <main className="site-main" id="main-content">
+            <IntroSection />
+            <PhotoQuotes />
+            <WorkSection />
+            <VisitorStatsPanel />
           </main>
-          <Footer />
-          <VirtualPet />
+          <ContactSidebar />
         </div>
-      </ThemeProvider>
+        <Footer />
+        <VirtualPet />
+      </div>
     </MotionConfig>
   );
 }
