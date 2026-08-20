@@ -3,6 +3,7 @@ import { Footer } from "./components/Footer.js";
 import { Header } from "./components/Header.js";
 import { IntroSection } from "./components/IntroSection.js";
 import { PhotoQuotes } from "./components/PhotoQuotes.js";
+import { SharedFileSection } from "./components/SharedFileSection.js";
 import { VisitorStatsPanel } from "./components/VisitorStatsPanel.js";
 import { WorkSection } from "./components/WorkSection.js";
 
@@ -16,6 +17,7 @@ export function App() {
           <PhotoQuotes />
           <WorkSection />
           <VisitorStatsPanel />
+          <SharedFileSection />
         </main>
         <ContactSidebar />
       </div>

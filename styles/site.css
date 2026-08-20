@@ -275,6 +275,44 @@ button {
   background: #c8c8c8;
 }
 
+/* ---- shared file ---- */
+
+.shared-file__label {
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.shared-file__intro {
+  color: var(--muted);
+  margin-top: 0.3rem;
+}
+
+.shared-file__current {
+  margin-top: 0.8rem;
+}
+
+.shared-file__status {
+  color: var(--soft);
+  margin-top: 0.8rem;
+}
+
+.shared-file__meta {
+  color: var(--soft);
+}
+
+.shared-file__form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.8rem;
+  margin-top: 0.8rem;
+}
+
+.shared-file__error {
+  color: #a11212;
+  margin-top: 0.6rem;
+}
+
 /* ---- contact sidebar ---- */
 
 .contact-sidebar {
