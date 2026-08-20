@@ -103,10 +103,13 @@ export function acceptAttribute(): string {
 
 let cachedClient: SupabaseClient | null = null;
 
-function getClient(): SupabaseClient | null {
+// Loaded lazily via dynamic import so the ~200 KB supabase-js bundle is only fetched
+// when a visitor actually uploads — not on first paint or for downloads.
+async function getClient(): Promise<SupabaseClient | null> {
   const config = getSharedFileConfig();
   if (!config) return null;
   if (!cachedClient) {
+    const { createClient } = await import("@supabase/supabase-js");
     cachedClient = createClient(config.url, config.anonKey, {
       auth: { persistSession: false },
     });
@@ -117,7 +120,7 @@ function getClient(): SupabaseClient | null {
 // Uploads directly from the browser to Supabase Storage (bypasses the ~4.5 MB
 // serverless body limit). Overwrites the same path; the API POST prunes stale files.
 export async function uploadSharedFile(file: File): Promise<void> {
-  const client = getClient();
+  const client = await getClient();
   if (!client) {
     throw new Error("File sharing isn't configured.");
   }
