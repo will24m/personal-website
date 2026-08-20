@@ -122,6 +122,12 @@ button {
   cursor: pointer;
 }
 
+.button:disabled {
+  color: var(--soft);
+  text-decoration: none;
+  cursor: default;
+}
+
 /* ---- intro ---- */
 
 .intro__name {
@@ -288,24 +294,67 @@ button {
 }
 
 .shared-file__current {
-  margin-top: 0.8rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.6rem;
+  margin-top: 0.9rem;
 }
 
-.shared-file__status {
-  color: var(--soft);
-  margin-top: 0.8rem;
+.shared-file__download {
+  font-size: 1.1rem;
 }
 
 .shared-file__meta {
   color: var(--soft);
+  font-size: 0.9rem;
 }
 
 .shared-file__form {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0.8rem;
-  margin-top: 0.8rem;
+  gap: 0.9rem;
+  margin-top: 0.9rem;
+}
+
+/* Native file input is visually hidden; the label's .button span is the trigger. */
+.shared-file__input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.shared-file__choose {
+  display: inline-flex;
+  cursor: pointer;
+}
+
+.shared-file__input:focus-visible + .button {
+  outline: 2px solid var(--text);
+  outline-offset: 2px;
+}
+
+.shared-file__chosen {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.shared-file__hint {
+  color: var(--soft);
+  font-size: 0.8rem;
+  margin-top: 0.5rem;
+}
+
+.shared-file__notice {
+  color: var(--muted);
+  margin-top: 0.6rem;
 }
 
 .shared-file__error {
