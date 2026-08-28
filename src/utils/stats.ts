@@ -10,6 +10,7 @@ export const visitorStatsConfig = {
   localClickKey: "will-wu-click-extra-v1",
   localViewKey: "will-wu-view-extra-v1",
   sessionViewKey: "will-wu-view-counted-v1",
+  liveCacheKey: "will-wu-stats-live-v1",
 } as const;
 
 export function getStoredStatExtra(key: string): number {
@@ -56,21 +57,49 @@ export function getFallbackVisitorStats(): VisitorStats {
   };
 }
 
+// The live API is authoritative: return its counts as-is (sanitized to finite,
+// non-negative integers). No ambient floor — otherwise the time-based formula would
+// mask the real persistent numbers.
 export function normalizeVisitorStats(payload: unknown): VisitorStats {
-  const fallback = getFallbackVisitorStats();
   const data = payload as Record<string, unknown> | null | undefined;
   const clicks = Number(data?.clicks);
   const views = Number(data?.views);
   return {
-    clicks: Math.max(
-      fallback.clicks,
-      Number.isFinite(clicks) ? Math.floor(clicks) : fallback.clicks
-    ),
-    views: Math.max(
-      fallback.views,
-      Number.isFinite(views) ? Math.floor(views) : fallback.views
-    ),
+    clicks: Number.isFinite(clicks) && clicks >= 0 ? Math.floor(clicks) : 0,
+    views: Number.isFinite(views) && views >= 0 ? Math.floor(views) : 0,
   };
+}
+
+// Cache the last known live counts so a returning visitor's first paint matches reality
+// instead of the ambient seed (which would otherwise cause a visible jump on sync).
+export function readCachedLiveStats(): VisitorStats | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = window.localStorage.getItem(visitorStatsConfig.liveCacheKey);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as { clicks?: unknown; views?: unknown };
+    const clicks = Number(parsed?.clicks);
+    const views = Number(parsed?.views);
+    if (!Number.isFinite(clicks) || !Number.isFinite(views)) return null;
+    return { clicks: Math.floor(clicks), views: Math.floor(views) };
+  } catch {
+    return null;
+  }
+}
+
+export function writeCachedLiveStats(stats: VisitorStats): void {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.setItem(visitorStatsConfig.liveCacheKey, JSON.stringify(stats));
+  } catch {
+    // localStorage unavailable in some private contexts
+  }
+}
+
+// First paint before the API responds: prefer the last known live value; fall back to
+// the ambient seed only on a first-ever visit.
+export function getInitialVisitorStats(): VisitorStats {
+  return readCachedLiveStats() ?? getFallbackVisitorStats();
 }
 
 export function canUseVisitorStatsApi(): boolean {

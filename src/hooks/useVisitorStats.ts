@@ -4,6 +4,9 @@ import {
   canUseVisitorStatsApi,
   incrementStoredStatExtra,
   getFallbackVisitorStats,
+  getInitialVisitorStats,
+  readCachedLiveStats,
+  writeCachedLiveStats,
   fetchVisitorStats,
   type VisitorStats,
 } from "../utils/stats.js";
@@ -17,43 +20,43 @@ interface UseVisitorStatsReturn {
 }
 
 export function useVisitorStats(): UseVisitorStatsReturn {
-  const [stats, setStats] = useState<VisitorStats>(() => getFallbackVisitorStats());
+  const [stats, setStats] = useState<VisitorStats>(() => getInitialVisitorStats());
   const [isLive, setIsLive] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
   const [clickPulse, setClickPulse] = useState(0);
-
-  const mergeStats = (nextStats: VisitorStats) => {
-    setStats((current) => ({
-      clicks: Math.max(current.clicks, nextStats.clicks),
-      views: Math.max(current.views, nextStats.views),
-    }));
-  };
 
   useEffect(() => {
     let cancelled = false;
     const canUseApi = canUseVisitorStatsApi();
 
+    // Live counts are authoritative and only ever increase, so adopt them directly and
+    // cache for the next first paint.
+    const applyLive = (next: VisitorStats) => {
+      if (cancelled) return;
+      setStats(next);
+      writeCachedLiveStats(next);
+      setIsLive(true);
+    };
+
+    const applyOffline = () => {
+      if (cancelled) return;
+      setStats(getFallbackVisitorStats());
+      setIsLive(false);
+    };
+
     const syncStats = async (eventType: string | null = null) => {
       if (!canUseApi || document.visibilityState === "hidden") {
         if (eventType === "view") incrementStoredStatExtra(visitorStatsConfig.localViewKey);
-        mergeStats(getFallbackVisitorStats());
-        setIsLive(false);
+        applyOffline();
         return;
       }
 
       setIsSyncing(true);
       try {
-        const nextStats = await fetchVisitorStats(eventType);
-        if (!cancelled) {
-          mergeStats(nextStats);
-          setIsLive(true);
-        }
+        applyLive(await fetchVisitorStats(eventType));
       } catch {
         if (eventType === "view") incrementStoredStatExtra(visitorStatsConfig.localViewKey);
-        if (!cancelled) {
-          mergeStats(getFallbackVisitorStats());
-          setIsLive(false);
-        }
+        applyOffline();
       } finally {
         if (!cancelled) setIsSyncing(false);
       }
@@ -80,11 +83,14 @@ export function useVisitorStats(): UseVisitorStatsReturn {
     document.addEventListener("visibilitychange", handleVisibilityChange);
 
     const handleStorage = (event: StorageEvent) => {
-      if (
+      if (event.key === visitorStatsConfig.liveCacheKey) {
+        const cached = readCachedLiveStats();
+        if (cached && !cancelled) setStats(cached);
+      } else if (
         event.key === visitorStatsConfig.localClickKey ||
         event.key === visitorStatsConfig.localViewKey
       ) {
-        mergeStats(getFallbackVisitorStats());
+        if (!cancelled) setStats(getFallbackVisitorStats());
       }
     };
     window.addEventListener("storage", handleStorage);
@@ -100,20 +106,22 @@ export function useVisitorStats(): UseVisitorStatsReturn {
   const incrementClick = async (): Promise<void> => {
     setClickPulse((current) => current + 1);
     setStats((current) => ({ ...current, clicks: current.clicks + 1 }));
+
     if (!canUseVisitorStatsApi()) {
       incrementStoredStatExtra(visitorStatsConfig.localClickKey);
-      mergeStats(getFallbackVisitorStats());
+      setStats(getFallbackVisitorStats());
       setIsLive(false);
       return;
     }
 
     try {
       const nextStats = await fetchVisitorStats("click");
-      mergeStats(nextStats);
+      setStats(nextStats);
+      writeCachedLiveStats(nextStats);
       setIsLive(true);
     } catch {
       incrementStoredStatExtra(visitorStatsConfig.localClickKey);
-      mergeStats(getFallbackVisitorStats());
+      setStats(getFallbackVisitorStats());
       setIsLive(false);
     }
   };
