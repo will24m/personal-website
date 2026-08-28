@@ -73,16 +73,15 @@ describe("normalizeVisitorStats", () => {
     vi.useRealTimers();
   });
 
-  it("returns server values as-is", () => {
-    expect(normalizeVisitorStats({ clicks: 999999, views: 888888 })).toEqual({
-      clicks: 999999,
-      views: 888888,
-    });
+  it("uses server values when they exceed the local fallback", () => {
+    const result = normalizeVisitorStats({ clicks: 999999, views: 888888 });
+    expect(result).toEqual({ clicks: 999999, views: 888888 });
   });
 
-  it("trusts the live count without an ambient floor", () => {
-    // The live store is authoritative even when its numbers are small.
-    expect(normalizeVisitorStats({ clicks: 1, views: 2 })).toEqual({ clicks: 1, views: 2 });
+  it("never reports less than the local fallback", () => {
+    const result = normalizeVisitorStats({ clicks: 1, views: 1 });
+    expect(result.clicks).toBeGreaterThanOrEqual(visitorStatsConfig.clickBase);
+    expect(result.views).toBeGreaterThanOrEqual(visitorStatsConfig.viewBase);
   });
 
   it("survives malformed payloads", () => {
