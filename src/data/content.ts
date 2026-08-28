@@ -6,12 +6,6 @@ export interface ProfileReviewQuote {
   context: string;
 }
 
-export interface Project {
-  title: string;
-  href: string;
-  blurb: string;
-}
-
 export const introCopy = {
   name: site.name,
   tagline: "Software | Systems | Technical Program Management",
@@ -71,12 +65,4 @@ export const skillsLine: string[] = [
   "Power BI",
   "CAMEO",
   "IBM DOORS",
-];
-
-export const projects: Project[] = [
-  {
-    title: "Online to-do list",
-    href: site.todo,
-    blurb: "The live to-do app I use daily to keep work and priorities organized.",
-  },
 ];

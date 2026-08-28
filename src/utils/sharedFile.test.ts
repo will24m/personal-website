@@ -1,8 +1,11 @@
 import { describe, expect, it } from "vitest";
 import {
+  ALLOWED_EXTENSIONS,
+  EXTENSION_MIME,
   MAX_FILE_BYTES,
   fileExtension,
   formatBytes,
+  mimeForFilename,
   sanitizeFilename,
   validateFile,
 } from "./sharedFile.js";
@@ -54,6 +57,21 @@ describe("validateFile", () => {
   it("rejects empty and oversized files", () => {
     expect(validateFile({ name: "empty.pdf", size: 0 }).ok).toBe(false);
     expect(validateFile({ name: "huge.zip", size: MAX_FILE_BYTES + 1 }).ok).toBe(false);
+  });
+});
+
+describe("mimeForFilename", () => {
+  it("maps every allowed extension to a concrete MIME (never octet-stream)", () => {
+    for (const ext of ALLOWED_EXTENSIONS) {
+      expect(mimeForFilename(`file.${ext}`)).toBe(EXTENSION_MIME[ext]);
+      expect(mimeForFilename(`file.${ext}`)).not.toBe("application/octet-stream");
+    }
+  });
+
+  it("is case-insensitive and falls back for unknown types", () => {
+    expect(mimeForFilename("Notes.MD")).toBe("text/markdown");
+    expect(mimeForFilename("data.CSV")).toBe("text/csv");
+    expect(mimeForFilename("mystery.bin")).toBe("application/octet-stream");
   });
 });
 
