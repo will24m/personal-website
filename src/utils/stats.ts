@@ -9,7 +9,6 @@ export const visitorStatsConfig = {
   epochMs: Date.UTC(2026, 3, 16, 16, 0, 0),
   localClickKey: "will-wu-click-extra-v1",
   localViewKey: "will-wu-view-extra-v1",
-  sessionViewKey: "will-wu-view-counted-v1",
 } as const;
 
 export function getStoredStatExtra(key: string): number {

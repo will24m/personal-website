@@ -59,19 +59,9 @@ export function useVisitorStats(): UseVisitorStatsReturn {
       }
     };
 
-    let viewEvent: string | null = null;
-    try {
-      if (window.sessionStorage.getItem(visitorStatsConfig.sessionViewKey) !== "1") {
-        window.sessionStorage.setItem(visitorStatsConfig.sessionViewKey, "1");
-        viewEvent = "view";
-        setStats((current) => ({ ...current, views: current.views + 1 }));
-      }
-    } catch {
-      viewEvent = "view";
-      setStats((current) => ({ ...current, views: current.views + 1 }));
-    }
-
-    void syncStats(viewEvent);
+    // Count a view on every page load — every refresh and every visit.
+    setStats((current) => ({ ...current, views: current.views + 1 }));
+    void syncStats("view");
 
     const intervalId = canUseApi ? window.setInterval(() => void syncStats(), 30000) : 0;
     const handleVisibilityChange = () => {
